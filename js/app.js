@@ -104,65 +104,62 @@
     el("injury-tag").classList.toggle("hidden", !player.injured);
   }
 
-  function renderLog() {
-    const logEl = el("log");
+  function renderSummaries() {
     const sumEl = el("simplified-summaries");
+    const newSeasons = player.seasons.filter(s => s.isNew);
+    if (newSeasons.length === 0) return;
 
-    const newEntries = player.history.filter(h => h.isNew);
-    if (newEntries.length === 0) return;
+    for (const d of newSeasons) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "season-wrapper";
+      
+      const row = document.createElement("div");
+      row.className = "simple-season-row";
+      row.style.cursor = "pointer";
+      row.title = "Clic para ver los eventos de esta temporada";
+      
+      let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.join(', ')})</span>` : '';
+      
+      const contentHTML = `
+        <div class="simple-season-info">
+          <span>T${d.season} · Edad ${d.age}</span>
+          <span class="simple-season-team">🛡️ ${d.team}</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Pos en Liga: ${d.leaguePos}° | ${d.qualification}</span>
+        </div>
+        <div class="simple-season-stats">
+          <span title="Partidos Jugados">P: ${d.matches}</span>
+          <span title="Goles">G: ${d.goals}</span>
+          <span title="Asistencias">A: ${d.assists}</span>
+          <span title="Títulos">🏆 ${d.titles}</span>
+          ${wonHtml}
+        </div>
+      `;
 
-    for (const entry of newEntries) {
-      if (entry.type === "season-summary") {
-        const d = entry.data;
-        const row = document.createElement("div");
-        row.className = "simple-season-row";
-        
-        let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.join(', ')})</span>` : '';
-        
-        const contentHTML = `
-          <div class="simple-season-info">
-            <span>T${d.season} · Edad ${d.age}</span>
-            <span class="simple-season-team">🛡️ ${d.team}</span>
-            <span style="font-size: 11px; color: var(--text-muted);">Pos en Liga: ${d.leaguePos}° | ${d.qualification}</span>
-          </div>
-          <div class="simple-season-stats">
-            <span title="Partidos Jugados">P: ${d.matches}</span>
-            <span title="Goles">G: ${d.goals}</span>
-            <span title="Asistencias">A: ${d.assists}</span>
-            <span title="Títulos">🏆 ${d.titles}</span>
-            ${wonHtml}
-          </div>
-        `;
-        
-        sumEl.appendChild(row);
-        typeWriterHTML(row, contentHTML);
-      } else {
-        const div = document.createElement("div");
-        div.className = "log-entry " + entry.type;
-        const contentHTML = `<span class="tag">${entry.tag}</span>${entry.text}`;
-        
-        logEl.appendChild(div);
-        typeWriterHTML(div, contentHTML);
-      }
-      entry.isNew = false;
+      // Contenedor oculto con los eventos de esta temporada específica
+      const eventsContainer = document.createElement("div");
+      eventsContainer.className = "season-events hidden";
+      
+      d.events.forEach(ev => {
+        const evDiv = document.createElement("div");
+        evDiv.className = "log-entry " + ev.type;
+        evDiv.innerHTML = `<span class="tag">${ev.tag}</span>${ev.text}`;
+        eventsContainer.appendChild(evDiv);
+      });
+
+      // Al hacer clic en la fila, se muestran u ocultan sus eventos
+      row.addEventListener("click", () => {
+        eventsContainer.classList.toggle("hidden");
+      });
+
+      wrapper.appendChild(row);
+      wrapper.appendChild(eventsContainer);
+      sumEl.appendChild(wrapper);
+      
+      typeWriterHTML(row, contentHTML);
+      d.isNew = false;
     }
     
-    if (!logEl.classList.contains("collapsed")) {
-      logEl.scrollTo({ top: 0, behavior: 'smooth' });
-    }
     setTimeout(() => { sumEl.scrollTo({ top: sumEl.scrollHeight, behavior: 'smooth' }); }, 50);
-  }
-
-  function toggleHistory() {
-    const log = el("log");
-    const arrow = el("history-arrow");
-    const collapsed = log.classList.toggle("collapsed");
-    arrow.classList.toggle("collapsed", collapsed);
-    el("history-toggle").setAttribute("aria-expanded", String(!collapsed));
-    
-    if (!collapsed) {
-      log.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   }
 
   function showRetireScreen(reason) {
@@ -186,7 +183,7 @@
   function handleAdvance() {
     el("btn-advance").disabled = true;
     const { injuryHappened, performance } = simulateSeason();
-    renderLog();
+    renderSummaries();
 
     if (player.retired) {
       renderPlayer();
@@ -219,7 +216,7 @@
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     acceptOffer();
-    renderLog();
+    renderSummaries();
     renderPlayer();
     el("btn-advance").disabled = false;
   }
@@ -228,7 +225,7 @@
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     rejectOffer();
-    renderLog();
+    renderSummaries();
     el("btn-advance").disabled = false;
   }
 
@@ -243,7 +240,7 @@
       if (buyItem(id)) {
         renderPlayer();
         renderShop();
-        renderLog();
+        renderSummaries();
       }
     }
   });
@@ -275,7 +272,7 @@
     el("screen-game").classList.remove("hidden");
     addHistory("season", "🚀 Debut", `${player.name} hace su debut profesional con <strong>${player.team}</strong> a los ${player.age} años.`);
     
-    renderLog();
+    renderSummaries();
     renderPlayer();
     renderShop();
   });
@@ -285,7 +282,6 @@
   el("btn-accept").addEventListener("click", handleAccept);
   el("btn-reject").addEventListener("click", handleReject);
   el("btn-restart").addEventListener("click", resetToCreate);
-  el("history-toggle").addEventListener("click", toggleHistory);
 
   populateNationalities();
   buildPitch();

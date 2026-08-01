@@ -44,12 +44,25 @@ function createPlayer(name, nationalityData, posCode, posName) {
     injured: false,
     retired: false,
     history: [],
-    explotar: false
+    explotar: false,
+    currentEvents: [], 
+    seasons: []
   };
 }
 
-function addHistory(type, tag, text) { player.history.push({ type, tag, text, isNew: true }); }
-function addSeasonSummary(data) { player.history.push({ type: "season-summary", data, isNew: true }); }
+function addHistory(type, tag, text) { 
+  player.currentEvents.push({ type, tag, text }); 
+}
+function addSeasonSummary(data) { 
+  // Empaquetamos los eventos acumulados dentro de los datos de esta temporada
+  player.seasons.push({ 
+    ...data, 
+    events: [...player.currentEvents], 
+    isNew: true 
+  });
+  // Vaciamos la lista temporal para la temporada siguiente
+  player.currentEvents = []; 
+}
 
 function calcularEstadisticas(code, rating, partidosJugados) {
   const posData = PREFERRED.find(p => p.code === code);

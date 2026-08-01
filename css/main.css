@@ -293,3 +293,23 @@ label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; c
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #45476a; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+
+/* Contenedor del Resumen + Eventos Desplegables */
+.season-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.season-events {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  padding-left: 16px;
+  border-left: 2px solid var(--primary-color);
+  animation: fadeIn 0.3s ease;
+}
+.season-events .log-entry {
+  background: var(--highlight-bg);
+}
