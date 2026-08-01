@@ -43,7 +43,8 @@ function createPlayer(name, nationalityData, posCode, posName) {
     fitness: 100,
     injured: false,
     retired: false,
-    history: []
+    history: [],
+    explotar: false
   };
 }
 
@@ -196,23 +197,40 @@ function simulateSeason() {
 
   addHistory("season", "📅 Temporada " + player.seasonsPlayed, `${player.name} tuvo una temporada <strong>${perfLabel}</strong> con ${player.team}.`);
 
-  const dado = randInt(1, 12);
+  // --- SISTEMA DE RNG "EXPLOTAR" ---
+  // Probabilidad base levemente creciente con cada temporada jugada
+  const probabilidadExplotar = 0.02 + (player.seasonsPlayed * 0.005); 
+  
+  // Si no ha explotado aún, tiramos los dados para ver si despierta su potencial este año
+  if (!player.explotar && Math.random() < probabilidadExplotar) {
+    player.explotar = true;
+    addHistory("season", "🔥 EXPLOSIÓN", `¡${player.name} ha explotado su potencial! A partir de ahora su progresión será mucho más rápida.`);
+  }
+
   let modificadorDado = 0;
-  if (dado === 6) modificadorDado = 1;
-  else if (dado === 3) modificadorDado = 1;
-  else if (dado === 12) modificadorDado = 9;
-  else if (dado === 5) modificadorDado = 1;
-  else if (dado === 2) modificadorDado = 0;
-  else if (dado === 1) modificadorDado = -1;
+  if (player.explotar === true && player.age <= 31) {
+    // ESTADO EXPLOTÓ (True y en edad óptima): Más probable que suba rápido y con saltos más grandes
+    const dado = randInt(1, 10);
+    if (dado >= 8) modificadorDado = randInt(3, 5); // Salto de calidad enorme
+    else if (dado >= 4) modificadorDado = randInt(1, 2); // Subida constante
+    else if (dado === 1) modificadorDado = -1; // Raro que baje
+    else modificadorDado = 0;
+  } else {
+    // ESTADO NORMAL (False o mayor a 31 años): Varía muy poco, crecimiento lento y estable
+    const dado = randInt(1, 6);
+    if (dado >= 5) modificadorDado = 1;
+    else if (dado <= 2) modificadorDado = -1;
+    else modificadorDado = 0;
+  }
+  // ---------------------------------
 
   const ageFactor = ageFactorFor(player.age);
   const perfFactor = (performance - 30) / 50; 
-  let delta = Math.round(modificadorDado + ageFactor + (perfFactor * 3));
+  let delta = Math.round(modificadorDado + ageFactor + perfFactor);
 
   if (player.rating < 85 && Math.random() < 0.25) {
-    delta += randInt(2, 4);
+    delta += randInt(0, 2);
   }
-
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;

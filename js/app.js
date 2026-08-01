@@ -233,24 +233,8 @@
   }
 
   function resetToCreate() {
-    el("screen-retire").classList.add("hidden");
-    el("screen-game").classList.add("hidden");
-    el("screen-create").classList.remove("hidden");
-    
-    el("offer-panel").classList.add("hidden");
-    el("action-bar").classList.remove("hidden");
-    
-    el("input-name").value = "";
-    el("input-nationality").selectedIndex = 0;
-    document.querySelectorAll(".pos-btn").forEach(b => b.classList.remove("selected"));
-    selectedPosition = null;
-    el("selected-position-label").textContent = "Seleccioná una posición en la cancha";
-    el("btn-create").disabled = true;
-
-    el("log").innerHTML = "";
-    el("simplified-summaries").innerHTML = "";
-    player = null;
-    currentOffer = null;
+    // Al recargar la página completamente, todos los scripts se vuelven a cargar y las variables vuelven a sus valores por defecto
+    location.reload();
   }
 
   el("shop-items").addEventListener("click", (e) => {
@@ -266,8 +250,17 @@
 
   el("btn-theme").addEventListener("click", () => {
     document.body.classList.toggle("dark");
-    el("btn-theme").textContent = document.body.classList.contains("dark") ? "☀️ Tema Claro" : "🌙 Tema Oscuro";
+    const isDark = document.body.classList.contains("dark");
+    el("btn-theme").textContent = isDark ? "☀️ Tema Claro" : "🌙 Tema Oscuro";
+    // Guardar preferencia para que persista al recargar la página
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   });
+
+  // Restaurar el tema si la página fue recargada
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+    el("btn-theme").textContent = "☀️ Tema Claro";
+  }
 
   el("btn-create").addEventListener("click", () => {
     if (!selectedPosition) return;
