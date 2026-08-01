@@ -1,0 +1,119 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Carrera - Futbolista</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+  <div class="theme-bar">
+    <button id="btn-theme">🌙 Tema Oscuro</button>
+  </div>
+
+  <!-- PANTALLA 1: CREACIÓN -->
+  <div id="screen-create" class="fade-in panel">
+    <h1>⚽ Crear Futbolista</h1>
+    <div class="create-layout">
+      <div class="create-inputs">
+        <div class="field">
+          <label for="input-name">Nombre</label>
+          <input type="text" id="input-name" placeholder="Ej: Diego Martínez" maxlength="24">
+        </div>
+        <div class="field">
+          <label for="input-nationality">Nacionalidad</label>
+          <select id="input-nationality"></select>
+        </div>
+        <button id="btn-create" disabled>🚀 Comenzar carrera</button>
+      </div>
+      <div class="create-pitch-section">
+        <label>Posición (elegí en la cancha)</label>
+        <div class="pitch-wrap">
+          <div id="pitch" class="pitch"></div>
+        </div>
+        <div id="selected-position-label">Seleccioná una posición</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 2: JUEGO -->
+  <div id="screen-game" class="hidden fade-in">
+    <!-- Columna Izquierda -->
+    <div class="left-col">
+      <div id="panel-player" class="panel">
+        <h2 id="p-name">-</h2>
+        <div id="rating-badge">--</div>
+        <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
+        <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
+        <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
+        <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
+        <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
+        <div class="stat-row"><span>🎂 Edad</span><span id="p-age">-</span></div>
+        <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
+        
+        <!-- Stats Totales -->
+        <div class="stat-row highlight" style="margin-top: 8px;"><span>🏃‍♂️ Partidos (Total)</span><span id="p-matches">0</span></div>
+        <div class="stat-row highlight"><span>⚽ Goles (Total)</span><span id="p-goals">0</span></div>
+        <div class="stat-row highlight"><span>👟 Asist. (Total)</span><span id="p-assists">0</span></div>
+
+        <div class="stat-row" style="margin-top: 8px;"><span>💵 Salario</span><span id="p-salary">-</span></div>
+        <div class="stat-row"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
+      </div>
+
+      <!-- Tienda de Potenciadores (desplegable) -->
+      <details id="panel-shop" class="panel shop-panel" open>
+        <summary class="shop-summary">
+          <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
+          <span class="chevron">▼</span>
+        </summary>
+        <div id="shop-items" class="shop-items-body"></div>
+      </details>
+    </div>
+
+    <!-- Columna Derecha -->
+    <div id="panel-main">
+      <!-- Oferta Integrada en UI (Oculta por defecto) -->
+      <div id="offer-panel" class="hidden panel highlight offer-banner">
+        <h3 class="offer-title">🤝 Nueva Oferta de Fichaje</h3>
+        <p>El club <strong><span id="offer-team">-</span></strong> te ofrece un contrato por <strong id="offer-salary">-</strong> por temporada.</p>
+        <div class="offer-actions">
+          <button id="btn-reject" class="btn-danger">❌ Rechazar</button>
+          <button id="btn-accept" class="btn-success">✅ Aceptar Oferta</button>
+        </div>
+      </div>
+
+      <div class="panel" id="action-bar">
+        <button id="btn-advance">⏭️ Avanzar temporada</button>
+        <button id="btn-retire-early" class="btn-danger">🚪 Retirarse</button>
+      </div>
+      
+      <div class="panel" style="flex:1; display:flex; flex-direction:column; gap: 12px; overflow: hidden;">
+        <h3 class="panel-subtitle">📊 Resumen de Temporadas</h3>
+        <div id="simplified-summaries"></div>
+
+        <button id="history-toggle" class="accordion-header" aria-expanded="false" style="margin-top: auto;">
+          <span>📜 Historial detallado de eventos</span>
+          <span id="history-arrow" class="arrow collapsed">▼</span>
+        </button>
+        <div id="log" class="collapsed"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3: RETIRO -->
+  <div id="screen-retire" class="hidden fade-in panel">
+    <h1>👞 Fin de carrera</h1>
+    <p id="retire-reason"></p>
+    <div id="retire-summary"></div>
+    <button id="btn-restart">🔄 Nueva carrera</button>
+  </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
