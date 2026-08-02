@@ -33,7 +33,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     flag: nationalityData.flag,
     position: posCode,
     positionName: posName,
-    age: 18,
+    age: 15,
     rating: startRating,
     team: club.nombre,
     teamRating: club.rating,
@@ -42,6 +42,8 @@ function createPlayer(name, nationalityData, posCode, posName) {
     salary: calcSalary(startRating),
     balance: 0, 
     totalMatches: 0,
+    explotar: false,
+
     
     // --- ESTADÍSTICAS DINÁMICAS ---
     stat1Code: posData.statPrimaria,

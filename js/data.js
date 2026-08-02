@@ -11,58 +11,132 @@ const NATIONALITIES = [
   { name: "España", flag: "🇪🇸" }
 ];
 
+// js/data.js
+
 const TEAMS_BY_COUNTRY = {
   "Argentina": [
-    { nombre: "Boca Juniors", rating: 82 }, { nombre: "River Plate", rating: 83 },
-    { nombre: "Racing Club", rating: 74 }, { nombre: "Independiente", rating: 71 },
-    { nombre: "San Lorenzo", rating: 70 }, { nombre: "Estudiantes de LP", rating: 72 }
-  ],
-  "Francia": [
-    { nombre: "PSG", rating: 88 }, { nombre: "Marsella", rating: 78 },
-    { nombre: "Olympique Lyon", rating: 76 }, { nombre: "AS Mónaco", rating: 79 },
-    { nombre: "Lille OSC", rating: 74 }, { nombre: "Stade Rennais", rating: 72 }
+    { nombre: "River Plate", rating: 78 },
+    { nombre: "Boca Juniors", rating: 77 },
+    { nombre: "Racing Club", rating: 75 },
+    { nombre: "Estudiantes LP", rating: 74 },
+    { nombre: "Talleres (C)", rating: 74 },
+    { nombre: "Vélez Sarsfield", rating: 74 },
+    { nombre: "San Lorenzo", rating: 73 },
+    { nombre: "Independiente", rating: 73 },
+    { nombre: "Defensa y Justicia", rating: 72 },
+    { nombre: "Argentinos Juniors", rating: 72 },
+    { nombre: "Lanús", rating: 72 },
+    { nombre: "Huracán", rating: 71 },
+    { nombre: "Godoy Cruz", rating: 71 },
+    { nombre: "Rosario Central", rating: 71 },
+    { nombre: "Newell's Old Boys", rating: 70 },
+    { nombre: "Belgrano (C)", rating: 70 },
+    { nombre: "Unión (SF)", rating: 69 },
+    { nombre: "Gimnasia LP", rating: 69 },
+    { nombre: "Tigre", rating: 68 },
+    { nombre: "Atlético Tucumán", rating: 68 },
+    { nombre: "Platense", rating: 68 },
+    { nombre: "Banfield", rating: 68 },
+    { nombre: "Instituto (C)", rating: 67 },
+    { nombre: "Central Córdoba (SdE)", rating: 66 },
+    { nombre: "Barracas Central", rating: 66 },
+    { nombre: "Sarmiento (J)", rating: 65 },
+    { nombre: "Riestra", rating: 64 },
+    { nombre: "Independiente Rivadavia", rating: 64 }
   ],
   "Brasil": [
-    { nombre: "Flamengo", rating: 83 }, { nombre: "Palmeiras", rating: 84 },
-    { nombre: "São Paulo", rating: 76 }, { nombre: "Corinthians", rating: 75 },
-    { nombre: "Grêmio", rating: 74 }, { nombre: "Internacional", rating: 73 }
-  ],
-  "Inglaterra": [
-    { nombre: "Manchester City", rating: 90 }, { nombre: "Liverpool", rating: 88 },
-    { nombre: "Arsenal", rating: 86 }, { nombre: "Manchester United", rating: 82 },
-    { nombre: "Chelsea", rating: 83 }, { nombre: "Tottenham", rating: 81 }
-  ],
-  "Bélgica": [
-    { nombre: "Club Brugge", rating: 77 }, { nombre: "Anderlecht", rating: 73 },
-    { nombre: "Genk", rating: 72 }, { nombre: "Gante", rating: 71 },
-    { nombre: "Standard Lieja", rating: 68 }
-  ],
-  "Croacia": [
-    { nombre: "Dinamo Zagreb", rating: 74 }, { nombre: "Hajduk Split", rating: 70 },
-    { nombre: "Rijeka", rating: 67 }, { nombre: "Osijek", rating: 64 }
-  ],
-  "Países Bajos": [
-    { nombre: "Ajax", rating: 80 }, { nombre: "PSV", rating: 81 },
-    { nombre: "Feyenoord", rating: 79 }, { nombre: "AZ Alkmaar", rating: 73 }
-  ],
-  "Portugal": [
-    { nombre: "Benfica", rating: 83 }, { nombre: "Porto", rating: 82 },
-    { nombre: "Sporting CP", rating: 81 }, { nombre: "Braga", rating: 75 }
-  ],
-  "Italia": [
-    { nombre: "Juventus", rating: 84 }, { nombre: "Inter de Milán", rating: 86 },
-    { nombre: "AC Milan", rating: 83 }, { nombre: "Napoli", rating: 85 },
-    { nombre: "AS Roma", rating: 79 }, { nombre: "Lazio", rating: 78 }
+    { nombre: "Flamengo", rating: 80 },
+    { nombre: "Palmeiras", rating: 80 },
+    { nombre: "Botafogo", rating: 78 },
+    { nombre: "Atlético Mineiro", rating: 78 },
+    { nombre: "Fluminense", rating: 77 },
+    { nombre: "São Paulo", rating: 77 },
+    { nombre: "Internacional", rating: 76 },
+    { nombre: "Grêmio", rating: 76 },
+    { nombre: "Corinthians", rating: 76 },
+    { nombre: "Cruzeiro", rating: 75 },
+    { nombre: "Bahia", rating: 74 },
+    { nombre: "Vasco da Gama", rating: 74 },
+    { nombre: "Athletico Paranaense", rating: 74 },
+    { nombre: "Red Bull Bragantino", rating: 73 },
+    { nombre: "Fortaleza", rating: 73 },
+    { nombre: "Cuibá", rating: 70 },
+    { nombre: "Juventude", rating: 69 },
+    { nombre: "Criciúma", rating: 69 },
+    { nombre: "Atlético Goianiense", rating: 68 },
+    { nombre: "Vitória", rating: 68 }
   ],
   "España": [
-    { nombre: "Real Madrid", rating: 91 }, { nombre: "FC Barcelona", rating: 89 },
-    { nombre: "Atlético Madrid", rating: 85 }, { nombre: "Sevilla FC", rating: 77 },
-    { nombre: "Real Sociedad", rating: 76 }, { nombre: "Villarreal CF", rating: 75 }
+    { nombre: "Real Madrid", rating: 89 },
+    { nombre: "FC Barcelona", rating: 87 },
+    { nombre: "Atlético de Madrid", rating: 84 },
+    { nombre: "Athletic Club", rating: 81 },
+    { nombre: "Real Sociedad", rating: 80 },
+    { nombre: "Girona FC", rating: 79 },
+    { nombre: "Villarreal CF", rating: 79 },
+    { nombre: "Real Betis", rating: 78 },
+    { nombre: "Sevilla FC", rating: 77 },
+    { nombre: "Valencia CF", rating: 76 },
+    { nombre: "CA Osasuna", rating: 75 },
+    { nombre: "RC Celta de Vigo", rating: 75 },
+    { nombre: "Getafe CF", rating: 74 },
+    { nombre: "Rayo Vallecano", rating: 74 },
+    { nombre: "RCD Mallorca", rating: 74 },
+    { nombre: "UD Las Palmas", rating: 73 },
+    { nombre: "Deportivo Alavés", rating: 73 },
+    { nombre: "RCD Espanyol", rating: 72 },
+    { nombre: "Real Valladolid", rating: 71 },
+    { nombre: "CD Leganés", rating: 71 }
+  ],
+  "Inglaterra": [
+    { nombre: "Manchester City", rating: 89 },
+    { nombre: "Arsenal", rating: 87 },
+    { nombre: "Liverpool", rating: 87 },
+    { nombre: "Chelsea", rating: 83 },
+    { nombre: "Aston Villa", rating: 82 },
+    { nombre: "Tottenham Hotspur", rating: 82 },
+    { nombre: "Newcastle United", rating: 82 },
+    { nombre: "Manchester United", rating: 81 },
+    { nombre: "Brighton & Hove Albion", rating: 79 },
+    { nombre: "West Ham United", rating: 78 },
+    { nombre: "Fulham", rating: 77 },
+    { nombre: "Crystal Palace", rating: 77 },
+    { nombre: "Bournemouth", rating: 76 },
+    { nombre: "Wolverhampton Wanderers", rating: 76 },
+    { nombre: "Brentford", rating: 76 },
+    { nombre: "Everton", rating: 75 },
+    { nombre: "Nottingham Forest", rating: 75 },
+    { nombre: "Leicester City", rating: 74 },
+    { nombre: "Ipswich Town", rating: 72 },
+    { nombre: "Southampton", rating: 72 }
+  ],
+  "Italia": [
+    { nombre: "Inter de Milán", rating: 86 },
+    { nombre: "Atalanta", rating: 83 },
+    { nombre: "Juventus", rating: 83 },
+    { nombre: "AC Milan", rating: 83 },
+    { nombre: "SSC Napoli", rating: 82 },
+    { nombre: "AS Roma", rating: 81 },
+    { nombre: "SS Lazio", rating: 80 },
+    { nombre: "Fiorentina", rating: 79 },
+    { nombre: "Bologna", rating: 78 },
+    { nombre: "Torino", rating: 76 },
+    { nombre: "Udinese", rating: 75 },
+    { nombre: "Genoa", rating: 75 },
+    { nombre: "Monza", rating: 74 },
+    { nombre: "Parma", rating: 73 },
+    { nombre: "Hellas Verona", rating: 73 },
+    { nombre: "Cagliari", rating: 73 },
+    { nombre: "Lecce", rating: 72 },
+    { nombre: "Empoli", rating: 72 },
+    { nombre: "Como", rating: 72 },
+    { nombre: "Venezia", rating: 71 }
   ]
 };
 
-const ALL_TEAMS = Object.keys(TEAMS_BY_COUNTRY).flatMap(pais =>
-  TEAMS_BY_COUNTRY[pais].map(t => ({ ...t, pais }))
+// Generamos ALL_TEAMS dinámicamente agregando el país a cada club
+const ALL_TEAMS = Object.entries(TEAMS_BY_COUNTRY).flatMap(([pais, equipos]) =>
+  equipos.map(e => ({ ...e, pais }))
 );
 
 const FORMATION_433 = [

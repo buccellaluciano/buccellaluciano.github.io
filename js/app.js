@@ -133,6 +133,7 @@
     el("p-salary").textContent = fmtMoney(player.salary) + " / temp.";
     el("p-fitness").textContent = player.fitness + "%";
     el("injury-tag").classList.toggle("hidden", !player.injured);
+    el("distinto-tag").classList.toggle("hidden", !player.explotar);
   }
 
   function renderSummaries() {
