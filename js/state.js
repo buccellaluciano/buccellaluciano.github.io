@@ -24,7 +24,6 @@ function createPlayer(name, nationalityData, posCode, posName) {
   const club = pickDebutTeam(nationalityData.name);
   const startRating = 50; 
   
-  // Obtenemos los datos de la posición elegida
   const posData = PREFERRED.find(p => p.code === posCode);
   
   return {
@@ -42,21 +41,19 @@ function createPlayer(name, nationalityData, posCode, posName) {
     salary: calcSalary(startRating),
     balance: 0, 
     totalMatches: 0,
-    explotar: false,
-
     
-    // --- ESTADÍSTICAS DINÁMICAS ---
     stat1Code: posData.statPrimaria,
     stat2Code: posData.statSecundaria,
     totalStat1: 0,
     totalStat2: 0,
+    goldenBoots: 0,
+    ballonsDor: 0,
     
     fitness: 100,
     injured: false,
     retired: false,
     lastDelta: 0,
     
-    // Sistema de eventos encapsulados por temporada
     currentEvents: [], 
     seasons: [] 
   };
@@ -117,7 +114,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let leaguePos = Math.round(22 - (teamRating / 4.5) - (performance / 15) + randInt(-3, 3));
   leaguePos = clamp(leaguePos, 1, 20);
 
-  let wonCup = Math.random() < (teamRating + player.rating / 133) * 0.3;
+  let wonCup = Math.random() < (teamRating + player.rating) / 270;
   let wonIntl = false;
   let qualification = "Ninguna";
 
@@ -250,6 +247,30 @@ function simulateSeason() {
   addHistory("season", `${icon} Progresión`, `Cambio en media: ${deltaStr}. Nueva valoración global: <strong>${player.rating}</strong>.`);
 
   const stats = calcSeasonStats(player.position, performance, player.fitness, player.teamRating, player.teamCountry);
+  
+  // --- Premios Individuales ---
+  let seasonGoals = 0;
+  if (player.stat1Code === 'GOL') seasonGoals = stats.val1;
+  else if (player.stat2Code === 'GOL') seasonGoals = stats.val2;
+
+  if (seasonGoals > 30 && Math.random() < 0.33) {
+    stats.titles++;
+    stats.wonTitles.push("Bota de Oro");
+    player.goldenBoots++;
+    addHistory("season", "🥇 Bota de Oro", `¡Imparable! ${player.name} ganó la Bota de Oro al marcar ${seasonGoals} goles esta temporada.`);
+  }
+
+  if (player.rating >= 85) {
+    const chanceBalon = (player.rating - 84) * 0.06;
+    if (Math.random() < chanceBalon) {
+      stats.titles++;
+      stats.wonTitles.push("Balón de Oro");
+      player.ballonsDor++;
+      addHistory("season", "🌕 Balón de Oro", `¡Histórico! ${player.name} fue galardonado con el Balón de Oro como el mejor jugador del mundo.`);
+    }
+  }
+  // ----------------------------
+
   player.totalMatches += stats.matches;
   player.totalStat1 += stats.val1;
   player.totalStat2 += stats.val2;

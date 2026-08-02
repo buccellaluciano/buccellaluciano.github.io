@@ -1,3 +1,4 @@
+// js/app.js
 (function () {
   const el = id => document.getElementById(id);
   let selectedPosition = null;
@@ -101,7 +102,6 @@
   function renderPlayer() {
     el("p-name").textContent = player.name;
     
-    // --- Lógica de la flecha de rendimiento ---
     let arrowHTML = "";
     if (player.lastDelta > 0) {
       arrowHTML = '<span style="color: #10b981; font-size: 22px; text-shadow: 0 0 10px rgba(16,185,129,0.5);">▲</span>';
@@ -109,7 +109,6 @@
       arrowHTML = '<span style="color: #f43f5e; font-size: 22px; text-shadow: 0 0 10px rgba(244,63,94,0.5);">▼</span>';
     }
     el("rating-badge").innerHTML = `${player.rating} ${arrowHTML}`;
-    // ----------------------------------------
 
     el("p-earnings").textContent = fmtMoney(player.balance);
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
@@ -118,7 +117,6 @@
     el("p-age").textContent = `${player.age} años`;
     el("p-seasons").textContent = player.seasonsPlayed;
     
-    // Estadísticas dinámicas del menú
     el("p-matches").textContent = player.totalMatches;
     
     const s1Info = STAT_LABELS[player.stat1Code];
@@ -133,7 +131,16 @@
     el("p-salary").textContent = fmtMoney(player.salary) + " / temp.";
     el("p-fitness").textContent = player.fitness + "%";
     el("injury-tag").classList.toggle("hidden", !player.injured);
-    el("distinto-tag").classList.toggle("hidden", !player.explotar);
+    el("distinto-tag").classList.toggle("hidden", !player.explotar); 
+    
+    if (el("row-balon")) {
+      el("row-balon").classList.toggle("hidden", player.ballonsDor === 0);
+      el("p-balon").textContent = player.ballonsDor;
+    }
+    if (el("row-bota")) {
+      el("row-bota").classList.toggle("hidden", player.goldenBoots === 0);
+      el("p-bota").textContent = player.goldenBoots;
+    }
   }
 
   function renderSummaries() {
@@ -170,7 +177,6 @@
         </div>
       `;
 
-      // Contenedor oculto con los eventos de esta temporada específica
       const eventsContainer = document.createElement("div");
       eventsContainer.className = "season-events hidden";
       
@@ -181,7 +187,6 @@
         eventsContainer.appendChild(evDiv);
       });
 
-      // Al hacer clic en la fila, se muestran u ocultan sus eventos
       row.addEventListener("click", () => {
         eventsContainer.classList.toggle("hidden");
       });
@@ -205,6 +210,14 @@
     const s1Info = STAT_LABELS[player.stat1Code];
     const s2Info = STAT_LABELS[player.stat2Code];
     
+    let extraStats = "";
+    if (player.ballonsDor > 0) {
+      extraStats += `<div class="stat-row"><span>🌕 Balones de Oro</span><span>${player.ballonsDor}</span></div>`;
+    }
+    if (player.goldenBoots > 0) {
+      extraStats += `<div class="stat-row"><span>🥇 Botas de Oro</span><span>${player.goldenBoots}</span></div>`;
+    }
+
     el("retire-summary").innerHTML = `
       <div class="stat-row"><span>Nombre</span><span>${player.name}</span></div>
       <div class="stat-row"><span>Nacionalidad</span><span>${player.flag} ${player.nationality}</span></div>
@@ -216,6 +229,7 @@
       <div class="stat-row"><span>Total Partidos</span><span>${player.totalMatches}</span></div>
       <div class="stat-row"><span>Total ${s1Info.name}</span><span>${player.totalStat1}</span></div>
       <div class="stat-row"><span>Total ${s2Info.name}</span><span>${player.totalStat2}</span></div>
+      ${extraStats}
     `;
   }
 
@@ -269,7 +283,6 @@
   }
 
   function resetToCreate() {
-    // Al recargar la página completamente, todos los scripts se vuelven a cargar
     location.reload();
   }
 
@@ -288,11 +301,9 @@
     document.body.classList.toggle("dark");
     const isDark = document.body.classList.contains("dark");
     el("btn-theme").textContent = isDark ? "☀️ Tema Claro" : "🌙 Tema Oscuro";
-    // Guardar preferencia para que persista al recargar la página
     localStorage.setItem("theme", isDark ? "dark" : "light");
   });
 
-  // Restaurar el tema si la página fue recargada
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
     el("btn-theme").textContent = "☀️ Tema Claro";
@@ -314,6 +325,67 @@
     renderSummaries();
     renderPlayer();
     renderShop();
+  });
+
+// --- LÓGICA DE LA VITRINA ---
+  function renderVitrina() {
+    const shelf = el("vitrina-shelf");
+    shelf.innerHTML = "";
+
+    // Diccionario para contar los trofeos
+    const trophies = {};
+
+    // Recolectar trofeos de equipo
+    player.seasons.forEach(s => {
+      if (s.wonTitles) {
+        s.wonTitles.forEach(t => {
+          if (t !== "Balón de Oro" && t !== "Bota de Oro") {
+            trophies[t] = (trophies[t] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    // Añadir premios individuales
+    if (player.ballonsDor > 0) trophies["Balón de Oro"] = player.ballonsDor;
+    if (player.goldenBoots > 0) trophies["Bota de Oro"] = player.goldenBoots;
+
+    if (Object.keys(trophies).length === 0) {
+      shelf.innerHTML = "<p style='color: var(--text-muted); font-size: 14px; width: 100%; text-align: center; align-self: center; margin-bottom: 20px;'>La vitrina está vacía.</p>";
+      return;
+    }
+
+    // Dibujar cada trofeo
+    for (const [name, count] of Object.entries(trophies)) {
+      const div = document.createElement("div");
+      div.className = "trophy-item";
+
+      // Asignar emoji según el tipo (Si consigues las imágenes, reemplaza esto por <img src='ruta.png' class='trophy-img'>)
+      let icon = "🏆";
+      if (name === "Balón de Oro") icon = "🌕";
+      else if (name === "Bota de Oro") icon = "🥇";
+      else if (name === "Champions League" || name === "Copa Libertadores") icon = "🌍";
+      else if (name === "Europa League" || name === "Copa Sudamericana") icon = "🥈";
+      else if (name === "Liga Local") icon = "🛡️";
+      else if (name === "Copa Nacional") icon = "🏺";
+
+      div.innerHTML = `
+        <div class="trophy-icon">${icon}</div>
+        <div class="trophy-label">${name}</div>
+        <div class="trophy-count">x${count}</div>
+      `;
+      shelf.appendChild(div);
+    }
+  }
+
+  // --- EVENTOS DE LA VITRINA ---
+  el("btn-vitrina").addEventListener("click", () => {
+    renderVitrina();
+    el("modal-vitrina").classList.remove("hidden");
+  });
+
+  el("btn-close-vitrina").addEventListener("click", () => {
+    el("modal-vitrina").classList.add("hidden");
   });
 
   el("btn-advance").addEventListener("click", handleAdvance);

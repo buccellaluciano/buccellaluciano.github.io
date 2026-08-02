@@ -64,6 +64,8 @@
             <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
             <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
             <div class="stat-row"><span>💵 Salario</span><span id="p-salary">-</span></div>
+            <div class="stat-row hidden" id="row-balon"><span>🌕 Balones de Oro</span><span id="p-balon">0</span></div>
+            <div class="stat-row hidden" id="row-bota"><span>🥇 Botas de Oro</span><span id="p-bota">0</span></div>
           </div>
         </details>
         
@@ -100,6 +102,7 @@
       <div class="panel" id="action-bar">
         <button id="btn-advance">⏭️ Avanzar temporada</button>
         <button id="btn-retire-early" class="btn-danger">🚪 Retirarse</button>
+        <button id="btn-vitrina" style="background-color: #f59e0b;">🏆 Vitrina</button>
       </div>
       
       <div class="panel" style="flex:1; display:flex; flex-direction:column; gap: 12px; overflow: hidden;">
@@ -115,6 +118,18 @@
     <p id="retire-reason"></p>
     <div id="retire-summary"></div>
     <button id="btn-restart">🔄 Nueva carrera</button>
+  </div>
+
+  <div id="modal-vitrina" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel">
+      <div class="vitrina-header">
+        <h2>🏆 Vitrina Personal</h2>
+        <button id="btn-close-vitrina">❌</button>
+      </div>
+      <div class="shelf-container" id="vitrina-shelf">
+        <!-- Los trofeos se inyectarán aquí -->
+      </div>
+    </div>
   </div>
 
 </div>
