@@ -1,16 +1,15 @@
 const NATIONALITIES = [
-  { name: "Argentina", flag: "🇦🇷" },
-  { name: "Francia", flag: "🇫🇷" },
-  { name: "Brasil", flag: "🇧🇷" },
-  { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  { name: "Bélgica", flag: "🇧🇪" },
-  { name: "Croacia", flag: "🇭🇷" },
-  { name: "Países Bajos", flag: "🇳🇱" },
-  { name: "Portugal", flag: "🇵🇹" },
-  { name: "Italia", flag: "🇮🇹" },
-  { name: "España", flag: "🇪🇸" }
+  { name: "Argentina", flag: "🇦🇷", liga: "LPF", icon: "<img src='assets/LPF.png' class='trophy-img'>" },
+  { name: "Francia", flag: "🇫🇷", liga: "Ligue 1", icon: "<img src='assets/Ligue1.png' class='trophy-img'>" },
+  { name: "Brasil", flag: "🇧🇷", liga: "Brasileirão", icon: "<img src='assets/Brasileirao.png' class='trophy-img'>" },
+  { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", liga: "Premier League", icon: "<img src='assets/PremierLeague.png' class='trophy-img'>" },
+  { name: "Bélgica", flag: "🇧🇪", liga: "Pro League", icon: "<img src='assets/ProLeague.png' class='trophy-img'>" },
+  { name: "Croacia", flag: "🇭🇷", liga: "HNL", icon: "<img src='assets/HNL.png' class='trophy-img'>" },
+  { name: "Países Bajos", flag: "🇳🇱", liga: "Eredivisie", icon: "<img src='assets/Eredivisie.png' class='trophy-img'>" },
+  { name: "Portugal", flag: "🇵🇹", liga: "Primeira Liga", icon: "<img src='assets/PrimeiraLiga.png' class='trophy-img'>" },
+  { name: "Italia", flag: "🇮🇹", liga: "Serie A", icon: "<img src='assets/SerieA.png' class='trophy-img'>" },
+  { name: "España", flag: "🇪🇸", liga: "La Liga", icon: "<img src='assets/LaLiga.png' class='trophy-img'>" }
 ];
-
 // js/data.js
 
 const TEAMS_BY_COUNTRY = {

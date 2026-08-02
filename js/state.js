@@ -144,12 +144,15 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let titles = 0;
   let wonTitles = [];
 
+  let liga = getTeamCountry(player.team);
   if (leaguePos === 1) {
     titles++;
-    wonTitles.push("Liga Local");
-    addHistory("season", "🏆 Campeón", `¡Ganaste la Liga Local con ${player.team}!`);
+    const nacionalidad = NATIONALITIES.find(n => n.name === liga);
+    const ligaCode = nacionalidad ? nacionalidad.liga : "Liga Local";
+    wonTitles.push(ligaCode);
+    addHistory("season", "🏆 Campeón", `¡Ganaste la ${ligaCode} con ${player.team}!`);
   }
-
+  
   if (wonCup) {
     titles++;
     wonTitles.push("Copa Nacional");
@@ -216,6 +219,7 @@ function simulateSeason() {
     else if (dado <= 2) modificadorDado = -1;
     else modificadorDado = 0;
   }
+  console.log(getTeamCountry(player.team));
 
   const ageFactor = ageFactorFor(player.age);
   const perfFactor = (performance - 30) / 50; 

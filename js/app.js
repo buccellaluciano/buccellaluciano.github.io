@@ -360,14 +360,45 @@
       const div = document.createElement("div");
       div.className = "trophy-item";
 
-      // Asignar emoji según el tipo (Si consigues las imágenes, reemplaza esto por <img src='ruta.png' class='trophy-img'>)
       let icon = "🏆";
-      if (name === "Balón de Oro") icon = "🌕";
-      else if (name === "Bota de Oro") icon = "🥇";
-      else if (name === "Champions League" || name === "Copa Libertadores") icon = "🌍";
-      else if (name === "Europa League" || name === "Copa Sudamericana") icon = "🥈";
-      else if (name === "Liga Local") icon = "🛡️";
-      else if (name === "Copa Nacional") icon = "🏺";
+      switch (name) {
+        // Distinciones individuales
+        case "Balón de Oro":
+          icon = "🌕";
+          break;
+        case "Bota de Oro":
+          icon = "🥇";
+          break;
+
+        // Torneos internacionales (agrupados)
+        case "Champions League":
+        case "Copa Libertadores":
+          icon = "🌍";
+          break;
+        case "Europa League":
+        case "Copa Sudamericana":
+          icon = "🥈";
+          break;
+
+        // Copas nacionales
+        case "Copa Nacional":
+          icon = "🏺";
+          break;
+
+        // Para cualquier otro caso (principalmente ligas locales)
+        default: {
+          // Busca en la lista de nacionalidades si el nombre coincide con alguna liga
+          const leagueEntry = NATIONALITIES.find(n => n.liga === name);
+          if (leagueEntry) {
+            icon = leagueEntry.icon; // usa el icono predefinido (img)
+          } else if (name === "Liga Local") {
+            // Fallback para ligas no incluidas en la lista
+            icon = "<img src='assets/LigaLocal.png' class='trophy-img'>";
+          }
+          // Si no es liga ni ninguno de los anteriores, se queda con 🏆
+          break;
+        }
+      }
 
       div.innerHTML = `
         <div class="trophy-icon">${icon}</div>
