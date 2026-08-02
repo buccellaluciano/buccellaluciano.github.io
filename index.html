@@ -47,19 +47,31 @@
         <div id="rating-badge">--</div>
         <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
         <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
-        <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
-        <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
+        
+        <!-- Atributos siempre visibles -->
         <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
         <div class="stat-row"><span>🎂 Edad</span><span id="p-age">-</span></div>
-        <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
+        
+        <!-- Menú desplegable (Atributos secundarios) -->
+        <details class="shop-panel" style="margin-top: 8px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--input-bg);">
+          <summary class="shop-summary" style="padding: 10px 14px;">
+            <span class="shop-summary-title" style="font-size: 12px;">📋 Más detalles</span>
+            <span class="chevron">▼</span>
+          </summary>
+          <div style="padding: 0 14px 10px 14px; display: flex; flex-direction: column;">
+            <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
+            <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
+            <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
+            <div class="stat-row"><span>💵 Salario</span><span id="p-salary">-</span></div>
+          </div>
+        </details>
         
         <!-- Stats Totales -->
         <div class="stat-row highlight" style="margin-top: 8px;"><span>🏃‍♂️ Partidos (Total)</span><span id="p-matches">0</span></div>
-        <div class="stat-row highlight"><span>⚽ Goles (Total)</span><span id="p-goals">0</span></div>
-        <div class="stat-row highlight"><span>👟 Asist. (Total)</span><span id="p-assists">0</span></div>
+        <div class="stat-row highlight"><span id="lbl-stat1">⚽ Stat 1 (Total)</span><span id="p-stat1">0</span></div>
+        <div class="stat-row highlight"><span id="lbl-stat2">👟 Stat 2 (Total)</span><span id="p-stat2">0</span></div>
 
-        <div class="stat-row" style="margin-top: 8px;"><span>💵 Salario</span><span id="p-salary">-</span></div>
-        <div class="stat-row"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
+        <div class="stat-row" style="margin-top: 8px;"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
       </div>
 
       <!-- Tienda de Potenciadores (desplegable) -->
@@ -92,7 +104,6 @@
       <div class="panel" style="flex:1; display:flex; flex-direction:column; gap: 12px; overflow: hidden;">
         <h3 class="panel-subtitle">📊 Resumen de Temporadas</h3>
         <div id="simplified-summaries"></div>
-        <div id="log" class="collapsed"></div>  
       </div>
     </div>
   </div>

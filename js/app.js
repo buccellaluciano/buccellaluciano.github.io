@@ -2,6 +2,17 @@
   const el = id => document.getElementById(id);
   let selectedPosition = null;
 
+  const STAT_LABELS = {
+    "GOL": { name: "Goles", icon: "⚽" },
+    "ASI": { name: "Asistencias", icon: "👟" },
+    "VIN": { name: "Vallas Invictas", icon: "🧤" },
+    "ATA": { name: "Atajadas", icon: "✋" },
+    "ENT": { name: "Entradas", icon: "🛑" },
+    "REC": { name: "Recuperaciones", icon: "🔄" },
+    "INT": { name: "Intercepciones", icon: "👁️" },
+    "TAP": { name: "Tiros a Puerta", icon: "🎯" }
+  };
+
   function populateNationalities() {
     const sel = el("input-nationality");
     NATIONALITIES.forEach((n, idx) => {
@@ -89,16 +100,36 @@
 
   function renderPlayer() {
     el("p-name").textContent = player.name;
-    el("rating-badge").textContent = player.rating;
+    
+    // --- Lógica de la flecha de rendimiento ---
+    let arrowHTML = "";
+    if (player.lastDelta > 0) {
+      arrowHTML = '<span style="color: #10b981; font-size: 22px; text-shadow: 0 0 10px rgba(16,185,129,0.5);">▲</span>';
+    } else if (player.lastDelta < 0) {
+      arrowHTML = '<span style="color: #f43f5e; font-size: 22px; text-shadow: 0 0 10px rgba(244,63,94,0.5);">▼</span>';
+    }
+    el("rating-badge").innerHTML = `${player.rating} ${arrowHTML}`;
+    // ----------------------------------------
+
     el("p-earnings").textContent = fmtMoney(player.balance);
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
     el("p-position").textContent = `${player.positionName} (${player.position})`;
     el("p-team").textContent = `🛡️ ${player.team}`;
     el("p-age").textContent = `${player.age} años`;
     el("p-seasons").textContent = player.seasonsPlayed;
+    
+    // Estadísticas dinámicas del menú
     el("p-matches").textContent = player.totalMatches;
-    el("p-goals").textContent = player.totalGoals;
-    el("p-assists").textContent = player.totalAssists;
+    
+    const s1Info = STAT_LABELS[player.stat1Code];
+    const s2Info = STAT_LABELS[player.stat2Code];
+
+    el("lbl-stat1").textContent = `${s1Info.icon} ${s1Info.name} (Total)`;
+    el("p-stat1").textContent = player.totalStat1;
+
+    el("lbl-stat2").textContent = `${s2Info.icon} ${s2Info.name} (Total)`;
+    el("p-stat2").textContent = player.totalStat2;
+
     el("p-salary").textContent = fmtMoney(player.salary) + " / temp.";
     el("p-fitness").textContent = player.fitness + "%";
     el("injury-tag").classList.toggle("hidden", !player.injured);
@@ -120,6 +151,9 @@
       
       let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.join(', ')})</span>` : '';
       
+      const s1Info = STAT_LABELS[player.stat1Code];
+      const s2Info = STAT_LABELS[player.stat2Code];
+
       const contentHTML = `
         <div class="simple-season-info">
           <span>T${d.season} · Edad ${d.age}</span>
@@ -128,8 +162,8 @@
         </div>
         <div class="simple-season-stats">
           <span title="Partidos Jugados">P: ${d.matches}</span>
-          <span title="Goles">G: ${d.goals}</span>
-          <span title="Asistencias">A: ${d.assists}</span>
+          <span title="${s1Info.name}">${player.stat1Code}: ${d.val1}</span>
+          <span title="${s2Info.name}">${player.stat2Code}: ${d.val2}</span>
           <span title="Títulos">🏆 ${d.titles}</span>
           ${wonHtml}
         </div>
@@ -166,6 +200,10 @@
     el("screen-game").classList.add("hidden");
     el("screen-retire").classList.remove("hidden");
     el("retire-reason").textContent = reason + ".";
+    
+    const s1Info = STAT_LABELS[player.stat1Code];
+    const s2Info = STAT_LABELS[player.stat2Code];
+    
     el("retire-summary").innerHTML = `
       <div class="stat-row"><span>Nombre</span><span>${player.name}</span></div>
       <div class="stat-row"><span>Nacionalidad</span><span>${player.flag} ${player.nationality}</span></div>
@@ -175,8 +213,8 @@
       <div class="stat-row"><span>Temporadas jugadas</span><span>${player.seasonsPlayed}</span></div>
       <div class="stat-row"><span>Valoración final</span><span>⭐ ${player.rating}</span></div>
       <div class="stat-row"><span>Total Partidos</span><span>${player.totalMatches}</span></div>
-      <div class="stat-row"><span>Total Goles</span><span>${player.totalGoals}</span></div>
-      <div class="stat-row"><span>Total Asistencias</span><span>${player.totalAssists}</span></div>
+      <div class="stat-row"><span>Total ${s1Info.name}</span><span>${player.totalStat1}</span></div>
+      <div class="stat-row"><span>Total ${s2Info.name}</span><span>${player.totalStat2}</span></div>
     `;
   }
 
@@ -230,7 +268,7 @@
   }
 
   function resetToCreate() {
-    // Al recargar la página completamente, todos los scripts se vuelven a cargar y las variables vuelven a sus valores por defecto
+    // Al recargar la página completamente, todos los scripts se vuelven a cargar
     location.reload();
   }
 

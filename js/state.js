@@ -23,6 +23,10 @@ function getTeamCountry(teamName) {
 function createPlayer(name, nationalityData, posCode, posName) {
   const club = pickDebutTeam(nationalityData.name);
   const startRating = 50; 
+  
+  // Obtenemos los datos de la posición elegida
+  const posData = PREFERRED.find(p => p.code === posCode);
+  
   return {
     name,
     nationality: nationalityData.name,
@@ -38,29 +42,34 @@ function createPlayer(name, nationalityData, posCode, posName) {
     salary: calcSalary(startRating),
     balance: 0, 
     totalMatches: 0,
-    totalGoals: 0,
-    totalAssists: 0,
+    
+    // --- ESTADÍSTICAS DINÁMICAS ---
+    stat1Code: posData.statPrimaria,
+    stat2Code: posData.statSecundaria,
+    totalStat1: 0,
+    totalStat2: 0,
+    
     fitness: 100,
     injured: false,
     retired: false,
-    history: [],
-    explotar: false,
+    lastDelta: 0,
+    
+    // Sistema de eventos encapsulados por temporada
     currentEvents: [], 
-    seasons: []
+    seasons: [] 
   };
 }
 
 function addHistory(type, tag, text) { 
   player.currentEvents.push({ type, tag, text }); 
 }
+
 function addSeasonSummary(data) { 
-  // Empaquetamos los eventos acumulados dentro de los datos de esta temporada
   player.seasons.push({ 
     ...data, 
     events: [...player.currentEvents], 
     isNew: true 
   });
-  // Vaciamos la lista temporal para la temporada siguiente
   player.currentEvents = []; 
 }
 
@@ -68,13 +77,9 @@ function calcularEstadisticas(code, rating, partidosJugados) {
   const posData = PREFERRED.find(p => p.code === code);
   if (!posData) return null;
 
-  // Factor base: rating 50 = ~0.4 | rating 90 = ~0.93
   const factorRating = Math.pow(rating / 100, 3);
-
-  // Proporción para ajustar los límites a la cantidad real de partidos jugados
   const factorPartidos = partidosJugados / 38;
 
-  // Límites máximos teóricos calculados dinámicamente según la temporada
   const limites = {
     "GOL": 45 * factorPartidos,
     "ASI": 25 * factorPartidos,
@@ -88,12 +93,8 @@ function calcularEstadisticas(code, rating, partidosJugados) {
 
   function calcularValor(statCode, esPrimaria) {
     const limiteDinamico = limites[statCode] || (30 * factorPartidos);
-    // La stat secundaria tiene un límite menor natural
     const limiteAjustado = esPrimaria ? limiteDinamico : limiteDinamico * 0.4;
-
-    // RNG: de 0.6 a 1.1 base. Un jugador de 90+ tiene un empuje extra en el multiplicador
     const suerte = 0.6 + (Math.random() * 0.5) + (rating / 300);
-
     return Math.round(limiteAjustado * factorRating * suerte);
   }
 
@@ -111,51 +112,36 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   const regionTopTier = isConmebol ? "Copa Libertadores" : "Champions League";
   const regionMidTier = isConmebol ? "Copa Sudamericana" : "Europa League";
 
-  // Determinar la posición en liga del equipo este año
   let leaguePos = Math.round(22 - (teamRating / 4.5) - (performance / 15) + randInt(-3, 3));
   leaguePos = clamp(leaguePos, 1, 20);
 
-  // Determinar campeonatos para el cálculo de partidos
   let wonCup = Math.random() < (teamRating + player.rating / 133) * 0.3;
   let wonIntl = false;
   let qualification = "Ninguna";
 
-  // --- CÁLCULO DINÁMICO DE PARTIDOS POSIBLES ---
-  const leagueMatches = 30; // Liga máximo 30 partidos
-  const cupMatches = wonCup ? 6 : randInt(1, 5); // Copa Nacional máximo 6
+  const leagueMatches = 30; 
+  const cupMatches = wonCup ? 6 : randInt(1, 5); 
   let intlMatches = 0;
 
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
     wonIntl = (teamRating > 80 && Math.random() < 0.15);
-    // Champions: Fase de liga (8) + Eliminatorias (7) = 15 máx
     intlMatches = wonIntl ? 15 : randInt(8, 14);
   } else if (leaguePos >= 5 && leaguePos <= 7) {
     qualification = regionMidTier;
     wonIntl = (teamRating > 75 && Math.random() < 0.20);
-    // Europa League / Sudamericana: Fase de grupos (6) + Eliminatorias (4) = 10 máx
     intlMatches = wonIntl ? 10 : randInt(6, 9);
   }
 
-  // Partidos bases sumando todas las competiciones jugadas
   const baseMatches = leagueMatches + cupMatches + intlMatches;
-
-  // Ajuste por la forma física del jugador
   const availability = fitness / 100;
   const matches = clamp(Math.round(baseMatches * availability), 3, baseMatches);
   
-  // // Factor de escala (usamos 38 como divisor base para mantener el balance estadístico original)
-  // const matchFactor = matches / 38;
-
   let perfMult = clamp(performance / 100, 0.5, 1.5);
-  let goals = 0, assists = 0;
   let statsGeneradas = calcularEstadisticas(player.position, player.rating, matches);
-  goals = statsGeneradas[0].valor; 
-  goals *= perfMult;
-  assists = statsGeneradas[1].valor;
-  assists *= perfMult;
-  goals = Math.round(goals);
-  assists = Math.round(assists);
+  
+  let val1 = Math.round(statsGeneradas[0].valor * perfMult);
+  let val2 = Math.round(statsGeneradas[1].valor * perfMult);
   let titles = 0;
   let wonTitles = [];
 
@@ -177,7 +163,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
   }
 
-  return { matches, goals, assists, titles, wonTitles, leaguePos, qualification };
+  return { matches, val1, val2, titles, wonTitles, leaguePos, qualification };
 }
 
 function ageFactorFor(age) {
@@ -210,40 +196,36 @@ function simulateSeason() {
 
   addHistory("season", "📅 Temporada " + player.seasonsPlayed, `${player.name} tuvo una temporada <strong>${perfLabel}</strong> con ${player.team}.`);
 
-  // --- SISTEMA DE RNG "EXPLOTAR" ---
-  // Probabilidad base levemente creciente con cada temporada jugada
   const probabilidadExplotar = 0.02 + (player.seasonsPlayed * 0.005); 
   
-  // Si no ha explotado aún, tiramos los dados para ver si despierta su potencial este año
   if (!player.explotar && Math.random() < probabilidadExplotar) {
     player.explotar = true;
     addHistory("season", "🔥 EXPLOSIÓN", `¡${player.name} ha explotado su potencial! A partir de ahora su progresión será mucho más rápida.`);
   }
 
   let modificadorDado = 0;
+  
   if (player.explotar === true && player.age <= 31) {
-    // ESTADO EXPLOTÓ (True y en edad óptima): Más probable que suba rápido y con saltos más grandes
     const dado = randInt(1, 10);
-    if (dado >= 8) modificadorDado = randInt(3, 5); // Salto de calidad enorme
-    else if (dado >= 4) modificadorDado = randInt(1, 2); // Subida constante
-    else if (dado === 1) modificadorDado = -1; // Raro que baje
+    if (dado >= 8) modificadorDado = randInt(3, 5); 
+    else if (dado >= 4) modificadorDado = randInt(1, 2); 
+    else if (dado === 1) modificadorDado = -1; 
     else modificadorDado = 0;
   } else {
-    // ESTADO NORMAL (False o mayor a 31 años): Varía muy poco, crecimiento lento y estable
     const dado = randInt(1, 6);
     if (dado >= 5) modificadorDado = 1;
     else if (dado <= 2) modificadorDado = -1;
     else modificadorDado = 0;
   }
-  // ---------------------------------
 
   const ageFactor = ageFactorFor(player.age);
   const perfFactor = (performance - 30) / 50; 
-  let delta = Math.round(modificadorDado + ageFactor + perfFactor);
+  let delta = Math.round(modificadorDado + ageFactor + (perfFactor * 3));
 
   if (player.rating < 85 && Math.random() < 0.25) {
-    delta += randInt(0, 2);
+    delta += randInt(2, 4);
   }
+
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
@@ -257,15 +239,18 @@ function simulateSeason() {
     addHistory("injury", "🚑 Lesión", `Sufrió una lesión <strong>${severityLabel}</strong>. Impacto en progresión: -${ratingHit}. Forma física baja a ${player.fitness}%.`);
   }
 
+  const oldRating = player.rating;
   player.rating = clamp(player.rating + delta, 25, 99);
+  player.lastDelta = player.rating - oldRating;
+
   const deltaStr = delta >= 0 ? `+${delta}` : `${delta}`;
   const icon = delta >= 0 ? "📈" : "📉";
   addHistory("season", `${icon} Progresión`, `Cambio en media: ${deltaStr}. Nueva valoración global: <strong>${player.rating}</strong>.`);
 
   const stats = calcSeasonStats(player.position, performance, player.fitness, player.teamRating, player.teamCountry);
   player.totalMatches += stats.matches;
-  player.totalGoals += stats.goals;
-  player.totalAssists += stats.assists;
+  player.totalStat1 += stats.val1;
+  player.totalStat2 += stats.val2;
 
   addSeasonSummary({ 
     season: player.seasonsPlayed, 
@@ -328,8 +313,16 @@ function buyItem(id) {
   if (item && player.balance >= item.price) {
     player.balance -= item.price;
     if (id === 'rest') player.fitness = 100;
-    if (id === 'shoes') player.rating = clamp(player.rating + 1, 25, 99);
-    if (id === 'coach') player.rating = clamp(player.rating + 2, 25, 99);
+    if (id === 'shoes') {
+      const oldR = player.rating;
+      player.rating = clamp(player.rating + 1, 25, 99);
+      player.lastDelta = player.rating - oldR;
+    }
+    if (id === 'coach') {
+      const oldR = player.rating;
+      player.rating = clamp(player.rating + 2, 25, 99);
+      player.lastDelta = player.rating - oldR;
+    }
     addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.`);
     return true;
   }
