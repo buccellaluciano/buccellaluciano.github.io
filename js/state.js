@@ -76,7 +76,7 @@ function calcularEstadisticas(code, rating, partidosJugados) {
   const posData = PREFERRED.find(p => p.code === code);
   if (!posData) return null;
 
-  const factorRating = Math.pow(rating / 100, 3);
+  const factorRating = Math.pow(rating / 91, 3);
   const factorPartidos = partidosJugados / 38;
 
   const limites = {
