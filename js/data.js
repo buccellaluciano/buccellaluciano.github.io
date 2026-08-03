@@ -1,14 +1,14 @@
 const NATIONALITIES = [
-  { name: "Argentina", flag: "🇦🇷", liga: "LPF", icon: "<img src='assets/LPF.png' class='trophy-img'>" },
-  { name: "Francia", flag: "🇫🇷", liga: "Ligue 1", icon: "<img src='assets/Ligue1.png' class='trophy-img'>" },
-  { name: "Brasil", flag: "🇧🇷", liga: "Brasileirão", icon: "<img src='assets/Brasileirao.png' class='trophy-img'>" },
-  { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", liga: "Premier League", icon: "<img src='assets/PremierLeague.png' class='trophy-img'>" },
-  { name: "Bélgica", flag: "🇧🇪", liga: "Pro League", icon: "<img src='assets/ProLeague.png' class='trophy-img'>" },
-  { name: "Croacia", flag: "🇭🇷", liga: "HNL", icon: "<img src='assets/HNL.png' class='trophy-img'>" },
-  { name: "Países Bajos", flag: "🇳🇱", liga: "Eredivisie", icon: "<img src='assets/Eredivisie.png' class='trophy-img'>" },
-  { name: "Portugal", flag: "🇵🇹", liga: "Primeira Liga", icon: "<img src='assets/PrimeiraLiga.png' class='trophy-img'>" },
-  { name: "Italia", flag: "🇮🇹", liga: "Serie A", icon: "<img src='assets/SerieA.png' class='trophy-img'>" },
-  { name: "España", flag: "🇪🇸", liga: "La Liga", icon: "<img src='assets/LaLiga.png' class='trophy-img'>" }
+  { name: "Argentina", flag: "🇦🇷", liga: "LPF", icon: "<img src='assets/trophies/LPF.png' class='trophy-img'>" },
+  { name: "Francia", flag: "🇫🇷", liga: "Ligue 1", icon: "<img src='assets/trophies/Ligue1.png' class='trophy-img'>" },
+  { name: "Brasil", flag: "🇧🇷", liga: "Brasileirão", icon: "<img src='assets/trophies/Brasileirao.png' class='trophy-img'>" },
+  { name: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", liga: "Premier League", icon: "<img src='assets/trophies/PremierLeague.png' class='trophy-img'>" },
+  { name: "Bélgica", flag: "🇧🇪", liga: "Pro League", icon: "<img src='assets/trophies/ProLeague.png' class='trophy-img'>" },
+  { name: "Croacia", flag: "🇭🇷", liga: "HNL", icon: "<img src='assets/trophies/HNL.png' class='trophy-img'>" },
+  { name: "Países Bajos", flag: "🇳🇱", liga: "Eredivisie", icon: "<img src='assets/trophies/Eredivisie.png' class='trophy-img'>" },
+  { name: "Portugal", flag: "🇵🇹", liga: "Primeira Liga", icon: "<img src='assets/trophies/PrimeiraLiga.png' class='trophy-img'>" },
+  { name: "Italia", flag: "🇮🇹", liga: "Serie A", icon: "<img src='assets/trophies/SerieA.png' class='trophy-img'>" },
+  { name: "España", flag: "🇪🇸", liga: "La Liga", icon: "<img src='assets/trophies/LaLiga.png' class='trophy-img'>" }
 ];
 // js/data.js
 
@@ -170,22 +170,22 @@ const topRegionTrophies = [
   {
     region: "CONMEBOL",
     name: "Copa Libertadores",
-    icon: "assets/CopaLibertadores.png"
+    icon: "assets/trophies/CopaLibertadores.png"
   },
   {
     region: "UEFA",
     name: "Champions League",
-    icon: "assets/UCL.png"
+    icon: "assets/trophies/UCL.png"
   },
   {
     region: "CONCACAF",
     name: "CONCACAF Champions Cup",
-    icon: "assets/CONCACAFChampionsCup.png"
+    icon: "assets/trophies/CONCACAFChampionsCup.png"
   },
   {
     region: "AFC",
     name: "AFC Champions League Elite",
-    icon: "assets/AFCChampionsLeagueElite.png"
+    icon: "assets/trophies/AFCChampionsLeagueElite.png"
   }
 ];
 
@@ -193,21 +193,21 @@ const secRegionTrophies = [
   {
     region: "CONMEBOL",
     name: "Copa Sudamericana",
-    icon: "assets/CopaSudamericana.png"
+    icon: "assets/trophies/CopaSudamericana.png"
   },
   {
     region: "UEFA",
     name: "Europa League",
-    icon: "assets/Europa League.png"
+    icon: "assets/trophies/Europa League.png"
   },
   {
     region: "CONCACAF",
     name: "CONCACAF Central American Cup",
-    icon: "assets/CONCACAFCentralAmericanCup.png"
+    icon: "assets/trophies/CONCACAFCentralAmericanCup.png"
   },
   {
     region: "AFC",
     name: "AFC Cup",
-    icon: "assets/AFCCup.png"
+    icon: "assets/trophies/AFCCup.png"
   }
 ];

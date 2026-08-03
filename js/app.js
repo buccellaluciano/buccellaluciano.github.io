@@ -350,8 +350,8 @@
           : `<div class="trophy-icon">🥈</div>`;
       }
       default:
-        if (name === "Balón de Oro") return `<div class="trophy-icon"><img src='assets/ballondor.png' class='trophy-img'></div>`;
-        if (name === "Bota de Oro") return `<div class="trophy-icon"><img src='assets/goldenboot.png' class='trophy-img'></div>`;
+        if (name === "Balón de Oro") return `<div class="trophy-icon"><img src='assets/trophies/ballondor.png' class='trophy-img'></div>`;
+        if (name === "Bota de Oro") return `<div class="trophy-icon"><img src='assets/trophies/goldenboot.png' class='trophy-img'></div>`;
         return `<div class="trophy-icon">🏆</div>`;
     }
   }
