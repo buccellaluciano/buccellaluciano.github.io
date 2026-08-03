@@ -12,12 +12,33 @@ function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function fmtMoney(v) { return "$" + v.toLocaleString("es-AR"); }
-function calcSalary(rating) { return Math.round(rating * rating * 12); }
+function calcSalary(rating, age) {
+  const MIN_SALARY = 120000;
+  const MAX_SALARY = 40000000;
+
+  const ratingFactor = clamp((rating - 50) / 49, 0, 1);
+  const ratingGrowth = Math.pow(2, 7.8 * ratingFactor) - 1;
+  const base = MIN_SALARY * (1 + ratingGrowth * youthFactorFor(age));
+  return Math.round(clamp(base, MIN_SALARY, MAX_SALARY));
+}
+
+function youthFactorFor(age) {
+  if (age <= 20) return 1.5;
+  if (age <= 25) return 1.35;
+  if (age <= 30) return 1.15;
+  if (age <= 34) return 1.0;
+  return 0.85;
+}
 function pickDebutTeam(nationality) { return pickRandom(TEAMS_BY_COUNTRY[nationality]); }
 
 function getTeamCountry(teamName) {
   const team = ALL_TEAMS.find(t => t.nombre === teamName);
   return team ? team.pais : "España"; 
+}
+
+function getRegionPower(teamName) {
+  const country = getTeamCountry(teamName);
+  return REGION_PURCHASING_POWER[country] ?? 1;
 }
 
 function createPlayer(name, nationalityData, posCode, posName) {
@@ -38,7 +59,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     teamRating: club.rating,
     teamCountry: nationalityData.name,
     seasonsPlayed: 0,
-    salary: calcSalary(startRating),
+    salary: Math.round(calcSalary(startRating, 15) * getRegionPower(club.nombre)),
     balance: 0, 
     totalMatches: 0,
     
@@ -107,30 +128,36 @@ function calcularEstadisticas(code, rating, partidosJugados) {
   ];
 }
 
+function titleChance(teamRating, playerRating, base, growth) {
+  const threshold = 75;
+  const avg = (teamRating + playerRating) / 2;
+  if (avg < threshold) return base * 0.50;
+  return clamp(base * Math.pow(growth, avg - threshold), 0, 0.96);
+}
+
 function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry) {
-  const isConmebol = ["Argentina", "Brasil"].includes(teamCountry);
-  const regionTopTier = isConmebol ? "Copa Libertadores" : "Champions League";
-  const regionMidTier = isConmebol ? "Copa Sudamericana" : "Europa League";
+  const nacionalidad = NATIONALITIES.find(n => n.name === teamCountry);
+  const region = nacionalidad ? nacionalidad.region : "UEFA";
+  const regionTopTier = (topRegionTrophies.find(t => t.region === region) || {}).name || "Champions League";
+  const regionMidTier = (secRegionTrophies.find(t => t.region === region) || {}).name || "Europa League";
 
   let leaguePos = Math.round(22 - (teamRating / 5.5) - (performance / 18) + randInt(-3, 3));
   leaguePos = clamp(leaguePos, 1, 20);
 
-  let wonCup = Math.random() < (teamRating / 3 + player.rating) / 285;
+  let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
   let wonIntl = false;
   let wonSintl = false;
   let qualification = "Ninguna";
-
   const leagueMatches = 30; 
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
   let intlMatches = 0;
-
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
-    wonIntl = ((teamRating / 175) + Math.random() > 0.87);
+    wonIntl = Math.random() < titleChance(teamRating, player.rating, 0.02, 1.2);
     intlMatches = wonIntl ? 15 : randInt(8, 14);
   } else if (leaguePos >= 5 && leaguePos <= 7) {
     qualification = regionMidTier;
-    wonSintl = ((teamRating / 155) + Math.random() > 0.8);
+    wonSintl = Math.random() < titleChance(teamRating, player.rating, 0.03, 1.18);
     intlMatches = wonSintl ? 10 : randInt(6, 9);
   }
 
@@ -157,8 +184,10 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
 
   if (wonCup) {
     titles++;
-    wonTitles.push({ name: "Copa Nacional", type: "cup" });
-    addHistory("season", "🏆 Campeón", `¡Conquistaste la Copa Nacional con ${player.team}!`);
+    const cupData = NATIONAL_CUPS.find(c => c.country === liga);
+    const cupName = cupData ? cupData.name : "Copa Nacional";
+    wonTitles.push({ name: cupName, type: "cup" });
+    addHistory("season", "🏆 Campeón", `¡Conquistaste la ${cupName} con ${player.team}!`);
   }
 
   if (wonIntl) {
@@ -189,7 +218,10 @@ function checkRetirement() {
   }
 }
 
-function simulateSeason() {
+function simulateSeason(times = 1) {
+  let lastInjury = false;
+  let lastPerformance = 50;
+  for (let i = 0; i < times; i++) {
   player.age += 1;
   player.seasonsPlayed += 1;
 
@@ -235,7 +267,6 @@ function simulateSeason() {
   if (player.rating < 85 && Math.random() < 0.15) {
     delta += randInt(1, 3);
   }
-  delta+=45
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
@@ -295,10 +326,14 @@ function simulateSeason() {
   });
 
   player.balance += player.salary;
-  player.salary = calcSalary(player.rating);
+  player.salary = Math.round(calcSalary(player.rating, player.age) * getRegionPower(player.team));
   checkRetirement();
 
-  return { injuryHappened, performance };
+  lastInjury = injuryHappened;
+  lastPerformance = performance;
+  if (player.retired) break;
+  }
+  return { injuryHappened: lastInjury, performance: lastPerformance };
 }
 
 function generateOffer(performance = 50) {
@@ -320,9 +355,10 @@ function generateOffer(performance = 50) {
   if (candidates.length === 0) candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
 
   const club = pickRandom(candidates);
-  const baseSalary = calcSalary(clamp(player.rating, club.rating - 10, club.rating + 10));
+  const regionPower = getRegionPower(club.nombre);
+  const baseSalary = calcSalary(clamp(player.rating, club.rating - 10, club.rating + 10), player.age);
   const bonus = 1 + (club.rating - player.teamRating) * 0.01 + Math.random() * 0.15;
-  currentOffer = { club, salary: Math.round(baseSalary * Math.max(0.7, bonus)) };
+  currentOffer = { club, salary: Math.round(baseSalary * Math.max(0.7, bonus) * regionPower) };
   return currentOffer;
 }
 

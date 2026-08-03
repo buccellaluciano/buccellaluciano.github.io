@@ -48,7 +48,7 @@
     el("btn-create").disabled = false;
   }
 
-  function typeWriterHTML(element, htmlContent) {
+  function typeWriterHTML(element, htmlContent, onDone) {
     element.innerHTML = "";
     let i = 0;
     let textBuffer = "";
@@ -70,6 +70,8 @@
       element.innerHTML = textBuffer;
       if (i < htmlArray.length) {
         requestAnimationFrame(type);
+      } else if (onDone) {
+        onDone();
       }
     }
     requestAnimationFrame(type);
@@ -148,6 +150,11 @@
     const newSeasons = player.seasons.filter(s => s.isNew);
     if (newSeasons.length === 0) return;
 
+    let pending = newSeasons.length;
+    const scrollToBottom = () => {
+      sumEl.scrollTo({ top: sumEl.scrollHeight, behavior: 'smooth' });
+    };
+
     for (const d of newSeasons) {
       const wrapper = document.createElement("div");
       wrapper.className = "season-wrapper";
@@ -194,11 +201,14 @@
       wrapper.appendChild(eventsContainer);
       sumEl.appendChild(wrapper);
       
-      typeWriterHTML(row, contentHTML);
+      typeWriterHTML(row, contentHTML, () => {
+        if (--pending === 0) {
+          scrollToBottom();
+          requestAnimationFrame(scrollToBottom);
+        }
+      });
       d.isNew = false;
     }
-    
-    setTimeout(() => { sumEl.scrollTo({ top: sumEl.scrollHeight, behavior: 'smooth' }); }, 50);
   }
 
   function showRetireScreen(reason) {
@@ -232,9 +242,10 @@
     `;
   }
 
-  function handleAdvance() {
+  function handleAdvance(times = 1) {
     el("btn-advance").disabled = true;
-    const { injuryHappened, performance } = simulateSeason();
+    el("btn-advance-2").disabled = true;
+    const { injuryHappened, performance } = simulateSeason(times);
     renderSummaries();
 
     if (player.retired) {
@@ -250,11 +261,19 @@
       const offer = generateOffer(performance);
       el("offer-team").textContent = offer.club.nombre;
       el("offer-salary").textContent = fmtMoney(offer.salary);
+
+      const power = getRegionPower(offer.club.nombre);
+      let powerLabel = "Bajo";
+      if (power >= 1.8) powerLabel = "Muy Alto";
+      else if (power >= 1.2) powerLabel = "Alto";
+      else if (power >= 0.8) powerLabel = "Medio";
+      el("offer-power").innerHTML = `💪 Poder adquisitivo del club: <strong>${powerLabel}</strong> (x${power.toFixed(2)})`;
       
       el("action-bar").classList.add("hidden");
       el("offer-panel").classList.remove("hidden");
     } else {
       el("btn-advance").disabled = false;
+      el("btn-advance-2").disabled = false;
     }
   }
   
@@ -271,6 +290,7 @@
     renderSummaries();
     renderPlayer();
     el("btn-advance").disabled = false;
+    el("btn-advance-2").disabled = false;
   }
 
   function handleReject() {
@@ -279,6 +299,7 @@
     rejectOffer();
     renderSummaries();
     el("btn-advance").disabled = false;
+    el("btn-advance-2").disabled = false;
   }
 
   function resetToCreate() {
@@ -335,8 +356,12 @@
           ? leagueEntry.icon
           : "<img src='assets/LigaLocal.png' class='trophy-img'>";
       }
-      case "cup":
-        return `<div class="trophy-icon">🏺</div>`;
+      case "cup": {
+        const cupEntry = NATIONAL_CUPS.find(c => c.name === name);
+        return cupEntry
+          ? `<img src='${cupEntry.icon}' class='trophy-img'>`
+          : `<div class="trophy-icon">🏺</div>`;
+      }
       case "intl": {
         const intlEntry = topRegionTrophies.find(n => n.name === name);
         return intlEntry
@@ -408,7 +433,8 @@
     el("modal-vitrina").classList.add("hidden");
   });
 
-  el("btn-advance").addEventListener("click", handleAdvance);
+  el("btn-advance").addEventListener("click", () => handleAdvance(1));
+  el("btn-advance-2").addEventListener("click", () => handleAdvance(2));
   el("btn-retire-early").addEventListener("click", handleRetireEarly);
   el("btn-accept").addEventListener("click", handleAccept);
   el("btn-reject").addEventListener("click", handleReject);
