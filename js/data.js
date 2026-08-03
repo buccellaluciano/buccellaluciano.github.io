@@ -153,7 +153,7 @@ const FORMATION_433 = [
 ];
 
 const PREFERRED = [
-  { code: "POR", statPrimaria: "VIN", statSecundaria: "ATA" },
+  { code: "POR", statPrimaria: "ATA", statSecundaria: "VIN" },
   { code: "LD",  statPrimaria: "ASI", statSecundaria: "ENT" },
   { code: "DFC", statPrimaria: "ENT", statSecundaria: "VIN" },
   { code: "DFC", statPrimaria: "ENT", statSecundaria: "VIN" },
@@ -164,4 +164,50 @@ const PREFERRED = [
   { code: "ED",  statPrimaria: "GOL", statSecundaria: "ASI" },
   { code: "DC",  statPrimaria: "GOL", statSecundaria: "ASI" },
   { code: "EI",  statPrimaria: "GOL", statSecundaria: "ASI" }
+];
+
+const topRegionTrophies = [
+  {
+    region: "CONMEBOL",
+    name: "Copa Libertadores",
+    icon: "assets/CopaLibertadores.png"
+  },
+  {
+    region: "UEFA",
+    name: "Champions League",
+    icon: "assets/UCL.png"
+  },
+  {
+    region: "CONCACAF",
+    name: "CONCACAF Champions Cup",
+    icon: "assets/CONCACAFChampionsCup.png"
+  },
+  {
+    region: "AFC",
+    name: "AFC Champions League Elite",
+    icon: "assets/AFCChampionsLeagueElite.png"
+  }
+];
+
+const secRegionTrophies = [
+  {
+    region: "CONMEBOL",
+    name: "Copa Sudamericana",
+    icon: "assets/CopaSudamericana.png"
+  },
+  {
+    region: "UEFA",
+    name: "Europa League",
+    icon: "assets/Europa League.png"
+  },
+  {
+    region: "CONCACAF",
+    name: "CONCACAF Central American Cup",
+    icon: "assets/CONCACAFCentralAmericanCup.png"
+  },
+  {
+    region: "AFC",
+    name: "AFC Cup",
+    icon: "assets/AFCCup.png"
+  }
 ];

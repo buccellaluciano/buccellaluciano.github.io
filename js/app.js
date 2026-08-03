@@ -157,8 +157,7 @@
       row.style.cursor = "pointer";
       row.title = "Clic para ver los eventos de esta temporada";
       
-      let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.join(', ')})</span>` : '';
-      
+      let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.map(t => t.name).join(', ')})</span>` : '';
       const s1Info = STAT_LABELS[player.stat1Code];
       const s2Info = STAT_LABELS[player.stat2Code];
 
@@ -328,80 +327,70 @@
   });
 
 // --- LÓGICA DE LA VITRINA ---
+  function trophyIconHTML(name, type) {
+    switch (type) {
+      case "league": {
+        const leagueEntry = NATIONALITIES.find(n => n.liga === name);
+        return leagueEntry
+          ? leagueEntry.icon
+          : "<img src='assets/LigaLocal.png' class='trophy-img'>";
+      }
+      case "cup":
+        return `<div class="trophy-icon">🏺</div>`;
+      case "intl": {
+        const intlEntry = topRegionTrophies.find(n => n.name === name);
+        return intlEntry
+          ? `<img src='${intlEntry.icon}' class='trophy-img'>`
+          : `<div class="trophy-icon">🌍</div>`;
+      }
+      case "sintl": {
+        const sintlEntry = secRegionTrophies.find(n => n.name === name);
+        return sintlEntry
+          ? `<img src='${sintlEntry.icon}' class='trophy-img'>`
+          : `<div class="trophy-icon">🥈</div>`;
+      }
+      default:
+        if (name === "Balón de Oro") return `<div class="trophy-icon"><img src='assets/ballondor.png' class='trophy-img'></div>`;
+        if (name === "Bota de Oro") return `<div class="trophy-icon"><img src='assets/goldenboot.png' class='trophy-img'></div>`;
+        return `<div class="trophy-icon">🏆</div>`;
+    }
+  }
+
   function renderVitrina() {
     const shelf = el("vitrina-shelf");
     shelf.innerHTML = "";
 
-    // Diccionario para contar los trofeos
     const trophies = {};
+    const trophyTypeMap = {};
 
-    // Recolectar trofeos de equipo
     player.seasons.forEach(s => {
-      if (s.wonTitles) {
-        s.wonTitles.forEach(t => {
-          if (t !== "Balón de Oro" && t !== "Bota de Oro") {
-            trophies[t] = (trophies[t] || 0) + 1;
-          }
-        });
-      }
+      if (!s.wonTitles) return;
+      s.wonTitles.forEach(({ name, type }) => {
+        trophies[name] = (trophies[name] || 0) + 1;
+        if (!trophyTypeMap[name]) trophyTypeMap[name] = type;
+      });
     });
 
-    // Añadir premios individuales
-    if (player.ballonsDor > 0) trophies["Balón de Oro"] = player.ballonsDor;
-    if (player.goldenBoots > 0) trophies["Bota de Oro"] = player.goldenBoots;
+    if (player.ballonsDor > 0) {
+      trophies["Balón de Oro"] = player.ballonsDor;
+      trophyTypeMap["Balón de Oro"] = "individual";
+    }
+    if (player.goldenBoots > 0) {
+      trophies["Bota de Oro"] = player.goldenBoots;
+      trophyTypeMap["Bota de Oro"] = "individual";
+    }
 
     if (Object.keys(trophies).length === 0) {
-      shelf.innerHTML = "<p style='color: var(--text-muted); font-size: 14px; width: 100%; text-align: center; align-self: center; margin-bottom: 20px;'>La vitrina está vacía.</p>";
+      shelf.innerHTML = `<p style="color: var(--text-muted); font-size: 14px; width: 100%; text-align: center; align-self: center; margin-bottom: 20px;">La vitrina está vacía.</p>`;
       return;
     }
 
-    // Dibujar cada trofeo
     for (const [name, count] of Object.entries(trophies)) {
+      const type = trophyTypeMap[name] || "other";
       const div = document.createElement("div");
       div.className = "trophy-item";
-
-      let icon = "🏆";
-      switch (name) {
-        // Distinciones individuales
-        case "Balón de Oro":
-          icon = "🌕";
-          break;
-        case "Bota de Oro":
-          icon = "🥇";
-          break;
-
-        // Torneos internacionales (agrupados)
-        case "Champions League":
-        case "Copa Libertadores":
-          icon = "🌍";
-          break;
-        case "Europa League":
-        case "Copa Sudamericana":
-          icon = "🥈";
-          break;
-
-        // Copas nacionales
-        case "Copa Nacional":
-          icon = "🏺";
-          break;
-
-        // Para cualquier otro caso (principalmente ligas locales)
-        default: {
-          // Busca en la lista de nacionalidades si el nombre coincide con alguna liga
-          const leagueEntry = NATIONALITIES.find(n => n.liga === name);
-          if (leagueEntry) {
-            icon = leagueEntry.icon; // usa el icono predefinido (img)
-          } else if (name === "Liga Local") {
-            // Fallback para ligas no incluidas en la lista
-            icon = "<img src='assets/LigaLocal.png' class='trophy-img'>";
-          }
-          // Si no es liga ni ninguno de los anteriores, se queda con 🏆
-          break;
-        }
-      }
-
       div.innerHTML = `
-        <div class="trophy-icon">${icon}</div>
+        ${trophyIconHTML(name, type)}
         <div class="trophy-label">${name}</div>
         <div class="trophy-count">x${count}</div>
       `;

@@ -53,6 +53,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     injured: false,
     retired: false,
     lastDelta: 0,
+    explotar: false,
     
     currentEvents: [], 
     seasons: [] 
@@ -111,11 +112,12 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   const regionTopTier = isConmebol ? "Copa Libertadores" : "Champions League";
   const regionMidTier = isConmebol ? "Copa Sudamericana" : "Europa League";
 
-  let leaguePos = Math.round(22 - (teamRating / 4.5) - (performance / 15) + randInt(-3, 3));
+  let leaguePos = Math.round(22 - (teamRating / 5.5) - (performance / 18) + randInt(-3, 3));
   leaguePos = clamp(leaguePos, 1, 20);
 
-  let wonCup = Math.random() < (teamRating + player.rating) / 270;
+  let wonCup = Math.random() < (teamRating / 3 + player.rating) / 285;
   let wonIntl = false;
+  let wonSintl = false;
   let qualification = "Ninguna";
 
   const leagueMatches = 30; 
@@ -124,12 +126,12 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
 
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
-    wonIntl = (teamRating > 80 && Math.random() < 0.15);
+    wonIntl = ((teamRating / 175) + Math.random() > 0.87);
     intlMatches = wonIntl ? 15 : randInt(8, 14);
   } else if (leaguePos >= 5 && leaguePos <= 7) {
     qualification = regionMidTier;
-    wonIntl = (teamRating > 75 && Math.random() < 0.20);
-    intlMatches = wonIntl ? 10 : randInt(6, 9);
+    wonSintl = ((teamRating / 155) + Math.random() > 0.8);
+    intlMatches = wonSintl ? 10 : randInt(6, 9);
   }
 
   const baseMatches = leagueMatches + cupMatches + intlMatches;
@@ -142,31 +144,38 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let val1 = Math.round(statsGeneradas[0].valor * perfMult);
   let val2 = Math.round(statsGeneradas[1].valor * perfMult);
   let titles = 0;
-  let wonTitles = [];
+  let wonTitles = []; // Ahora cada elemento es { name: string, type: string }
 
   let liga = getTeamCountry(player.team);
   if (leaguePos === 1) {
     titles++;
     const nacionalidad = NATIONALITIES.find(n => n.name === liga);
     const ligaCode = nacionalidad ? nacionalidad.liga : "Liga Local";
-    wonTitles.push(ligaCode);
+    wonTitles.push({ name: ligaCode, type: "league" });
     addHistory("season", "🏆 Campeón", `¡Ganaste la ${ligaCode} con ${player.team}!`);
   }
-  
+
   if (wonCup) {
     titles++;
-    wonTitles.push("Copa Nacional");
+    wonTitles.push({ name: "Copa Nacional", type: "cup" });
     addHistory("season", "🏆 Campeón", `¡Conquistaste la Copa Nacional con ${player.team}!`);
   }
 
   if (wonIntl) {
     titles++;
-    wonTitles.push(qualification);
+    wonTitles.push({ name: qualification, type: "intl" });
+    addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
+  }
+
+  if (wonSintl) {
+    titles++;
+    wonTitles.push({ name: qualification, type: "sintl" });
     addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
   }
 
   return { matches, val1, val2, titles, wonTitles, leaguePos, qualification };
-}
+} // <---- AQUI FALTABA LA LLAVE DE CIERRE
+
 
 function ageFactorFor(age) {
   if (age <= 21) return 2.0; if (age <= 26) return 1.0;
@@ -219,16 +228,14 @@ function simulateSeason() {
     else if (dado <= 2) modificadorDado = -1;
     else modificadorDado = 0;
   }
-  console.log(getTeamCountry(player.team));
-
+  
   const ageFactor = ageFactorFor(player.age);
   const perfFactor = (performance - 30) / 50; 
-  let delta = Math.round(modificadorDado + ageFactor + (perfFactor * 3));
-
-  if (player.rating < 85 && Math.random() < 0.25) {
-    delta += randInt(2, 4);
+  let delta = Math.round(modificadorDado + ageFactor + (perfFactor * 1.33));
+  if (player.rating < 85 && Math.random() < 0.15) {
+    delta += randInt(1, 3);
   }
-
+  delta+=45
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
@@ -259,7 +266,7 @@ function simulateSeason() {
 
   if (seasonGoals > 30 && Math.random() < 0.33) {
     stats.titles++;
-    stats.wonTitles.push("Bota de Oro");
+    stats.wonTitles.push({ name: "Bota de Oro", type: "individual" });
     player.goldenBoots++;
     addHistory("season", "🥇 Bota de Oro", `¡Imparable! ${player.name} ganó la Bota de Oro al marcar ${seasonGoals} goles esta temporada.`);
   }
@@ -268,7 +275,7 @@ function simulateSeason() {
     const chanceBalon = (player.rating - 84) * 0.06;
     if (Math.random() < chanceBalon) {
       stats.titles++;
-      stats.wonTitles.push("Balón de Oro");
+      stats.wonTitles.push({ name: "Balón de Oro", type: "individual" });
       player.ballonsDor++;
       addHistory("season", "🌕 Balón de Oro", `¡Histórico! ${player.name} fue galardonado con el Balón de Oro como el mejor jugador del mundo.`);
     }
