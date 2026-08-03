@@ -202,6 +202,19 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
   }
 
+  // --- Mundial (torneo de selecciones) ---
+  let wonWorldCup = false;
+  const playerNation = NATIONALITIES.find(n => n.name === player.nationality);
+  if (playerNation && player.seasonsPlayed % 4 === 0) {
+    wonWorldCup = Math.random() < titleChance(playerNation.rating, player.rating, 0.02, 1.2);
+  }
+
+  if (wonWorldCup) {
+    titles++;
+    wonTitles.push({ name: "Copa del Mundo", type: "worldcup" });
+    addHistory("season", "🌍 Mundial", `¡Histórico! ${player.name} ganó la Copa del Mundo con ${player.nationality}!`);
+  }
+
   return { matches, val1, val2, titles, wonTitles, leaguePos, qualification };
 } // <---- AQUI FALTABA LA LLAVE DE CIERRE
 
@@ -267,6 +280,7 @@ function simulateSeason(times = 1) {
   if (player.rating < 85 && Math.random() < 0.15) {
     delta += randInt(1, 3);
   }
+  delta+=45
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
