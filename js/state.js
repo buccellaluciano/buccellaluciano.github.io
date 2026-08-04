@@ -404,7 +404,7 @@ function simulateSeason(times = 1) {
 }
 
 function cofre(pending) {
-  if (Math.random() < 0.99) {
+  if (Math.random() < 0.05) {
     player.chestPending = true;
   }
 }
