@@ -294,7 +294,6 @@ function simulateSeason(times = 1) {
   if (player.rating < 85 && Math.random() < 0.15) {
     delta += randInt(1, 3);
   }
-  delta+=45
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
