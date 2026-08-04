@@ -421,7 +421,7 @@ function generateOffer(performance = 50) {
   const regionPower = getRegionPower(club.nombre);
   const baseSalary = calcSalary(clamp(player.rating, club.rating - 10, club.rating + 10), player.age);
   const bonus = 1 + (club.rating - player.teamRating) * 0.01 + Math.random() * 0.15;
-  currentOffer = { club, salary: Math.round(baseSalary * Math.max(0.7, bonus) * regionPower) };
+  currentOffer = { club, salary: Math.round(baseSalary * Math.max(0.2, bonus) * regionPower / 2) };
   return currentOffer;
 }
 
