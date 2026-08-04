@@ -71,6 +71,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     lastDelta: 0,
     explotar: false,
     convocado: false,
+    chestPending: false,
     
     currentEvents: [], 
     seasons: [],
@@ -164,6 +165,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
   convocado = (player.rating >= nacionalidad.rating-10) ? true : false;
+  player.convocado = convocado;
   const torneo = (continentalTrophies.find(t => t.region === region)|| {}).name;
 
   if (leaguePos >= 1 && leaguePos <= 4) {
@@ -380,6 +382,8 @@ function simulateSeason(times = 1) {
   player.totalStat1 += stats.val1;
   player.totalStat2 += stats.val2;
 
+  cofre(player.chestPending);
+
   addSeasonSummary({ 
     season: player.seasonsPlayed, 
     age: player.age, 
@@ -397,6 +401,12 @@ function simulateSeason(times = 1) {
   if (player.retired) break;
   }
   return { injuryHappened: lastInjury, performance: lastPerformance };
+}
+
+function cofre(pending) {
+  if (Math.random() < 0.99) {
+    player.chestPending = true;
+  }
 }
 
 function generateOffer(performance = 50) {

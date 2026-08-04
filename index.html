@@ -50,6 +50,8 @@
         <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
         <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
         <div id="distinto-tag" class="hidden pulse">🔥 JUGADOR DISTINTO</div>
+        <div id="convocado-tag" class="hidden pulse">🌍 CONVOCADO</div>
+        <button id="btn-chest" class="chest-btn hidden" type="button">🎁 ¡Cofre misterioso!</button>
         
         <!-- Atributos siempre visibles -->
         <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
@@ -229,6 +231,27 @@
             <li><strong>🌙 Tema Oscuro</strong>: alterna entre el tema claro y el oscuro.</li>
           </ul>
         </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-chest" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel chest-modal-panel">
+      <div class="vitrina-header">
+        <h2>🎁 Cofre Misterioso</h2>
+        <button id="btn-close-chest">❌</button>
+      </div>
+      <div class="chest-modal-body">
+        <p>Encontraste un cofre misterioso en tu carrera.</p>
+        <p>Al abrirlo puede pasar una de dos cosas:</p>
+        <ul>
+          <li>💀 <strong>50% de probabilidad</strong> — el cofre te obliga a retirarte del fútbol.</li>
+          <li>💰 <strong>50% de probabilidad</strong> — ganás <strong>$20.000.000</strong> para tu balance.</li>
+        </ul>
+        <div class="offer-actions">
+          <button id="btn-chest-leave" class="btn-danger">🚪 Dejarlo</button>
+          <button id="btn-chest-open" class="btn-success">🗝️ Abrir cofre</button>
+        </div>
       </div>
     </div>
   </div>

@@ -198,7 +198,9 @@
     el("p-salary").textContent = fmtMoney(player.salary) + " / temp.";
     el("p-fitness").textContent = player.fitness + "%";
     el("injury-tag").classList.toggle("hidden", !player.injured);
-    el("distinto-tag").classList.toggle("hidden", !player.explotar); 
+    el("distinto-tag").classList.toggle("hidden", !player.explotar);
+    el("convocado-tag").classList.toggle("hidden", !player.convocado);
+    el("btn-chest").classList.toggle("hidden", !player.chestPending); 
     
     if (el("row-balon")) {
       el("row-balon").classList.toggle("hidden", player.ballonsDor === 0);
@@ -563,6 +565,34 @@
   el("btn-accept").addEventListener("click", handleAccept);
   el("btn-reject").addEventListener("click", handleReject);
   el("btn-restart").addEventListener("click", resetToCreate);
+
+  el("btn-chest").addEventListener("click", () => {
+    el("modal-chest").classList.remove("hidden");
+  });
+
+  el("btn-chest-open").addEventListener("click", () => {
+    el("modal-chest").classList.add("hidden");
+    el("btn-chest").classList.add("hidden");
+    player.chestPending = false;
+    if (Math.random() < 0.5) {
+      player.retired = true;
+      renderPlayer();
+      showRetireScreen("Un cofre misterioso decidió que tu carrera termina aquí");
+    } else {
+      player.balance += 20000000;
+      renderPlayer();
+      renderShop();
+      renderLastSeasonEvents();
+    }
+  });
+
+  el("btn-close-chest").addEventListener("click", () => {
+    el("modal-chest").classList.add("hidden");
+  });
+
+  el("btn-chest-leave").addEventListener("click", () => {
+    el("modal-chest").classList.add("hidden");
+  });
 
   populateNationalities();
   buildPitch();
