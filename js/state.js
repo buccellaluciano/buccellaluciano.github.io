@@ -2,12 +2,6 @@
 let player = null;
 let currentOffer = null;
 
-const SHOP_ITEMS = [
-  { id: 'rest', icon: '🔋', name: 'Recuperación Rápida', desc: 'Restaura forma al 100%', price: 150000 },
-  { id: 'shoes', icon: '👟', name: 'Botines Patrocinados', desc: '+1 Valoración Global', price: 750000 },
-  { id: 'coach', icon: '🧠', name: 'Entrenador Personal', desc: '+2 Valoración Global', price: 1500000 }
-];
-
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -77,7 +71,8 @@ function createPlayer(name, nationalityData, posCode, posName) {
     explotar: false,
     
     currentEvents: [], 
-    seasons: [] 
+    seasons: [],
+    boughtItems: []
   };
 }
 
@@ -161,7 +156,33 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     intlMatches = wonSintl ? 10 : randInt(6, 9);
   }
 
-  const baseMatches = leagueMatches + cupMatches + intlMatches;
+  let playWorldCup = false;
+  let wonWorldCup = false;
+  let wcMatches = 0;
+  const playerNation = NATIONALITIES.find(n => n.name === player.nationality);
+  if (playerNation && player.seasonsPlayed % 4 === 0 && player.rating >= playerNation.rating) {
+    playWorldCup = true;
+  }
+  switch (playWorldCup){
+    case true:
+      addHistory("season", "🌍 Mundial", `¡Es año de Mundial! ${player.name} representará a ${player.nationality}.`);
+      if (wonWorldCup = Math.random() < titleChance(playerNation.rating, player.rating, 0.02, 1.2)) {
+        wonWorldCup = true;
+        wcMatches += 8;
+      }else {
+        addHistory("season", "🌍 Mundial", `Lamentablemente, ${player.name} no logró ganar la Copa del Mundo con ${player.nationality}.`);
+        wcMatches += randInt(3, 8);
+      }
+      break;
+    default: {
+      if (player.seasonsPlayed % 4 === 0){
+        addHistory("season", "🌍 Mundial", `No hubo Mundial este año para ${player.name}.`);
+      }
+    }
+      break;
+  }
+
+  const baseMatches = leagueMatches + cupMatches + intlMatches + wcMatches;
   const availability = fitness / 100;
   const matches = clamp(Math.round(baseMatches * availability), 3, baseMatches);
   
@@ -200,13 +221,6 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     titles++;
     wonTitles.push({ name: qualification, type: "sintl" });
     addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
-  }
-
-  // --- Mundial (torneo de selecciones) ---
-  let wonWorldCup = false;
-  const playerNation = NATIONALITIES.find(n => n.name === player.nationality);
-  if (playerNation && player.seasonsPlayed % 4 === 0) {
-    wonWorldCup = Math.random() < titleChance(playerNation.rating, player.rating, 0.02, 1.2);
   }
 
   if (wonWorldCup) {
@@ -394,21 +408,22 @@ function rejectOffer() {
 
 function buyItem(id) {
   const item = SHOP_ITEMS.find(i => i.id === id);
-  if (item && player.balance >= item.price) {
-    player.balance -= item.price;
-    if (id === 'rest') player.fitness = 100;
-    if (id === 'shoes') {
-      const oldR = player.rating;
-      player.rating = clamp(player.rating + 1, 25, 99);
-      player.lastDelta = player.rating - oldR;
-    }
-    if (id === 'coach') {
-      const oldR = player.rating;
-      player.rating = clamp(player.rating + 2, 25, 99);
-      player.lastDelta = player.rating - oldR;
-    }
-    addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.`);
-    return true;
+  if (!item) return false;
+  if (!item.repeatable && player.boughtItems.includes(id)) return false;
+  if (player.balance < item.price) return false;
+
+  player.balance -= item.price;
+
+  if (item.id === 'rest') {
+    player.fitness = 100;
   }
-  return false;
+  if (item.ratingBoost) {
+    const oldR = player.rating;
+    player.rating = clamp(player.rating + item.ratingBoost, 25, 99);
+    player.lastDelta = player.rating - oldR;
+  }
+  if (!item.repeatable) player.boughtItems.push(id);
+
+  addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.`);
+  return true;
 }

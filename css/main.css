@@ -50,7 +50,7 @@ body {
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  transition: background-color 0.4s ease;
+  transition: background-color 0.6s ease;
 }
 
 /* La ventana principal que contiene la App */
@@ -64,6 +64,7 @@ body {
   border-radius: var(--radius-app);
   box-shadow: var(--shadow-app);
   padding: 24px;
+  transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
 }
 .hidden { display: none !important; }
 
@@ -91,6 +92,7 @@ body {
   padding: 20px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
+  transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 /* Botones con estilo pastilla (Pill-shaped) */
@@ -175,20 +177,20 @@ label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; c
 }
 .left-col { display:flex; flex-direction:column; gap:16px; }
 
-/* Tienda Desplegable */
-.shop-panel { padding: 0; overflow: hidden; }
+/* Tienda (ventana modal) */
 .shop-summary {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 20px;
+  transition: all 0.2s ease;
 }
-.shop-summary::-webkit-details-marker { display: none; }
-.shop-summary::marker { content: ""; }
+.shop-summary:hover { border-color: var(--primary-color); background: var(--panel-bg); }
+.shop-summary .chevron { font-size: 12px; color: var(--primary-color); transition: transform 0.2s ease; }
+.shop-summary:hover .chevron { transform: translateX(4px); }
 .shop-summary-title { font-size: 14px; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; text-transform: uppercase; }
-.shop-panel .chevron { font-size: 10px; color: var(--text-muted); transition: transform 0.3s ease; }
-.shop-panel[open] .chevron { transform: rotate(180deg); color: var(--primary-color); }
-.shop-panel[open] .shop-summary { background: var(--highlight-bg); border-bottom: 1px solid var(--border-color); }
-.shop-items-body { padding: 8px 20px 20px; }
+.shop-items-body { padding: 4px 0 0; }
+.shop-modal-panel { max-width: 480px; }
+#shop-items { max-height: 60vh; overflow-y: auto; }
 
 .shop-item { border-bottom: 1px dashed var(--border-color); padding: 12px 0; display: flex; flex-direction: column; gap: 8px; }
 .shop-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -346,11 +348,14 @@ label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; c
   border-radius: var(--radius-app); padding: 24px;
   width: 90%; max-width: 600px;
   box-shadow: var(--shadow-app);
+  transition: background-color 0.6s ease, border-color 0.6s ease;
 }
 .vitrina-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .vitrina-header h2 { color: var(--text-main); font-size: 20px; font-weight: 800; }
 #btn-close-vitrina { background: transparent; color: var(--text-muted); box-shadow: none; font-size: 16px; padding: 8px; min-width: auto; }
 #btn-close-vitrina:hover { color: #f43f5e; background: rgba(244,63,94,0.1); transform: scale(1.1); }
+#btn-close-shop { background: transparent; color: var(--text-muted); box-shadow: none; font-size: 16px; padding: 8px; min-width: auto; }
+#btn-close-shop:hover { color: #f43f5e; background: rgba(244,63,94,0.1); transform: scale(1.1); }
 
 /* La estantería oscura con base */
 .shelf-container {

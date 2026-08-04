@@ -3,6 +3,70 @@
   const el = id => document.getElementById(id);
   let selectedPosition = null;
 
+  let contextualOn = localStorage.getItem("contextual") === "on";
+
+  function shadeHex(hex, percent) {
+    const num = parseInt(hex.replace("#", ""), 16);
+    let r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+    const t = percent < 0 ? 0 : 255;
+    const p = Math.abs(percent);
+    r = Math.round((t - r) * p + r);
+    g = Math.round((t - g) * p + g);
+    b = Math.round((t - b) * p + b);
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  function hexToRgba(hex, a) {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  function ensureReadable(hex) {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+    const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    if (lum <= 0.55) return hex;
+    const f = 0.5 / lum;
+    const nr = Math.round(r * f), ng = Math.round(g * f), nb = Math.round(b * f);
+    return "#" + ((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1);
+  }
+
+  function mixBlack(hex, t) {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const r = Math.round(((num >> 16) & 255) * (1 - t));
+    const g = Math.round(((num >> 8) & 255) * (1 - t));
+    const b = Math.round((num & 255) * (1 - t));
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  const CONTEXTUAL_VARS = ['--primary-color', '--primary-hover', '--primary-ring', '--badge-color', '--offer-bg', '--offer-border', '--offer-text', '--bg-color', '--app-bg', '--panel-bg', '--input-bg'];
+
+  function resetContextualColor() {
+    const root = document.documentElement.style;
+    CONTEXTUAL_VARS.forEach(v => root.removeProperty(v));
+  }
+
+  function applyContextualColor() {
+    const root = document.documentElement.style;
+    if (!contextualOn || !player) return;
+    const team = ALL_TEAMS.find(t => t.nombre === player.team);
+    const raw = team && team.color ? team.color : null;
+    if (!raw) return;
+    const color = ensureReadable(raw);
+    root.setProperty('--primary-color', color);
+    root.setProperty('--primary-hover', shadeHex(color, 0.2));
+    root.setProperty('--primary-ring', hexToRgba(color, 0.3));
+    root.setProperty('--badge-color', color);
+    root.setProperty('--offer-bg', hexToRgba(color, 0.12));
+    root.setProperty('--offer-border', hexToRgba(color, 0.4));
+    root.setProperty('--offer-text', shadeHex(color, 0.45));
+    root.setProperty('--bg-color', mixBlack(color, 0.55));
+    root.setProperty('--app-bg', mixBlack(color, 0.80));
+    root.setProperty('--panel-bg', mixBlack(color, 0.70));
+    root.setProperty('--input-bg', mixBlack(color, 0.87));
+  }
+
   const STAT_LABELS = {
     "GOL": { name: "Goles", icon: "⚽" },
     "ASI": { name: "Asistencias", icon: "👟" },
@@ -86,15 +150,16 @@
       
       const canAfford = player.balance >= item.price;
       const isMaxFitness = (item.id === 'rest' && player.fitness >= 100);
-      const isDisabled = (!canAfford || isMaxFitness);
+      const isBought = player.boughtItems.includes(item.id);
+      const isDisabled = (!canAfford || isMaxFitness || isBought);
       
       div.innerHTML = `
         <div class="shop-item-header">
           <span>${item.icon} ${item.name}</span>
-          <span style="color: ${canAfford ? 'var(--text-main)' : '#ff3b30'}">${fmtMoney(item.price)}</span>
+          <span style="color: ${canAfford && !isBought ? 'var(--text-main)' : '#ff3b30'}">${fmtMoney(item.price)}</span>
         </div>
         <div class="shop-item-desc">${item.desc}</div>
-        <button class="shop-btn" data-id="${item.id}" ${isDisabled ? 'disabled' : ''}>Comprar</button>
+        <button class="shop-btn" data-id="${item.id}" ${isDisabled ? 'disabled' : ''}>${isBought ? '✅ Comprado' : 'Comprar'}</button>
       `;
       
       container.appendChild(div);
@@ -143,6 +208,8 @@
       el("row-bota").classList.toggle("hidden", player.goldenBoots === 0);
       el("p-bota").textContent = player.goldenBoots;
     }
+
+    applyContextualColor();
   }
 
   function renderSummaries() {
@@ -324,6 +391,16 @@
     localStorage.setItem("theme", isDark ? "dark" : "light");
   });
 
+  el("btn-contextual").addEventListener("click", () => {
+    contextualOn = !contextualOn;
+    localStorage.setItem("contextual", contextualOn ? "on" : "off");
+    el("btn-contextual").textContent = contextualOn ? "🎨 Color Contextual: ON" : "🎨 Color Contextual: OFF";
+    if (contextualOn) applyContextualColor();
+    else resetContextualColor();
+  });
+
+  if (contextualOn) el("btn-contextual").textContent = "🎨 Color Contextual: ON";
+
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
     el("btn-theme").textContent = "☀️ Tema Claro";
@@ -433,6 +510,16 @@
 
   el("btn-close-vitrina").addEventListener("click", () => {
     el("modal-vitrina").classList.add("hidden");
+  });
+
+  // --- EVENTOS DE LA TIENDA (ventana modal) ---
+  el("btn-open-shop").addEventListener("click", () => {
+    renderShop();
+    el("modal-shop").classList.remove("hidden");
+  });
+
+  el("btn-close-shop").addEventListener("click", () => {
+    el("modal-shop").classList.add("hidden");
   });
 
   el("btn-advance").addEventListener("click", () => handleAdvance(1));

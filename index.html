@@ -10,6 +10,7 @@
 <body>
 <div id="app">
   <div class="theme-bar">
+    <button id="btn-contextual">🎨 Color Contextual: OFF</button>
     <button id="btn-theme">🌙 Tema Oscuro</button>
   </div>
 
@@ -77,14 +78,11 @@
         <div class="stat-row" style="margin-top: 8px;"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
       </div>
 
-      <!-- Tienda de Potenciadores (desplegable) -->
-      <details id="panel-shop" class="panel shop-panel" open>
-        <summary class="shop-summary">
-          <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
-          <span class="chevron">▼</span>
-        </summary>
-        <div id="shop-items" class="shop-items-body"></div>
-      </details>
+      <!-- Tienda de Potenciadores (abre ventana modal) -->
+      <div id="btn-open-shop" class="panel shop-summary" role="button" tabindex="0">
+        <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
+        <span class="chevron">⮕</span>
+      </div>
     </div>
 
     <!-- Columna Derecha -->
@@ -131,6 +129,16 @@
       <div class="shelf-container" id="vitrina-shelf">
         <!-- Los trofeos se inyectarán aquí -->
       </div>
+    </div>
+  </div>
+
+  <div id="modal-shop" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel shop-modal-panel">
+      <div class="vitrina-header">
+        <h2>🛒 Tienda (Mejoras)</h2>
+        <button id="btn-close-shop">❌</button>
+      </div>
+      <div id="shop-items" class="shop-items-body"></div>
     </div>
   </div>
 
