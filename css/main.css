@@ -68,7 +68,7 @@ body {
 }
 .hidden { display: none !important; }
 
-.theme-bar { display: flex; justify-content: flex-end; margin-bottom: -10px; }
+.theme-bar { display: flex; justify-content: flex-end; margin-bottom: -10px; gap: 8px; }
 #btn-theme {
   background: var(--input-bg); color: var(--text-muted);
   border: 1px solid var(--border-color); padding: 8px 16px;
@@ -356,6 +356,25 @@ label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; c
 #btn-close-vitrina:hover { color: #f43f5e; background: rgba(244,63,94,0.1); transform: scale(1.1); }
 #btn-close-shop { background: transparent; color: var(--text-muted); box-shadow: none; font-size: 16px; padding: 8px; min-width: auto; }
 #btn-close-shop:hover { color: #f43f5e; background: rgba(244,63,94,0.1); transform: scale(1.1); }
+#btn-close-instructions { background: transparent; color: var(--text-muted); box-shadow: none; font-size: 16px; padding: 8px; min-width: auto; }
+#btn-close-instructions:hover { color: #f43f5e; background: rgba(244,63,94,0.1); transform: scale(1.1); }
+
+.instructions-panel { max-width: 720px; max-height: 85vh; display: flex; flex-direction: column; }
+.instructions-body {
+  overflow-y: auto; padding-right: 8px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.instructions-body h3 {
+  color: var(--primary-color); font-size: 15px; font-weight: 800;
+  margin-bottom: 6px; margin-top: 0;
+}
+.instructions-body p { color: var(--text-muted); font-size: 13px; line-height: 1.6; margin: 0; }
+.instructions-body ul { margin: 4px 0 0 0; padding-left: 18px; }
+.instructions-body li { color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 4px; }
+.instructions-body section { padding-bottom: 14px; border-bottom: 1px solid var(--border-color); }
+.instructions-body section:last-child { border-bottom: none; padding-bottom: 0; }
+.instructions-body::-webkit-scrollbar { width: 8px; }
+.instructions-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
 /* La estantería oscura con base */
 .shelf-container {

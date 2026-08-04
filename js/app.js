@@ -522,6 +522,15 @@
     el("modal-shop").classList.add("hidden");
   });
 
+  // --- EVENTOS DE INSTRUCCIONES (ventana modal) ---
+  el("btn-instructions").addEventListener("click", () => {
+    el("modal-instructions").classList.remove("hidden");
+  });
+
+  el("btn-close-instructions").addEventListener("click", () => {
+    el("modal-instructions").classList.add("hidden");
+  });
+
   el("btn-advance").addEventListener("click", () => handleAdvance(1));
   el("btn-advance-2").addEventListener("click", () => handleAdvance(2));
   el("btn-retire-early").addEventListener("click", handleRetireEarly);

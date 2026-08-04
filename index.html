@@ -10,6 +10,7 @@
 <body>
 <div id="app">
   <div class="theme-bar">
+    <button id="btn-instructions">❓ Instrucciones</button>
     <button id="btn-contextual">🎨 Color Contextual: OFF</button>
     <button id="btn-theme">🌙 Tema Oscuro</button>
   </div>
@@ -139,6 +140,92 @@
         <button id="btn-close-shop">❌</button>
       </div>
       <div id="shop-items" class="shop-items-body"></div>
+    </div>
+  </div>
+
+  <div id="modal-instructions" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel instructions-panel">
+      <div class="vitrina-header">
+        <h2>❓ Instrucciones</h2>
+        <button id="btn-close-instructions">❌</button>
+      </div>
+      <div class="instructions-body">
+        <section>
+          <h3>🎮 Objetivo</h3>
+          <p>Creá un futbolista de 15 años y gestioná su carrera hasta el retiro. Avanzá temporada a temporada, mejorá tu media, ganá títulos, cambiá de club y convertite en una leyenda.</p>
+        </section>
+
+        <section>
+          <h3>👤 Creación del jugador</h3>
+          <ul>
+            <li>Elegí tu <strong>nombre</strong> (o dejalo al azar).</li>
+            <li>Elegí tu <strong>nacionalidad</strong>: define tu país, la liga de debut, tu región y el nivel de tu selección nacional.</li>
+            <li>Elegí tu <strong>posición</strong> tocando un punto en la cancha. Cada posición tiene dos estadísticas principales distintas (goles, atajadas, recuperaciones, etc.).</li>
+            <li>Al crear, debutás automáticamente en un club aleatorio de tu país.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>⏭️ Avanzar temporadas</h3>
+          <ul>
+            <li><strong>▶ Avanzar 1 temporada</strong>: simula una temporada completa.</li>
+            <li><strong>⏩ Avanzar 2 temporadas</strong>: simula dos temporadas seguidas de una vez.</li>
+          </ul>
+          <p>Cada temporada:</p>
+          <ul>
+            <li>Sube tu edad y tus temporadas jugadas.</li>
+            <li>Se calcula tu <strong>rendimiento</strong> según tu forma física.</li>
+            <li>Tu <strong>media</strong> puede subir o bajar según la edad, el rendimiento y la suerte. Podés "explotar" tu potencial (🔥) y progresar mucho más rápido.</li>
+            <li>Hay un <strong>9% de probabilidad de lesionarte</strong>: perdés media y forma física.</li>
+            <li>Se simulan tus partidos, la posición en liga, los títulos y tus estadísticas.</li>
+            <li>Recibís tu <strong>salario</strong> y se recalcula tu nuevo salario.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🤝 Ofertas de fichaje</h3>
+          <p>Al avanzar, puede aparecer una oferta de otro club (30% de probabilidad). Podés <strong>Aceptar</strong> (cambiás de club, país y salario) o <strong>Rechazar</strong>. El salario depende del nivel del club, tu media y el poder adquisitivo de su país.</p>
+        </section>
+
+        <section>
+          <h3>🏆 Títulos y trofeos</h3>
+          <ul>
+            <li><strong>Liga</strong>: salís 1° en la clasificación de tu liga.</li>
+            <li><strong>Copa nacional</strong>: probabilidad según el nivel de tu equipo.</li>
+            <li><strong>Competiciones internacionales</strong>: clasificás según tu posición en liga (4 primeros → torneo élite; 5° a 7° → torneo secundario).</li>
+            <li><strong>Copa del Mundo 🌍</strong>: cada 4 temporadas si tu media alcanza el nivel de tu selección.</li>
+            <li><strong>Premios individuales</strong>: Bota de Oro 🥇 (si marcás muchos goles) y Balón de Oro 🌕 (si tu media es muy alta).</li>
+          </ul>
+          <p>Presioná <strong>🏆 Vitrina</strong> para ver todos tus trofeos.</p>
+        </section>
+
+        <section>
+          <h3>💰 Salario y poder adquisitivo</h3>
+          <p>Tu salario crece con tu media y edad (desde $120.000 hasta $40.000.000). Además, el país de tu club tiene un <strong>poder adquisitivo</strong> que multiplica el salario: por ejemplo, Argentina (x0.25) paga poco e Inglaterra (x2.2) paga mucho más. Usá tu dinero en la tienda.</p>
+        </section>
+
+        <section>
+          <h3>🛒 Tienda</h3>
+          <ul>
+            <li>💤 <strong>Descanso</strong> ($150.000): recupera tu forma física al 100% (repetible).</li>
+            <li>👟 <strong>Botas nuevas</strong> ($750.000): +1 a tu media (una sola vez).</li>
+            <li>🎓 <strong>Mejor entrenador</strong> ($1.500.000): +2 a tu media (una sola vez).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🚪 Retiro</h3>
+          <p>Tu carrera termina si tenés 40 años o más, si con 35+ años tu media baja de 55, o si tu media baja de 28. También podés retirarte cuando quieras con <strong>🚪 Retirarse</strong>. Al final se muestra el resumen completo de tu carrera.</p>
+        </section>
+
+        <section>
+          <h3>🎨 Temas y apariencia</h3>
+          <ul>
+            <li><strong>🎨 Color Contextual</strong>: tiñe la interfaz con el color del club actual.</li>
+            <li><strong>🌙 Tema Oscuro</strong>: alterna entre el tema claro y el oscuro.</li>
+          </ul>
+        </section>
+      </div>
     </div>
   </div>
 
