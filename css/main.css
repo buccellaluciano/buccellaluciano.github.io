@@ -266,25 +266,6 @@ label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; c
 .simple-season-team { font-weight: 700; color: var(--text-main); font-size: 14px; }
 .simple-season-stats { display: flex; gap: 12px; font-weight: 600; color: var(--text-main); flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.15); padding: 6px 12px; border-radius: 12px;}
 
-/* Historial desplegable */
-.accordion-header {
-  display: flex; justify-content: space-between; align-items: center; width: 100%;
-  background: var(--input-bg); color: var(--text-main);
-  border: 1px solid var(--border-color); padding: 14px 20px; font-size: 13px; border-radius: 16px;
-  font-weight: 700; margin-top: auto;
-}
-.accordion-header:hover { background: var(--panel-bg); border-color: var(--primary-color); box-shadow: none; }
-.arrow { display: inline-block; transition: transform 0.3s ease; transform: rotate(180deg); color: var(--primary-color);}
-.arrow.collapsed { transform: rotate(0deg); color: var(--text-muted); }
-
-#log {
-  max-height: 220px; overflow-y: auto; scroll-behavior: smooth;
-  border-radius: 16px; padding: 12px; display: flex; flex-direction: column-reverse; gap: 8px;
-  background: var(--input-bg); border: 1px solid transparent; margin-top: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-#log.collapsed { max-height: 0; opacity: 0; margin-top: 0; padding: 0; border-width: 0; }
-
 #panel-main { display: flex; flex-direction: column; gap: 16px; }
 #action-bar { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; background: transparent; padding: 0; border: none; box-shadow: none; }
 #action-bar button { flex: 1; padding: 14px; font-size: 14px; min-width: 140px; }

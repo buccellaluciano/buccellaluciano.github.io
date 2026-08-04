@@ -278,6 +278,21 @@
     }
   }
 
+  function renderLastSeasonEvents() {
+    const wrappers = document.querySelectorAll("#simplified-summaries .season-wrapper");
+    const lastSeason = player.seasons[player.seasons.length - 1];
+    if (!lastSeason || wrappers.length === 0) return;
+    const eventsContainer = wrappers[wrappers.length - 1].querySelector(".season-events");
+    if (!eventsContainer) return;
+    eventsContainer.innerHTML = "";
+    lastSeason.events.forEach(ev => {
+      const evDiv = document.createElement("div");
+      evDiv.className = "log-entry " + ev.type;
+      evDiv.innerHTML = `<span class="tag">${ev.tag}</span>${ev.text}`;
+      eventsContainer.appendChild(evDiv);
+    });
+  }
+
   function showRetireScreen(reason) {
     el("screen-game").classList.add("hidden");
     el("screen-retire").classList.remove("hidden");
@@ -354,8 +369,8 @@
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     acceptOffer();
-    renderSummaries();
     renderPlayer();
+    renderLastSeasonEvents();
     el("btn-advance").disabled = false;
     el("btn-advance-2").disabled = false;
   }
@@ -364,7 +379,7 @@
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     rejectOffer();
-    renderSummaries();
+    renderLastSeasonEvents();
     el("btn-advance").disabled = false;
     el("btn-advance-2").disabled = false;
   }
@@ -453,6 +468,11 @@
       }
       case "worldcup":
         return `<div class="trophy-icon"><img src='assets/trophies/worldcup.png' class='trophy-img'></div>`;
+      case "contcup":
+        const contEntry = continentalTrophies.find(n => n.name === name);
+        return contEntry
+          ? `<img src='${contEntry.icon}' class='trophy-img'>`
+          : `<div class="trophy-icon">🌎</div>`;
       default:
         if (name === "Balón de Oro") return `<div class="trophy-icon"><img src='assets/trophies/ballondor.png' class='trophy-img'></div>`;
         if (name === "Bota de Oro") return `<div class="trophy-icon"><img src='assets/trophies/goldenboot.png' class='trophy-img'></div>`;

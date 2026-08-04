@@ -472,10 +472,8 @@ const PREFERRED = [
   { code: "POR", statPrimaria: "ATA", statSecundaria: "VIN" },
   { code: "LD",  statPrimaria: "ASI", statSecundaria: "ENT" },
   { code: "DFC", statPrimaria: "ENT", statSecundaria: "VIN" },
-  { code: "DFC", statPrimaria: "ENT", statSecundaria: "VIN" },
   { code: "LI",  statPrimaria: "ASI", statSecundaria: "ENT" },
   { code: "MCD", statPrimaria: "REC", statSecundaria: "INT" },
-  { code: "MC",  statPrimaria: "ASI", statSecundaria: "GOL" },
   { code: "MC",  statPrimaria: "ASI", statSecundaria: "GOL" },
   { code: "ED",  statPrimaria: "GOL", statSecundaria: "ASI" },
   { code: "DC",  statPrimaria: "GOL", statSecundaria: "ASI" },
@@ -505,7 +503,18 @@ const REGION_PURCHASING_POWER = {
   "Bélgica": 0.7,
   "Croacia": 0.4,
   "Países Bajos": 1.1,
-  "Portugal": 0.9
+  "Portugal": 0.9,
+  "Alemania": 1.5,
+  "Marruecos": 0.4,
+  "Uruguay": 0.6,
+  "Colombia": 0.5,
+  "México": 1.1,
+  "Estados Unidos": 1.8,
+  "Senegal": 0.35,
+  "Japón": 0.95,
+  "Suiza": 1.25,
+  "Irán": 0.3,
+  "Dinamarca": 1.0
 };
 
 const SHOP_ITEMS = [
@@ -557,5 +566,33 @@ const secRegionTrophies = [
     region: "AFC",
     name: "AFC Cup",
     icon: "assets/trophies/AFCCup.png"
+  }
+];
+
+const continentalTrophies = [
+  {
+    region: "CONMEBOL",
+    name: "Copa América",
+    icon: "assets/trophies/CopaAmerica.png"
+  },
+  {
+    region: "UEFA",
+    name: "Eurocopa",
+    icon: "assets/trophies/Eurocopa.png"
+  },
+  {
+    region: "CONCACAF",
+    name: "Copa Oro",
+    icon: "assets/trophies/CopaOro.png"
+  },
+  {
+    region: "AFC",
+    name: "Copa Asiática",
+    icon: "assets/trophies/CopaAsiatica.png"
+  },
+  {
+    region: "CAF",
+    name: "Copa Africana de Naciones",
+    icon: "assets/trophies/CopaAfricanaDeNaciones.png"
   }
 ];

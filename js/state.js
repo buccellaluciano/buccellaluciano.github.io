@@ -56,6 +56,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     salary: Math.round(calcSalary(startRating, 15) * getRegionPower(club.nombre)),
     balance: 0, 
     totalMatches: 0,
+    year: 2026,
     
     stat1Code: posData.statPrimaria,
     stat2Code: posData.statSecundaria,
@@ -69,6 +70,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     retired: false,
     lastDelta: 0,
     explotar: false,
+    convocado: false,
     
     currentEvents: [], 
     seasons: [],
@@ -87,6 +89,15 @@ function addSeasonSummary(data) {
     isNew: true 
   });
   player.currentEvents = []; 
+}
+
+function addHistoryToLastSeason(type, tag, text) {
+  const lastSeason = player.seasons[player.seasons.length - 1];
+  if (lastSeason) {
+    lastSeason.events.push({ type, tag, text });
+  } else {
+    addHistory(type, tag, text);
+  }
 }
 
 function calcularEstadisticas(code, rating, partidosJugados) {
@@ -132,20 +143,29 @@ function titleChance(teamRating, playerRating, base, growth) {
 
 function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry) {
   const nacionalidad = NATIONALITIES.find(n => n.name === teamCountry);
-  const region = nacionalidad ? nacionalidad.region : "UEFA";
-  const regionTopTier = (topRegionTrophies.find(t => t.region === region) || {}).name || "Champions League";
-  const regionMidTier = (secRegionTrophies.find(t => t.region === region) || {}).name || "Europa League";
-
-  let leaguePos = Math.round(22 - (teamRating / 5.5) - (performance / 18) + randInt(-3, 3));
-  leaguePos = clamp(leaguePos, 1, 20);
-
-  let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
+  const region = nacionalidad.region;
+  const regionTopTier = (topRegionTrophies.find(t => t.region === region) || {}).name;
+  const regionMidTier = (secRegionTrophies.find(t => t.region === region) || {}).name;
   let wonIntl = false;
   let wonSintl = false;
   let qualification = "Ninguna";
-  const leagueMatches = 30; 
-  const cupMatches = wonCup ? 6 : randInt(1, 5); 
+  let leaguePos = Math.round(22 - (teamRating / 5.5) - (performance / 18) + randInt(-3, 3));
+  leaguePos = clamp(leaguePos, 1, 20);
+  const leagueMatches = 38; 
+  let titles = 0;
+  let wonTitles = []; // Ahora cada elemento es { name: string, type: string }
   let intlMatches = 0;
+  let playWorldCup = false;
+  let wonWorldCup = false;
+  let wonContCup = false;
+  let wcMatches = 0;
+  let contCupmatches = 0;
+  let torneoType = 0; // 0: Ninguno, 1: Mundial, 2: Copa Continental
+  let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
+  const cupMatches = wonCup ? 6 : randInt(1, 5); 
+  convocado = (nacionalidad && player.rating >= nacionalidad.rating) ? true : false;
+  const torneo = (continentalTrophies.find(t => t.region === region)|| {}).name;
+
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
     wonIntl = Math.random() < titleChance(teamRating, player.rating, 0.02, 1.2);
@@ -156,45 +176,36 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     intlMatches = wonSintl ? 10 : randInt(6, 9);
   }
 
-  let playWorldCup = false;
-  let wonWorldCup = false;
-  let wcMatches = 0;
-  const playerNation = NATIONALITIES.find(n => n.name === player.nationality);
-  if (playerNation && player.seasonsPlayed % 4 === 0 && player.rating >= playerNation.rating) {
-    playWorldCup = true;
+  if (player.seasonsPlayed > 1 && player.seasonsPlayed % 4 === 0) {
+    torneoType = 1; // Mundial
+  }else if (player.seasonsPlayed > 1 && (player.seasonsPlayed - 1) % 4 === 0) {
+    torneoType = 2; // Copa Continental
   }
-  switch (playWorldCup){
-    case true:
-      addHistory("season", "🌍 Mundial", `¡Es año de Mundial! ${player.name} representará a ${player.nationality}.`);
-      if (wonWorldCup = Math.random() < titleChance(playerNation.rating, player.rating, 0.02, 1.2)) {
-        wonWorldCup = true;
-        wcMatches += 8;
-      }else {
-        addHistory("season", "🌍 Mundial", `Lamentablemente, ${player.name} no logró ganar la Copa del Mundo con ${player.nationality}.`);
-        wcMatches += randInt(3, 8);
-      }
+  switch (torneoType) {
+    case 1:
+      switch (convocado) {
+        case true:
+          addHistory("season", "🌍 Mundial", `¡Es año de Mundial! ${player.name} representará a ${player.nationality}.`);
+          wonWorldCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          break;
+        case false:
+          addHistory("season", "🌍 Mundial", `Lamentablemente, ${player.name} no fue convocado para la Copa del Mundo con ${player.nationality}.`);
+          break;
+        }
       break;
-    default: {
-      if (player.seasonsPlayed % 4 === 0){
-        addHistory("season", "🌍 Mundial", `No hubo Mundial este año para ${player.name}.`);
+    case 2:
+      switch (convocado) {
+        case true:
+          addHistory("season", `🌍${torneo}! `, `¡Es año de ${torneo}! ${player.name} representará a ${player.nationality}.`);
+          wonContCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          break;
+        case false:
+          addHistory("season", `🌍${torneo}! `, `Lamentablemente, ${player.name} no fue convocado para el ${torneo} con ${player.nationality}.`);
+          break;
       }
     }
-      break;
-  }
 
-  const baseMatches = leagueMatches + cupMatches + intlMatches + wcMatches;
-  const availability = fitness / 100;
-  const matches = clamp(Math.round(baseMatches * availability), 3, baseMatches);
-  
-  let perfMult = clamp(performance / 100, 0.5, 1.5);
-  let statsGeneradas = calcularEstadisticas(player.position, player.rating, matches);
-  
-  let val1 = Math.round(statsGeneradas[0].valor * perfMult);
-  let val2 = Math.round(statsGeneradas[1].valor * perfMult);
-  let titles = 0;
-  let wonTitles = []; // Ahora cada elemento es { name: string, type: string }
-
-  let liga = getTeamCountry(player.team);
+    let liga = getTeamCountry(player.team);
   if (leaguePos === 1) {
     titles++;
     const nacionalidad = NATIONALITIES.find(n => n.name === liga);
@@ -224,13 +235,32 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   }
 
   if (wonWorldCup) {
+    wcMatches += 8;
     titles++;
     wonTitles.push({ name: "Copa del Mundo", type: "worldcup" });
     addHistory("season", "🌍 Mundial", `¡Histórico! ${player.name} ganó la Copa del Mundo con ${player.nationality}!`);
   }
 
-  return { matches, val1, val2, titles, wonTitles, leaguePos, qualification };
-} // <---- AQUI FALTABA LA LLAVE DE CIERRE
+  if (wonContCup) {
+    contCupmatches += 6;
+    titles++;
+    wonTitles.push({ name: torneo, type: "contcup" });
+    addHistory("season", `🌍${torneo}!`, `¡Increíble! ${player.name} ganó el ${torneo} con ${player.nationality}.`)
+  }
+
+  const baseMatches = leagueMatches + cupMatches + intlMatches + wcMatches;
+  const availability = fitness / 100;
+  const matches = clamp(Math.round(baseMatches * availability), 3, baseMatches);
+  
+  let perfMult = clamp(performance / 100, 0.5, 1.5);
+  let statsGeneradas = calcularEstadisticas(player.position, player.rating, matches);
+  
+  let val1 = Math.round(statsGeneradas[0].valor * perfMult);
+  let val2 = Math.round(statsGeneradas[1].valor * perfMult);
+
+  return { matches, val1, val2, titles, wonTitles, leaguePos, qualification, contCupmatches, wcMatches};
+}
+
 
 
 function ageFactorFor(age) {
@@ -246,6 +276,7 @@ function checkRetirement() {
 }
 
 function simulateSeason(times = 1) {
+  player.year +=1;
   let lastInjury = false;
   let lastPerformance = 50;
   for (let i = 0; i < times; i++) {
@@ -268,7 +299,7 @@ function simulateSeason(times = 1) {
 
   const probabilidadExplotar = 0.02 + (player.seasonsPlayed * 0.005); 
   
-  if (!player.explotar && Math.random() < probabilidadExplotar) {
+  if (!player.explotar && Math.random() < probabilidadExplotar && player.age <= 27) {
     player.explotar = true;
     addHistory("season", "🔥 EXPLOSIÓN", `¡${player.name} ha explotado su potencial! A partir de ahora su progresión será mucho más rápida.`);
   }
@@ -294,6 +325,7 @@ function simulateSeason(times = 1) {
   if (player.rating < 85 && Math.random() < 0.15) {
     delta += randInt(1, 3);
   }
+
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
@@ -391,7 +423,7 @@ function generateOffer(performance = 50) {
 
 function acceptOffer() {
   if (!currentOffer) return;
-  addHistory("transfer", "🤝 Fichaje", `${player.name} ficha por <strong>${currentOffer.club.nombre}</strong>. Nuevo salario: ${fmtMoney(currentOffer.salary)}.`);
+  addHistoryToLastSeason("transfer", "🤝 Fichaje", `${player.name} ficha por <strong>${currentOffer.club.nombre}</strong>. Nuevo salario: ${fmtMoney(currentOffer.salary)}.`);
   player.team = currentOffer.club.nombre;
   player.teamRating = currentOffer.club.rating;
   player.teamCountry = getTeamCountry(player.team);
@@ -401,7 +433,7 @@ function acceptOffer() {
 
 function rejectOffer() {
   if (!currentOffer) return;
-  addHistory("offer", "❌ Oferta rechazada", `Se rechazó la oferta de <strong>${currentOffer.club.nombre}</strong>.`);
+  addHistoryToLastSeason("offer", "❌ Oferta rechazada", `Se rechazó la oferta de <strong>${currentOffer.club.nombre}</strong>.`);
   currentOffer = null;
 }
 
