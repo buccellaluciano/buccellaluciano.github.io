@@ -519,8 +519,12 @@ const REGION_PURCHASING_POWER = {
 
 const SHOP_ITEMS = [
   { id: 'rest', icon: '🔋', name: 'Recuperación Rápida', desc: 'Restaura forma al 100%', price: 150000, repeatable: true },
+  { id: 'spa', icon: '🛁', name: 'Spa de Recuperación', desc: 'Restaura forma al 100%', price: 100000, repeatable: true },
   { id: 'shoes', icon: '👟', name: 'Botines Patrocinados', desc: '+1 Valoración Global', price: 750000, repeatable: false, ratingBoost: 1 },
-  { id: 'coach', icon: '🧠', name: 'Entrenador Personal', desc: '+2 Valoración Global', price: 1500000, repeatable: false, ratingBoost: 2 }
+  { id: 'coach', icon: '🧠', name: 'Entrenador Personal', desc: '+2 Valoración Global', price: 1500000, repeatable: false, ratingBoost: 2 },
+  { id: 'academy', icon: '🏫', name: 'Academia de Elite', desc: '+1 Valoración Global', price: 900000, repeatable: false, ratingBoost: 1 },
+  { id: 'serum', icon: '🧪', name: 'Suero de Potencial', desc: '+4 Valoración Global, pero envejece 3 años', price: 3000000, repeatable: false, ratingBoost: 4, shortened: true, agePenalty: 3 },
+  { id: 'extreme', icon: '🏋️', name: 'Métodos Extremos', desc: '+6 Valoración Global, pero envejece 4 años', price: 5000000, repeatable: false, ratingBoost: 6, shortened: true, agePenalty: 4 }
 ];
 
 const topRegionTrophies = [

@@ -163,7 +163,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let torneoType = 0; // 0: Ninguno, 1: Mundial, 2: Copa Continental
   let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
-  convocado = (nacionalidad && player.rating >= nacionalidad.rating) ? true : false;
+  convocado = (player.rating >= nacionalidad.rating-10) ? true : false;
   const torneo = (continentalTrophies.find(t => t.region === region)|| {}).name;
 
   if (leaguePos >= 1 && leaguePos <= 4) {
@@ -181,12 +181,22 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   }else if (player.seasonsPlayed > 1 && (player.seasonsPlayed - 1) % 4 === 0) {
     torneoType = 2; // Copa Continental
   }
+
   switch (torneoType) {
     case 1:
       switch (convocado) {
         case true:
           addHistory("season", "🌍 Mundial", `¡Es año de Mundial! ${player.name} representará a ${player.nationality}.`);
           wonWorldCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          if (wonWorldCup) {
+            wcMatches += 8;
+            titles++;
+            wonTitles.push({ name: "Copa del Mundo", type: "worldcup" });
+            addHistory("season", "🌍 Mundial", `¡Histórico! ${player.name} ganó la Copa del Mundo con ${player.nationality}!`);
+          }else {
+            wcMatches += randInt(3, 8);
+            addHistory("season", "🌍 Mundial", `Lamentablemente ${player.name} no pudo conseguir la Copa del Mundo con ${player.nationality}.`);
+          }
           break;
         case false:
           addHistory("season", "🌍 Mundial", `Lamentablemente, ${player.name} no fue convocado para la Copa del Mundo con ${player.nationality}.`);
@@ -198,6 +208,15 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
         case true:
           addHistory("season", `🌍${torneo}! `, `¡Es año de ${torneo}! ${player.name} representará a ${player.nationality}.`);
           wonContCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          if (wonContCup) {
+            contCupmatches += 6;
+            titles++;
+            wonTitles.push({ name: torneo, type: "contcup" });
+            addHistory("season", `🌍${torneo}!`, `¡Increíble! ${player.name} ganó el ${torneo} con ${player.nationality}.`)
+          }else {
+            contCupmatches += randInt(3, 6);
+            addHistory("season", `🌍${torneo}!`, `Lamentablemente ${player.name} no pudo conseguir el ${torneo} con ${player.nationality}.`);
+          }
           break;
         case false:
           addHistory("season", `🌍${torneo}! `, `Lamentablemente, ${player.name} no fue convocado para el ${torneo} con ${player.nationality}.`);
@@ -232,20 +251,6 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
     titles++;
     wonTitles.push({ name: qualification, type: "sintl" });
     addHistory("season", "🌟 Éxito Internacional", `¡Increíble! Ganaste la ${qualification} con ${player.team}!`);
-  }
-
-  if (wonWorldCup) {
-    wcMatches += 8;
-    titles++;
-    wonTitles.push({ name: "Copa del Mundo", type: "worldcup" });
-    addHistory("season", "🌍 Mundial", `¡Histórico! ${player.name} ganó la Copa del Mundo con ${player.nationality}!`);
-  }
-
-  if (wonContCup) {
-    contCupmatches += 6;
-    titles++;
-    wonTitles.push({ name: torneo, type: "contcup" });
-    addHistory("season", `🌍${torneo}!`, `¡Increíble! ${player.name} ganó el ${torneo} con ${player.nationality}.`)
   }
 
   const baseMatches = leagueMatches + cupMatches + intlMatches + wcMatches;
@@ -325,7 +330,6 @@ function simulateSeason(times = 1) {
   if (player.rating < 85 && Math.random() < 0.15) {
     delta += randInt(1, 3);
   }
-
   let injuryHappened = false;
   if (Math.random() < 0.09) {
     injuryHappened = true;
@@ -396,13 +400,13 @@ function simulateSeason(times = 1) {
 }
 
 function generateOffer(performance = 50) {
-  let maxRating = player.rating + 4;
-  let minRating = player.rating - 8;
+  let maxRating = player.rating + 2;
+  let minRating = player.rating - 10;
 
-  if (player.rating < 79) {
+  if (player.rating < 81) {
     maxRating = player.rating; 
-  } else if (performance >= 80) {
-    maxRating += 5; 
+  } else if (performance >= 82) {
+    maxRating += 4; 
   }
 
   let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating >= minRating && t.rating <= maxRating);
@@ -445,7 +449,7 @@ function buyItem(id) {
 
   player.balance -= item.price;
 
-  if (item.id === 'rest') {
+  if (item.id === 'rest' || item.id === 'spa') {
     player.fitness = 100;
   }
   if (item.ratingBoost) {
@@ -453,8 +457,13 @@ function buyItem(id) {
     player.rating = clamp(player.rating + item.ratingBoost, 25, 99);
     player.lastDelta = player.rating - oldR;
   }
+  if (item.shortened) {
+    player.age += item.agePenalty;
+    checkRetirement();
+  }
   if (!item.repeatable) player.boughtItems.push(id);
 
-  addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.`);
+  const shortNote = item.shortened ? ` ¡Pero el desgaste te hizo envejecer ${item.agePenalty} años!` : "";
+  addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.${shortNote}`);
   return true;
 }

@@ -339,7 +339,7 @@
     renderPlayer();
     renderShop(); 
 
-    if (!injuryHappened && Math.random() < 0.30) {
+    if (!injuryHappened && Math.random() < 0.75) {
       const offer = generateOffer(performance);
       el("offer-team").textContent = offer.club.nombre;
       el("offer-salary").textContent = fmtMoney(offer.salary);
@@ -392,6 +392,12 @@
     if (e.target.classList.contains("shop-btn")) {
       const id = e.target.getAttribute("data-id");
       if (buyItem(id)) {
+        if (player.retired) {
+          el("modal-shop").classList.add("hidden");
+          renderPlayer();
+          showRetireScreen("El desgaste físico acumulado por los potenciadores extremos forzó tu retiro");
+          return;
+        }
         renderPlayer();
         renderShop();
         renderSummaries();
