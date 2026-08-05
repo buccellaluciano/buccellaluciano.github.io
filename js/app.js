@@ -40,7 +40,7 @@
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
-  const CONTEXTUAL_VARS = ['--primary-color', '--primary-hover', '--primary-ring', '--badge-color', '--offer-bg', '--offer-border', '--offer-text', '--bg-color', '--app-bg', '--panel-bg', '--input-bg'];
+  const CONTEXTUAL_VARS = ['--primary-color', '--primary-hover', '--primary-ring', '--badge-color', '--offer-bg', '--offer-border', '--offer-text', '--bg-color', '--app-bg', '--panel-bg', '--panel-border', '--input-bg', '--blob-1', '--blob-2'];
 
   function resetContextualColor() {
     const root = document.documentElement.style;
@@ -58,13 +58,16 @@
     root.setProperty('--primary-hover', shadeHex(color, 0.2));
     root.setProperty('--primary-ring', hexToRgba(color, 0.3));
     root.setProperty('--badge-color', color);
-    root.setProperty('--offer-bg', hexToRgba(color, 0.12));
+    root.setProperty('--offer-bg', hexToRgba(color, 0.14));
     root.setProperty('--offer-border', hexToRgba(color, 0.4));
-    root.setProperty('--offer-text', shadeHex(color, 0.45));
-    root.setProperty('--bg-color', mixBlack(color, 0.55));
-    root.setProperty('--app-bg', mixBlack(color, 0.80));
-    root.setProperty('--panel-bg', mixBlack(color, 0.70));
-    root.setProperty('--input-bg', mixBlack(color, 0.87));
+    root.setProperty('--offer-text', shadeHex(color, 0.55));
+    root.setProperty('--bg-color', mixBlack(color, 0.88));
+    root.setProperty('--app-bg', `linear-gradient(160deg, ${mixBlack(color, 0.95)} 0%, ${mixBlack(color, 0.90)} 45%, ${mixBlack(color, 0.85)} 100%)`);
+    root.setProperty('--panel-bg', hexToRgba(mixBlack(color, 0.85), 0.45));
+    root.setProperty('--panel-border', hexToRgba(color, 0.18));
+    root.setProperty('--input-bg', hexToRgba(mixBlack(color, 0.82), 0.35));
+    root.setProperty('--blob-1', `radial-gradient(circle, ${shadeHex(color, 0.35)} 0%, transparent 70%)`);
+    root.setProperty('--blob-2', `radial-gradient(circle, ${hexToRgba(color, 0.55)} 0%, transparent 70%)`);
   }
 
   const STAT_LABELS = {
@@ -407,13 +410,6 @@
     }
   });
 
-  el("btn-theme").addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    const isDark = document.body.classList.contains("dark");
-    el("btn-theme").textContent = isDark ? "☀️ Tema Claro" : "🌙 Tema Oscuro";
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
-
   el("btn-contextual").addEventListener("click", () => {
     contextualOn = !contextualOn;
     localStorage.setItem("contextual", contextualOn ? "on" : "off");
@@ -424,19 +420,15 @@
 
   if (contextualOn) el("btn-contextual").textContent = "🎨 Color Contextual: ON";
 
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
-    el("btn-theme").textContent = "☀️ Tema Claro";
-  }
-
   el("btn-create").addEventListener("click", () => {
     if (!selectedPosition) return;
     
     const name = el("input-name").value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;") || "Jugador Anónimo";
     const natIndex = el("input-nationality").value;
     const nationalityData = NATIONALITIES[natIndex];
+    const careerType = document.querySelector('input[name="career-type"]:checked').value;
     
-    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre);
+    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre, careerType);
 
     el("screen-create").classList.add("hidden");
     el("screen-game").classList.remove("hidden");

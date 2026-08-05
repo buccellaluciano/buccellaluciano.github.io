@@ -35,7 +35,7 @@ function getRegionPower(teamName) {
   return REGION_PURCHASING_POWER[country] ?? 1;
 }
 
-function createPlayer(name, nationalityData, posCode, posName) {
+function createPlayer(name, nationalityData, posCode, posName, careerType = "normal") {
   const club = pickDebutTeam(nationalityData.name);
   const startRating = 50; 
   
@@ -43,6 +43,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
   
   return {
     name,
+    careerType: careerType,
     nationality: nationalityData.name,
     flag: nationalityData.flag,
     position: posCode,
@@ -69,7 +70,7 @@ function createPlayer(name, nationalityData, posCode, posName) {
     injured: false,
     retired: false,
     lastDelta: 0,
-    explotar: false,
+    explotar: careerType === "prodigio",
     convocado: false,
     chestPending: false,
     
@@ -143,8 +144,8 @@ function titleChance(teamRating, playerRating, base, growth) {
 }
 
 function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry) {
-  const nacionalidad = NATIONALITIES.find(n => n.name === teamCountry);
-  const region = nacionalidad.region;
+  const nacionClub = NATIONALITIES.find(n => n.name === teamCountry);
+  const region = nacionClub.region;
   const regionTopTier = (topRegionTrophies.find(t => t.region === region) || {}).name;
   const regionMidTier = (secRegionTrophies.find(t => t.region === region) || {}).name;
   let wonIntl = false;
@@ -164,9 +165,9 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   let torneoType = 0; // 0: Ninguno, 1: Mundial, 2: Copa Continental
   let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
-  convocado = (player.rating >= nacionalidad.rating-10) ? true : false;
+  convocado = (player.rating >= nacionClub.rating-10) ? true : false;
   player.convocado = convocado;
-  const torneo = (continentalTrophies.find(t => t.region === region)|| {}).name;
+  const torneo = (continentalTrophies.find(t => t.region === player.nacionalidad)|| {}).name;
 
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
@@ -189,7 +190,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
       switch (convocado) {
         case true:
           addHistory("season", "🌍 Mundial", `¡Es año de Mundial! ${player.name} representará a ${player.nationality}.`);
-          wonWorldCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          wonWorldCup = Math.random() < titleChance(nacionClub.rating, player.rating, 0.02, 1.2);
           if (wonWorldCup) {
             wcMatches += 8;
             titles++;
@@ -209,7 +210,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
       switch (convocado) {
         case true:
           addHistory("season", `🌍${torneo}! `, `¡Es año de ${torneo}! ${player.name} representará a ${player.nationality}.`);
-          wonContCup = Math.random() < titleChance(nacionalidad.rating, player.rating, 0.02, 1.2);
+          wonContCup = Math.random() < titleChance(nacionClub.rating, player.rating, 0.02, 1.2);
           if (wonContCup) {
             contCupmatches += 6;
             titles++;
@@ -425,7 +426,7 @@ function generateOffer(performance = 50) {
     candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= maxRating + 2);
   }
   
-  if (candidates.length === 0) candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
+  // if (candidates.length === 0) candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
 
   const club = pickRandom(candidates);
   const regionPower = getRegionPower(club.nombre);
