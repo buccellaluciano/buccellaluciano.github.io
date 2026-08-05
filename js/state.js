@@ -421,10 +421,13 @@ function generateOffer(performance = 50) {
   }
 
   let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating >= minRating && t.rating <= maxRating);
-  
-  if (Math.random() < 0.15 || candidates.length === 0) {
-    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= maxRating + 2);
+  if (player.rating < 65){
+    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= 70);
   }
+  
+  // if (Math.random() < 0.15 || candidates.length === 0) {
+  //   candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= maxRating + 2);
+  // }
   
   // if (candidates.length === 0) candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
 

@@ -337,6 +337,10 @@ select {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
 }
+select option {
+  color: #111;
+  background: #fff;
+}
 input[type="text"]::placeholder {
   color: var(--text-muted);
 }
