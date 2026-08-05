@@ -179,6 +179,7 @@
       arrowHTML = '<span style="color: #f43f5e; font-size: 22px; text-shadow: 0 0 10px rgba(244,63,94,0.5);">▼</span>';
     }
     el("rating-badge").innerHTML = `${player.rating} ${arrowHTML}`;
+    el("p-dorsal").textContent = player.dorsal != null ? `#${player.dorsal}` : "-";
 
     el("p-earnings").textContent = fmtMoney(player.balance);
     el("p-value").textContent = fmtMoney(calcMarketValue(player.rating, player.age));
@@ -226,6 +227,9 @@
     let pending = newSeasons.length;
     const scrollToBottom = () => {
       sumEl.scrollTo({ top: sumEl.scrollHeight, behavior: 'smooth' });
+      if (window.innerWidth <= 900) {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }
     };
 
     for (const d of newSeasons) {
@@ -237,7 +241,7 @@
       row.style.cursor = "pointer";
       row.title = "Clic para ver los eventos de esta temporada";
       
-      let wonHtml = d.wonTitles && d.wonTitles.length ? `<span style="font-size:11px; color:var(--offer-text); font-weight:700;">(🏆 ${d.wonTitles.map(t => t.name).join(', ')})</span>` : '';
+      let wonHtml = d.wonTitles && d.wonTitles.length ? `<span class="season-won-trophies" title="${d.wonTitles.map(t => t.name).join(', ')}"> ${d.wonTitles.map(t => trophyIconHTML(t.name, t.type)).join(' ')}</span>` : '';
       const s1Info = STAT_LABELS[player.stat1Code];
       const s2Info = STAT_LABELS[player.stat2Code];
 
@@ -346,18 +350,35 @@
     renderShop(); 
 
     if (!injuryHappened && Math.random() < 0.75) {
-      const offer = generateOffer(performance);
-      el("offer-team").textContent = offer.club.nombre;
-      el("offer-salary").textContent = fmtMoney(offer.salary);
-
-      el("offer-power").innerHTML = `💰 Presupuesto del club: <strong>${fmtMoney(offer.budget != null ? offer.budget : offer.salary)}</strong>`;
-      
+      generateOffers(3);
+      renderOffers();
       el("action-bar").classList.add("hidden");
       el("offer-panel").classList.remove("hidden");
     } else {
       el("btn-advance").disabled = false;
       el("btn-advance-2").disabled = false;
     }
+  }
+
+  function renderOffers() {
+    const list = el("offer-list");
+    list.innerHTML = "";
+    currentOffers.forEach((offer, i) => {
+      const row = document.createElement("div");
+      row.className = "offer-item";
+      const budgetTxt = fmtMoney(offer.budget != null ? offer.budget : offer.salary);
+      row.innerHTML = `
+        <div class="offer-item-body">
+          <div class="offer-item-club">🛡️ ${offer.club.nombre}</div>
+          <div class="offer-item-salary">💰 <strong>${fmtMoney(offer.salary)}</strong> / temporada</div>
+          <div class="offer-power">Presupuesto del club: ${budgetTxt}</div>
+        </div>
+        <div class="offer-actions">
+          <button class="btn-danger offer-reject" data-index="${i}">❌ Rechazar</button>
+          <button class="btn-success offer-accept" data-index="${i}">✅ Aceptar</button>
+        </div>`;
+      list.appendChild(row);
+    });
   }
   
   function handleRetireEarly() {
@@ -366,23 +387,27 @@
     showRetireScreen("Decidiste retirarte anticipadamente por voluntad propia");
   }
 
-  function handleAccept() {
+  function handleAccept(index) {
+    acceptOffer(index);
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
-    acceptOffer();
     renderPlayer();
     renderLastSeasonEvents();
     el("btn-advance").disabled = false;
     el("btn-advance-2").disabled = false;
   }
 
-  function handleReject() {
-    el("offer-panel").classList.add("hidden");
-    el("action-bar").classList.remove("hidden");
-    rejectOffer();
+  function handleReject(index) {
+    const remaining = rejectOffer(index);
     renderLastSeasonEvents();
-    el("btn-advance").disabled = false;
-    el("btn-advance-2").disabled = false;
+    if (remaining.length > 0) {
+      renderOffers();
+    } else {
+      el("offer-panel").classList.add("hidden");
+      el("action-bar").classList.remove("hidden");
+      el("btn-advance").disabled = false;
+      el("btn-advance-2").disabled = false;
+    }
   }
 
   function resetToCreate() {
@@ -416,6 +441,10 @@
 
   if (contextualOn) el("btn-contextual").textContent = "🎨 Color Contextual: ON";
 
+  el("input-dorsal").addEventListener("input", () => {
+    el("input-dorsal").value = el("input-dorsal").value.replace(/\D/g, "").slice(0, 2);
+  });
+
   el("btn-create").addEventListener("click", () => {
     if (!selectedPosition) return;
     
@@ -423,8 +452,11 @@
     const natIndex = el("input-nationality").value;
     const nationalityData = NATIONALITIES[natIndex];
     const careerType = document.querySelector('input[name="career-type"]:checked').value;
+    const dorsalRaw = el("input-dorsal").value.trim();
+    let dorsal = parseInt(dorsalRaw, 10);
+    if (!(dorsal >= 1 && dorsal <= 99)) dorsal = Math.floor(Math.random() * 99) + 1;
     
-    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre, careerType);
+    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre, careerType, dorsal);
 
     el("screen-create").classList.add("hidden");
     el("screen-game").classList.remove("hidden");
@@ -550,9 +582,15 @@
   el("btn-advance").addEventListener("click", () => handleAdvance(1));
   el("btn-advance-2").addEventListener("click", () => handleAdvance(2));
   el("btn-retire-early").addEventListener("click", handleRetireEarly);
-  el("btn-accept").addEventListener("click", handleAccept);
-  el("btn-reject").addEventListener("click", handleReject);
   el("btn-restart").addEventListener("click", resetToCreate);
+
+  el("offer-list").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-index]");
+    if (!btn) return;
+    const index = parseInt(btn.getAttribute("data-index"), 10);
+    if (btn.classList.contains("offer-accept")) handleAccept(index);
+    else if (btn.classList.contains("offer-reject")) handleReject(index);
+  });
 
   el("btn-chest").addEventListener("click", () => {
     el("modal-chest").classList.remove("hidden");

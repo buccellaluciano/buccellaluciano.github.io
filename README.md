@@ -41,10 +41,11 @@ Una vez creado el jugador se muestra el **panel del jugador** (rating, edad, clu
 8. Se comprueba si el jugador se retira.
 
 ### 3. Ofertas de fichaje
-Al avanzar una temporada hay un 30% de probabilidad de recibir una **oferta** de otro club (si no hubo lesión). La oferta se muestra en un panel con opción de **Aceptar** o **Rechazar**:
+Al avanzar una temporada hay un 75% de probabilidad de recibir un lote de **3 ofertas** de otros clubes (si no hubo lesión). Cada oferta muestra el club, el salario propuesto y su presupuesto, con botones de **Aceptar** / **Rechazar**:
 
-- **Aceptar**: cambias de club, país, rating de equipo y salario.
-- **Rechazar**: te quedas donde estás y la oferta desaparece.
+- **Aceptar**: fichás por ese club (cambian tu equipo, su rating y tu salario).
+- **Rechazar**: descartás esa oferta y siguen disponibles las demás; si rechazás todas, seguís en tu club.
+- El salario se calcula según el presupuesto del club oferente frente al tuyo: clubes con más presupuesto ofrecen más, y viceversa.
 
 ### 4. Tienda 🛒
 Se abre como modal. Con el balance acumulado por salarios puedes comprar:
@@ -181,12 +182,12 @@ valor = límiteDinámico × factorRating × suerte × perfMult
 
 ### 💰 Salarios (`calcSalary`)
 
-El salario base se calcula con la media y la edad, con un mínimo de **$120.000** y máximo de **$40.000.000**:
+El salario base se calcula con la media y la edad, con un mínimo de **$15.000** y máximo de **$40.000.000**:
 
 ```
 ratingFactor = (rating − 50) / 49        (entre 0 y 1)
-ratingGrowth = 2^(7.8 × ratingFactor) − 1
-salario      = 120000 × (1 + ratingGrowth × factorJuvenil)
+ratingGrowth = 2^(10.8 × ratingFactor) − 1
+salario      = 15000 × (1 + ratingGrowth × factorJuvenil)
 ```
 
 Factor juvenil (`youthFactorFor`):
@@ -199,29 +200,20 @@ Factor juvenil (`youthFactorFor`):
 | 31–34 | 1.0 |
 | ≥ 35 | 0.85 |
 
-### 🌍 Poder adquisitivo por región
+### 💰 Presupuesto por club (`budget`)
 
-El salario real se multiplica por el **poder adquisitivo** del país del club (`REGION_PURCHASING_POWER`). Esto crea diferencias salariales notables entre ligas:
+Cada club de `TEAMS_BY_COUNTRY` tiene un atributo **`budget`** individual (entre $15.000 y $40M) que determina cuánto puede pagar de salario. Reemplazó al antiguo "poder adquisitivo regional": ahora el dinero depende de **cada club**, no del país. `ALL_TEAMS` propaga el `budget` automáticamente, y el salario efectivo se calcula como `min(salarioBase, budget)`.
 
-| País/Región | Poder adquisitivo |
-|---|---|
-| 🇦🇷 Argentina | 0.25 |
-| 🇧🇷 Brasil | 0.5 |
-| 🇭🇷 Croacia | 0.4 |
-| 🇧🇪 Bélgica | 0.7 |
-| 🇫🇷 Francia | 1.0 |
-| 🇵🇹 Portugal | 0.9 |
-| 🇳🇱 Países Bajos | 1.1 |
-| 🇮🇹 Italia | 1.3 |
-| 🇪🇸 España | 1.6 |
-| 🏴 Inglaterra | 2.2 |
+### 💎 Valor de mercado (`calcMarketValue`)
 
-### 🤝 Ofertas de fichaje (`generateOffer`)
+Usa la misma lógica exponencial que el salario, pero con rango **$10.000–$220.000.000** (exponente 13.84). Es **informativo**: se muestra en el panel del jugador como referencia y no afecta ofertas ni salarios.
 
-- Un 30% de probabilidad al avanzar temporada (si no hubo lesión).
-- Se filtran clubes con rating entre `rating−8` y `rating+4` (si media < 79, el máximo baja a la propia media; si rendimiento ≥ 80, sube +5).
-- Con un 15% de probabilidad (o si no hay candidatos) se amplía el filtro a `rating ≤ media + 2`, y si aún así no hay, a cualquier club.
-- El salario de la oferta usa `calcSalary(rating, edad)` (con la media ajustada al club) × bono por diferencia de nivel del club × poder adquisitivo regional.
+### 🤝 Ofertas de fichaje (`generateOffer` / `generateOffers`)
+
+- Un 75% de probabilidad al avanzar temporada (si no hubo lesión), se generan **3 ofertas distintas** a la vez.
+- Candidatos: clubes cuyo `budget` cubre el salario del jugador (`budget >= calcSalary(rating, edad)`) y de nivel cercano (`player.rating >= club.rating − 15`). Si no hay candidatos, se cae a cualquier club (menos el actual).
+- El salario de la oferta se calcula por la diferencia de **presupuesto** entre el club oferente y el del jugador: `worth × (1 + (budgetOferente − budgetActual) / budgetActual × 0.5)`, topeado al presupuesto del oferente.
+- Podés **aceptar** una oferta (fichás por ese club) o **rechazar** las que quieras; si rechazás todas, seguís en tu club.
 
 ### 🛒 Tienda (`buyItem`)
 
@@ -256,12 +248,11 @@ bealegend/
 ## 🗄️ Datos de configuración (`js/data.js`)
 
 - **`NATIONALITIES`**: nacionalidades jugables con bandera, liga, región y rating de selección.
-- **`TEAMS_BY_COUNTRY`**: clubes por país (381 clubes) con `rating` y `color`.
+- **`TEAMS_BY_COUNTRY`**: clubes por país (381 clubes) con `rating`, `color` y `budget`.
 - **`ALL_TEAMS`**: lista plana de todos los clubes.
 - **`FORMATION_433`**: layout de la alineación 4-3-3 usada en la pantalla de creación.
 - **`PREFERRED`**: estadísticas primaria/secundaria por posición.
 - **`NATIONAL_CUPS`**: nombre de la copa nacional por país (con icono).
-- **`REGION_PURCHASING_POWER`**: multiplicador salarial por país.
 - **`SHOP_ITEMS`**: ítems de la tienda (`price`, `ratingBoost`, `repeatable`).
 - **`topRegionTrophies` / `secRegionTrophies`**: nombre del torneo internacional élite/secundario por región.
 
@@ -273,9 +264,11 @@ Los clubes tienen ratings entre **65 y 99** (ej. Riestra 65, Boca 93, River 95, 
 
 ## 🧩 Cómo modificar el balance
 
-- **Salarios**: ajusta `MIN_SALARY`, `MAX_SALARY`, `youthFactorFor` o el exponente `7.8` en `calcSalary`.
+- **Salarios**: ajusta `MIN_SALARY`, `MAX_SALARY`, `youthFactorFor` o el exponente `10.8` en `calcSalary`.
+- **Valor de mercado**: ajusta `MIN_VALUE`, `MAX_VALUE` o el exponente `13.84` en `calcMarketValue`.
 - **Títulos**: cambia las bases/crecimiento de `titleChance` en `calcSeasonStats`, o el umbral 75 en `titleChance`.
 - **Progresión**: ajusta `ageFactorFor`, la probabilidad de explosión o los dados en `simulateSeason`.
 - **Lesiones**: cambia el `0.09` de probabilidad o las penalizaciones.
-- **Diferencias entre ligas**: edita `REGION_PURCHASING_POWER`.
+- **Presupuestos de clubes**: edita el atributo `budget` de cada club en `TEAMS_BY_COUNTRY` (entre $15.000 y $40M).
+- **Ofertas**: el coeficiente de sensibilidad al presupuesto es el `0.5` en `generateOffer`; la cantidad de ofertas es el argumento de `generateOffers` (por defecto 3).
 - **Tienda**: agrega/edita ítems en `SHOP_ITEMS` de `data.js`.

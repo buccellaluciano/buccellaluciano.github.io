@@ -1,6 +1,6 @@
 // js/state.js
 let player = null;
-let currentOffer = null;
+let currentOffers = [];
 
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -51,7 +51,7 @@ function calcEffectiveSalary(rating, age, teamName) {
   return Math.round(budget == null ? worth : Math.min(worth, budget));
 }
 
-function createPlayer(name, nationalityData, posCode, posName, careerType = "normal") {
+function createPlayer(name, nationalityData, posCode, posName, careerType = "normal", dorsal = null) {
   const club = pickDebutTeam(nationalityData.name);
   const startRating = 50; 
   
@@ -59,6 +59,7 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
   
   return {
     name,
+    dorsal,
     careerType: careerType,
     nationality: nationalityData.name,
     flag: nationalityData.flag,
@@ -426,12 +427,11 @@ function cofre(pending) {
   }
 }
 
-function generateOffer() {
+function generateOffer(excludedClubs = []) {
   const worth = calcSalary(player.rating, player.age);
-  console.log(worth)
-  let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && (t.budget ?? worth) >= worth && player.rating >= t.rating - 15);
+  let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && !excludedClubs.includes(t.nombre) && (t.budget ?? worth) >= worth && player.rating >= t.rating - 15);
   if (candidates.length === 0) {
-    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
+    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && !excludedClubs.includes(t.nombre));
   }
 
   const club = pickRandom(candidates);
@@ -444,24 +444,39 @@ function generateOffer() {
   let salary = Math.round(worth * (1 + relDiff * 0.5));
   if (budget != null) salary = Math.min(salary, budget);
 
-  currentOffer = { club, salary, budget };
-  return currentOffer;
+  return { club, salary, budget };
 }
 
-function acceptOffer() {
-  if (!currentOffer) return;
-  addHistoryToLastSeason("transfer", "🤝 Fichaje", `${player.name} ficha por <strong>${currentOffer.club.nombre}</strong>. Nuevo salario: ${fmtMoney(currentOffer.salary)}.`);
-  player.team = currentOffer.club.nombre;
-  player.teamRating = currentOffer.club.rating;
+function generateOffers(count = 3) {
+  const seen = [];
+  currentOffers = [];
+  for (let i = 0; i < count; i++) {
+    const offer = generateOffer(seen);
+    if (offer.club) {
+      currentOffers.push(offer);
+      seen.push(offer.club.nombre);
+    }
+  }
+  return currentOffers;
+}
+
+function acceptOffer(index) {
+  const offer = currentOffers[index];
+  if (!offer) return;
+  addHistoryToLastSeason("transfer", "🤝 Fichaje", `${player.name} ficha por <strong>${offer.club.nombre}</strong>. Nuevo salario: ${fmtMoney(offer.salary)}.`);
+  player.team = offer.club.nombre;
+  player.teamRating = offer.club.rating;
   player.teamCountry = getTeamCountry(player.team);
-  player.salary = currentOffer.salary;
-  currentOffer = null;
+  player.salary = offer.salary;
+  currentOffers = [];
 }
 
-function rejectOffer() {
-  if (!currentOffer) return;
-  addHistoryToLastSeason("offer", "❌ Oferta rechazada", `Se rechazó la oferta de <strong>${currentOffer.club.nombre}</strong>.`);
-  currentOffer = null;
+function rejectOffer(index) {
+  const offer = currentOffers[index];
+  if (!offer) return;
+  addHistoryToLastSeason("offer", "❌ Oferta rechazada", `Se rechazó la oferta de <strong>${offer.club.nombre}</strong>.`);
+  currentOffers.splice(index, 1);
+  return currentOffers;
 }
 
 function buyItem(id) {

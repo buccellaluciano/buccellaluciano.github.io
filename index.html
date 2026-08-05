@@ -25,6 +25,10 @@
           <input type="text" id="input-name" placeholder="Ej: Diego Martínez" maxlength="24">
         </div>
         <div class="field">
+          <label for="input-dorsal">Dorsal (1–99)</label>
+          <input type="text" id="input-dorsal" placeholder="Ej: 10" maxlength="2" inputmode="numeric">
+        </div>
+        <div class="field">
           <label for="input-nationality">Nacionalidad</label>
           <select id="input-nationality"></select>
         </div>
@@ -60,6 +64,7 @@
       <div id="panel-player" class="panel">
         <h2 id="p-name">-</h2>
         <div id="rating-badge">--</div>
+        <div class="stat-row highlight"><span>👕 Dorsal</span><span id="p-dorsal">-</span></div>
         <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
         <div class="stat-row highlight"><span>💎 Valor de mercado</span><span id="p-value">-</span></div>
         <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
@@ -106,13 +111,8 @@
     <div id="panel-main">
       <!-- Oferta Integrada en UI (Oculta por defecto) -->
       <div id="offer-panel" class="hidden panel highlight offer-banner">
-        <h3 class="offer-title">🤝 Nueva Oferta de Fichaje</h3>
-        <p>El club <strong><span id="offer-team">-</span></strong> te ofrece un contrato por <strong id="offer-salary">-</strong> por temporada.</p>
-        <p class="offer-power"><span id="offer-power">-</span></p>
-        <div class="offer-actions">
-          <button id="btn-reject" class="btn-danger">❌ Rechazar</button>
-          <button id="btn-accept" class="btn-success">✅ Aceptar Oferta</button>
-        </div>
+        <h3 class="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
+        <div id="offer-list"></div>
       </div>
 
       <div class="panel" id="action-bar">
@@ -122,7 +122,7 @@
         <button id="btn-vitrina" style="background-color: #f59e0b;">🏆 Vitrina</button>
       </div>
       
-      <div class="panel" style="flex:1; display:flex; flex-direction:column; gap: 12px; overflow: hidden; max-height: 60vh;">
+      <div class="panel summaries-panel">
         <h3 class="panel-subtitle">📊 Resumen de Temporadas</h3>
         <div id="simplified-summaries"></div>
       </div>
@@ -200,7 +200,7 @@
 
         <section>
           <h3>🤝 Ofertas de fichaje</h3>
-          <p>Al avanzar, puede aparecer una oferta de otro club (30% de probabilidad). Podés <strong>Aceptar</strong> (cambiás de club, país y salario) o <strong>Rechazar</strong>. El salario depende del nivel del club, tu media y el poder adquisitivo de su país.</p>
+          <p>Al avanzar, puede aparecer un lote de <strong>3 ofertas</strong> de otros clubes. Cada una podés <strong>Aceptar</strong> (cambiás de club y salario) o <strong>Rechazar</strong>. El salario depende del <strong>presupuesto</strong> de cada club frente al tuyo: un club con más presupuesto te ofrece más, y uno con menos, menos.</p>
         </section>
 
         <section>
@@ -216,8 +216,8 @@
         </section>
 
         <section>
-          <h3>💰 Salario y poder adquisitivo</h3>
-          <p>Tu salario crece con tu media y edad (desde $120.000 hasta $40.000.000). Además, el país de tu club tiene un <strong>poder adquisitivo</strong> que multiplica el salario: por ejemplo, Argentina (x0.25) paga poco e Inglaterra (x2.2) paga mucho más. Usá tu dinero en la tienda.</p>
+          <h3>💰 Salario y valor de mercado</h3>
+          <p>Tu salario crece con tu media y edad (desde $15.000 hasta $40.000.000). Además, cada club tiene un <strong>presupuesto</strong> individual que limita cuánto puede ofrecerte. En tu panel también ves tu <strong>💎 Valor de mercado</strong> (de $10.000 a $220.000.000) como referencia de tu valor. Usá tu dinero en la tienda.</p>
         </section>
 
         <section>
