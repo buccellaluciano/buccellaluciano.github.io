@@ -40,6 +40,19 @@ function getTeamCountry(teamName) {
   return team ? team.pais : "España"; 
 }
 
+function getIdolatry(team) { return player.idolatria[team] || 0; }
+
+function addIdolatry(team, amount) {
+  if (!team) return;
+  player.idolatria[team] = clamp(getIdolatry(team) + amount, 0, 100);
+}
+
+const TITLE_IDOLATRY = { league: 8, cup: 6, intl: 10, sintl: 8, worldcup: 15, contcup: 10, individual: 5 };
+
+function idolatryTeamFactor(teamRating) {
+  return 1 - ((clamp(teamRating, 65, 99) - 65) / 34) * 0.7;
+}
+
 function getTeamBudget(teamName) {
   const team = ALL_TEAMS.find(t => t.nombre === teamName);
   return team ? (team.budget ?? null) : null;
@@ -94,7 +107,8 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
     
     currentEvents: [], 
     seasons: [],
-    boughtItems: []
+    boughtItems: [],
+    idolatria: { [club.nombre]: 5 }
   };
 }
 
@@ -374,6 +388,13 @@ function simulateSeason(times = 1) {
 
   const stats = calcSeasonStats(player.position, performance, player.fitness, player.teamRating, player.teamCountry);
   
+  let seasonIdolatry = Math.min(5, (stats.val1 + stats.val2) / 80);
+  stats.wonTitles.forEach(t => {
+    if ((t.type === "worldcup" || t.type === "contcup") && player.teamCountry !== player.nationality) return;
+    seasonIdolatry += TITLE_IDOLATRY[t.type] || 0;
+  });
+  addIdolatry(player.team, Math.round(seasonIdolatry * idolatryTeamFactor(player.teamRating)));
+  
   
   let seasonGoals = 0;
   if (player.stat1Code === 'GOL') seasonGoals = stats.val1;
@@ -469,6 +490,7 @@ function acceptOffer(index) {
   player.teamRating = offer.club.rating;
   player.teamCountry = getTeamCountry(player.team);
   player.salary = offer.salary;
+  player.idolatria[offer.club.nombre] = Math.max(getIdolatry(offer.club.nombre), 5);
   currentOffers = [];
 }
 
@@ -476,6 +498,7 @@ function rejectOffer(index) {
   const offer = currentOffers[index];
   if (!offer) return;
   addHistoryToLastSeason("offer", "❌ Oferta rechazada", `Se rechazó la oferta de <strong>${offer.club.nombre}</strong>.`);
+  if (offer.salary > player.salary) addIdolatry(player.team, 5);
   currentOffers.splice(index, 1);
   return currentOffers;
 }

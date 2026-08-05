@@ -177,6 +177,73 @@ p { color: var(--text-secondary); line-height: 1.5; }
   margin: 0;
 }
 
+.idolatry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px;
+  font-size: 14px;
+  color: var(--text-color);
+}
+.idolatry-row > span:first-child {
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.idolatry-row > span:last-child {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.idolatry-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+.idolatry-bar > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+  transition: width 0.4s ease;
+  min-width: 0;
+}
+.vitrina-idolatria {
+  width: 100%;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vitrina-idolatria h3 {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 4px 0;
+}
+.vitrina-idolatry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-color);
+}
+.vitrina-idolatry-row > span:first-child {
+  width: 160px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vitrina-idolatry-row > span:last-child {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  font-weight: 700;
+}
+
 
 .theme-bar {
   display: flex;

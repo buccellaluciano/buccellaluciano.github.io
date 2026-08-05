@@ -239,6 +239,8 @@
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
     el("p-position").textContent = `${player.positionName} (${player.position})`;
     el("p-team").textContent = `${player.team}`;
+    el("p-idolatry").textContent = `${getIdolatry(player.team)}%`;
+    el("idolatry-fill").style.width = `${getIdolatry(player.team)}%`;
     el("p-age").textContent = `${player.age} años`;
     el("p-seasons").textContent = player.seasonsPlayed;
     
@@ -588,8 +590,15 @@
     }
 
     if (Object.keys(trophies).length === 0) {
-      shelf.innerHTML = `<p style="color: var(--text-muted); font-size: 14px; width: 100%; text-align: center; align-self: center; margin-bottom: 20px;">La vitrina está vacía.</p>`;
-      return;
+      const emptyMsg = document.createElement("p");
+      emptyMsg.style.color = "var(--text-muted)";
+      emptyMsg.style.fontSize = "14px";
+      emptyMsg.style.width = "100%";
+      emptyMsg.style.textAlign = "center";
+      emptyMsg.style.alignSelf = "center";
+      emptyMsg.style.marginBottom = "20px";
+      emptyMsg.textContent = "La vitrina está vacía.";
+      shelf.appendChild(emptyMsg);
     }
 
     for (const [name, count] of Object.entries(trophies)) {
@@ -602,6 +611,23 @@
         <div class="trophy-count">x${count}</div>
       `;
       shelf.appendChild(div);
+    }
+
+    const idolEntries = Object.entries(player.idolatria).filter(([, v]) => v > 0);
+    if (idolEntries.length) {
+      const idol = document.createElement("div");
+      idol.className = "vitrina-idolatria";
+      let rows = "";
+      for (const [team, val] of idolEntries) {
+        rows += `
+          <div class="vitrina-idolatry-row">
+            <span>🛡️ ${team}</span>
+            <div class="idolatry-bar"><div style="width:${val}%"></div></div>
+            <span>${val}%</span>
+          </div>`;
+      }
+      idol.innerHTML = `<h3>❤️ Clubes que te aman</h3>${rows}`;
+      shelf.appendChild(idol);
     }
   }
 
