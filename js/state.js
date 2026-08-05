@@ -62,6 +62,7 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
     dorsal,
     careerType: careerType,
     nationality: nationalityData.name,
+    region: nationalityData.region,
     flag: nationalityData.flag,
     position: posCode,
     positionName: posName,
@@ -184,7 +185,7 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
   convocado = (player.rating >= nacionClub.rating-10) ? true : false;
   player.convocado = convocado;
-  const torneo = (continentalTrophies.find(t => t.region === player.nacionalidad)|| {}).name;
+  const torneo = (continentalTrophies.find(t => t.region === player.region) || {}).name;
 
   if (leaguePos >= 1 && leaguePos <= 4) {
     qualification = regionTopTier;
