@@ -1,4 +1,4 @@
-<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +15,7 @@
     <button id="btn-contextual">🎨 Color Contextual: OFF</button>
   </div>
 
-  <!-- PANTALLA 1: CREACIÓN -->
+  
   <div id="screen-create" class="fade-in panel">
     <h1>⚽ Crear Futbolista</h1>
     <div class="create-layout">
@@ -57,13 +57,16 @@
     </div>
   </div>
 
-  <!-- PANTALLA 2: JUEGO -->
+  
   <div id="screen-game" class="hidden fade-in">
-    <!-- Columna Izquierda -->
+    
     <div class="left-col">
       <div id="panel-player" class="panel">
         <h2 id="p-name">-</h2>
-        <div id="rating-badge">--</div>
+        <div id="player-head">
+          <div id="p-team-badge"></div>
+          <div id="rating-badge">--</div>
+        </div>
         <div class="stat-row highlight"><span>👕 Dorsal</span><span id="p-dorsal">-</span></div>
         <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
         <div class="stat-row highlight"><span>💎 Valor de mercado</span><span id="p-value">-</span></div>
@@ -72,11 +75,11 @@
         <div id="convocado-tag" class="hidden pulse">🌍 CONVOCADO</div>
         <button id="btn-chest" class="chest-btn hidden" type="button">🎁 ¡Cofre misterioso!</button>
         
-        <!-- Atributos siempre visibles -->
+        
         <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
         <div class="stat-row"><span>🎂 Edad</span><span id="p-age">-</span></div>
         
-        <!-- Menú desplegable (Atributos secundarios) -->
+        
         <details class="shop-panel" style="margin-top: 8px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--input-bg);">
           <summary class="shop-summary" style="padding: 10px 14px;">
             <span class="shop-summary-title" style="font-size: 12px;">📋 Más detalles</span>
@@ -92,7 +95,7 @@
           </div>
         </details>
         
-        <!-- Stats Totales -->
+        
         <div class="stat-row highlight" style="margin-top: 8px;"><span>🏃‍♂️ Partidos (Total)</span><span id="p-matches">0</span></div>
         <div class="stat-row highlight"><span id="lbl-stat1">⚽ Stat 1 (Total)</span><span id="p-stat1">0</span></div>
         <div class="stat-row highlight"><span id="lbl-stat2">👟 Stat 2 (Total)</span><span id="p-stat2">0</span></div>
@@ -100,16 +103,16 @@
         <div class="stat-row" style="margin-top: 8px;"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
       </div>
 
-      <!-- Tienda de Potenciadores (abre ventana modal) -->
+      
       <div id="btn-open-shop" class="panel shop-summary" role="button" tabindex="0">
         <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
         <span class="chevron">⮕</span>
       </div>
     </div>
 
-    <!-- Columna Derecha -->
+    
     <div id="panel-main">
-      <!-- Oferta Integrada en UI (Oculta por defecto) -->
+      
       <div id="offer-panel" class="hidden panel highlight offer-banner">
         <h3 class="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
         <div id="offer-list"></div>
@@ -129,7 +132,7 @@
     </div>
   </div>
 
-  <!-- PANTALLA 3: RETIRO -->
+  
   <div id="screen-retire" class="hidden fade-in panel">
     <h1>👞 Fin de carrera</h1>
     <p id="retire-reason"></p>
@@ -144,7 +147,7 @@
         <button id="btn-close-vitrina">❌</button>
       </div>
       <div class="shelf-container" id="vitrina-shelf">
-        <!-- Los trofeos se inyectarán aquí -->
+        
       </div>
     </div>
   </div>

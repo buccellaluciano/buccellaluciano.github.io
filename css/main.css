@@ -1,10 +1,8 @@
-/* ============================================================
-   main.css — Estilo "Liquid Glass" (Apple) en tonos verdes
-   ============================================================ */
+
 
 :root {
-  /* Paleta verde base (tema oscuro por defecto) */
-  --primary-color: #34c759;      /* verde Apple */
+  
+  --primary-color: #34c759;      
   --primary-hover: #2aa648;
   --primary-ring: rgba(52, 199, 89, 0.30);
   --badge-color: #34c759;
@@ -13,11 +11,11 @@
   --danger-color: #ff453a;
   --warning-color: #ffb020;
 
-  /* Fondos: degradé oscuro verde, tipo vidrio sobre luz natural */
+  
   --bg-color: #06140c;
   --app-bg: linear-gradient(160deg, #04130a 0%, #071c10 45%, #0a2415 100%);
 
-  /* Superficies de vidrio */
+  
   --panel-bg: rgba(20, 40, 28, 0.45);
   --panel-border: rgba(255, 255, 255, 0.10);
   --input-bg: rgba(255, 255, 255, 0.06);
@@ -32,7 +30,7 @@
 
   --border-color: rgba(255, 255, 255, 0.08);
 
-  /* Manchas de luz de fondo (personalizables por el color contextual) */
+  
   --blob-1: radial-gradient(circle, #1f6b3c 0%, transparent 70%);
   --blob-2: radial-gradient(circle, #0e4023 0%, transparent 70%);
 
@@ -51,9 +49,7 @@
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* ============================================================
-   Base
-   ============================================================ */
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -75,7 +71,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Manchas de luz decorativas, tipo "wallpaper" de Apple */
+
 body::before,
 body::after {
   content: "";
@@ -137,9 +133,7 @@ p { color: var(--text-secondary); line-height: 1.5; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   Superficie de vidrio genérica
-   ============================================================ */
+
 .panel {
   position: relative;
   background: var(--panel-bg);
@@ -159,9 +153,31 @@ p { color: var(--text-secondary); line-height: 1.5; }
   font-weight: 600;
 }
 
-/* ============================================================
-   Barra superior de tema
-   ============================================================ */
+.team-badge {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  object-fit: contain;
+  vertical-align: -5px;
+  margin-right: 4px;
+  padding: 1px;
+  
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+#p-team-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.team-badge-lg {
+  width: 48px;
+  height: 48px;
+  vertical-align: middle;
+  margin: 0;
+}
+
+
 .theme-bar {
   display: flex;
   gap: 12px;
@@ -195,9 +211,7 @@ p { color: var(--text-secondary); line-height: 1.5; }
   outline-offset: 2px;
 }
 
-/* ============================================================
-   Botones generales
-   ============================================================ */
+
 button {
   font-family: inherit;
   cursor: pointer;
@@ -276,16 +290,13 @@ button {
   box-shadow: 0 10px 28px rgba(245, 158, 11, 0.45);
 }
 
-/* ============================================================
-   Pantalla de creación
-   ============================================================ */
+
 #screen-create h1 {
   text-align: center;
   margin-bottom: 24px;
 }
 
-/* En desktop amplía el panel de creación un 30% respecto al contenedor (1200px).
-   Solo se activa cuando hay ancho de sobra para evitar desbordes. */
+
 @media (min-width: 1200px) {
   #screen-create {
     width: 80%;
@@ -492,9 +503,7 @@ select {
   padding: 8px 0;
 }
 
-/* ============================================================
-   Pantalla de juego
-   ============================================================ */
+
 #screen-game {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -526,7 +535,7 @@ select {
 
 #rating-badge {
   width: fit-content;
-  margin: 0 auto 18px auto;
+  margin: 0;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
   color: #fff;
   font-size: 24px;
@@ -535,6 +544,13 @@ select {
   border-radius: 999px;
   box-shadow: 0 6px 20px var(--primary-ring), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   letter-spacing: -0.02em;
+}
+#player-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .stat-row {
@@ -630,7 +646,7 @@ select {
   transform: translateY(-3px);
 }
 
-/* Detalles desplegables */
+
 .shop-panel {
   overflow: hidden;
   margin-top: 10px;
@@ -685,7 +701,7 @@ select {
   font-weight: 800;
 }
 
-/* ---- columna derecha ---- */
+
 #panel-main {
   display: flex;
   flex-direction: column;
@@ -757,9 +773,7 @@ select {
   min-width: 150px;
 }
 
-/* ============================================================
-   Resumen de temporadas
-   ============================================================ */
+
 #simplified-summaries {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -801,7 +815,7 @@ select {
   transition: background 0.2s ease;
 }
 .simple-season-row:hover {
-  background: rgba(52, 199, 89, 0.08); /* glass sutil */
+  background: rgba(52, 199, 89, 0.08); 
 }
 
 .simple-season-info {
@@ -886,9 +900,7 @@ select {
   white-space: nowrap;
 }
 
-/* ============================================================
-   Modales tipo vidrio (vitrina, tienda, instrucciones, cofre)
-   ============================================================ */
+
 .vitrina-overlay {
   position: fixed;
   inset: 0;
@@ -1009,7 +1021,7 @@ select {
   color: var(--primary-hover);
 }
 
-/* Tienda (modal) */
+
 .shop-items-body {
   padding: 20px;
   overflow-y: auto;
@@ -1034,7 +1046,7 @@ select {
   box-shadow: var(--shadow-glass-sm);
 }
 
-/* Parche: como la estructura HTML de cada ítem es plana, forzamos columna para el texto */
+
 .shop-item-header,
 .shop-item-desc {
   flex: 1;
@@ -1075,7 +1087,7 @@ select {
   box-shadow: none;
 }
 
-/* Instrucciones */
+
 .instructions-panel .vitrina-header,
 .instructions-body {
   scrollbar-width: thin;
@@ -1109,7 +1121,7 @@ select {
   color: var(--text-color);
 }
 
-/* Cofre */
+
 .chest-modal-body {
   padding: 20px 24px 24px 24px;
 }
@@ -1121,9 +1133,7 @@ select {
   margin-bottom: 10px;
 }
 
-/* ============================================================
-   Pantalla de retiro
-   ============================================================ */
+
 #screen-retire {
   max-width: 640px;
   margin: 50px auto;
@@ -1137,9 +1147,7 @@ select {
   gap: 10px;
 }
 
-/* ============================================================
-   Scrollbars estilo glass
-   ============================================================ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -1155,9 +1163,7 @@ select {
   background: var(--primary-color);
 }
 
-/* ============================================================
-   Responsive fino
-   ============================================================ */
+
 @media (max-width: 520px) {
   #app { padding: 12px; }
   .panel { padding: 16px; border-radius: var(--radius-md); }
@@ -1166,7 +1172,7 @@ select {
   #action-bar button { min-width: 0; }
 }
 
-/* Mejora extra: foco accesible para botones */
+
 button:focus-visible,
 .shop-btn:focus-visible {
   outline: 2px solid var(--primary-color);

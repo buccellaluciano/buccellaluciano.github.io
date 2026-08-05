@@ -1,4 +1,4 @@
-// js/state.js
+
 let player = null;
 let currentOffers = [];
 
@@ -173,14 +173,14 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   leaguePos = clamp(leaguePos, 1, 20);
   const leagueMatches = 38; 
   let titles = 0;
-  let wonTitles = []; // Ahora cada elemento es { name: string, type: string }
+  let wonTitles = []; 
   let intlMatches = 0;
   let playWorldCup = false;
   let wonWorldCup = false;
   let wonContCup = false;
   let wcMatches = 0;
   let contCupmatches = 0;
-  let torneoType = 0; // 0: Ninguno, 1: Mundial, 2: Copa Continental
+  let torneoType = 0; 
   let wonCup = Math.random() < titleChance(teamRating, player.rating, 0.05, 1.16);
   const cupMatches = wonCup ? 6 : randInt(1, 5); 
   convocado = (player.rating >= nacionClub.rating-10) ? true : false;
@@ -198,9 +198,9 @@ function calcSeasonStats(posCode, performance, fitness, teamRating, teamCountry)
   }
 
   if (player.seasonsPlayed > 1 && player.seasonsPlayed % 4 === 0) {
-    torneoType = 1; // Mundial
+    torneoType = 1; 
   }else if (player.seasonsPlayed > 1 && (player.seasonsPlayed - 1) % 4 === 0) {
-    torneoType = 2; // Copa Continental
+    torneoType = 2; 
   }
 
   switch (torneoType) {
@@ -374,7 +374,7 @@ function simulateSeason(times = 1) {
 
   const stats = calcSeasonStats(player.position, performance, player.fitness, player.teamRating, player.teamCountry);
   
-  // --- Premios Individuales ---
+  
   let seasonGoals = 0;
   if (player.stat1Code === 'GOL') seasonGoals = stats.val1;
   else if (player.stat2Code === 'GOL') seasonGoals = stats.val2;
@@ -395,7 +395,7 @@ function simulateSeason(times = 1) {
       addHistory("season", "🌕 Balón de Oro", `¡Histórico! ${player.name} fue galardonado con el Balón de Oro como el mejor jugador del mundo.`);
     }
   }
-  // ----------------------------
+  
 
   player.totalMatches += stats.matches;
   player.totalStat1 += stats.val1;

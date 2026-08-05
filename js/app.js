@@ -1,7 +1,58 @@
-// js/app.js
+
 (function () {
   const el = id => document.getElementById(id);
   let selectedPosition = null;
+
+  const badgePending = new Set();
+  const badgeFailed = new Set();
+
+  function getCachedBadge(teamName) {
+    try { return localStorage.getItem("badge:" + teamName) || ""; } catch (e) { return ""; }
+  }
+
+  function setCachedBadge(teamName, url) {
+    try { localStorage.setItem("badge:" + teamName, url); } catch (e) {}
+  }
+
+  function fetchTeamBadge(teamName) {
+    if (badgePending.has(teamName) || badgeFailed.has(teamName) || getCachedBadge(teamName)) return;
+    const team = ALL_TEAMS.find(t => t.nombre === teamName);
+    const query = (team && (team.apiname || team.nombre)) || teamName;
+    badgePending.add(teamName);
+    fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then(data => {
+        const list = data && data.teams;
+        if (!list || !list.length) return;
+        const exact = list.find(t => (t.strTeam || "").toLowerCase() === query.toLowerCase());
+        const badge = (exact || list[0]).strBadge;
+        if (badge) {
+          setCachedBadge(teamName, badge);
+          updateBadges(teamName);
+        }
+      })
+      .catch(() => badgeFailed.add(teamName))
+      .finally(() => badgePending.delete(teamName));
+  }
+
+  function updateBadges(teamName) {
+    const url = getCachedBadge(teamName);
+    if (!url) return;
+    document.querySelectorAll(".team-badge").forEach(img => {
+      if (img.dataset.badgeTeam === teamName) {
+        if (img.getAttribute("src") !== url) {
+          img.setAttribute("src", url);
+          img.style.display = "";
+        }
+      }
+    });
+  }
+
+  function badgeHTML(teamName, extraClass = "") {
+    const safe = teamName.replace(/"/g, "&quot;");
+    const cls = extraClass ? `team-badge ${extraClass}` : "team-badge";
+    return `<img class="${cls}" data-badge-team="${safe}" src="${getCachedBadge(teamName)}" alt="" onerror="this.style.display='none'">`;
+  }
 
   let contextualOn = localStorage.getItem("contextual") === "on";
 
@@ -179,13 +230,15 @@
       arrowHTML = '<span style="color: #f43f5e; font-size: 22px; text-shadow: 0 0 10px rgba(244,63,94,0.5);">▼</span>';
     }
     el("rating-badge").innerHTML = `${player.rating} ${arrowHTML}`;
+    el("p-team-badge").innerHTML = badgeHTML(player.team, "team-badge-lg");
+    fetchTeamBadge(player.team);
     el("p-dorsal").textContent = player.dorsal != null ? `#${player.dorsal}` : "-";
 
     el("p-earnings").textContent = fmtMoney(player.balance);
     el("p-value").textContent = fmtMoney(calcMarketValue(player.rating, player.age));
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
     el("p-position").textContent = `${player.positionName} (${player.position})`;
-    el("p-team").textContent = `🛡️ ${player.team}`;
+    el("p-team").textContent = `${player.team}`;
     el("p-age").textContent = `${player.age} años`;
     el("p-seasons").textContent = player.seasonsPlayed;
     
@@ -233,6 +286,7 @@
     };
 
     for (const d of newSeasons) {
+      fetchTeamBadge(d.team);
       const wrapper = document.createElement("div");
       wrapper.className = "season-wrapper";
       
@@ -248,7 +302,7 @@
       const contentHTML = `
         <div class="simple-season-info">
           <span>T${d.season} · Edad ${d.age}</span>
-          <span class="simple-season-team">🛡️ ${d.team}</span>
+          <span class="simple-season-team">${badgeHTML(d.team)} 🛡️ ${d.team}</span>
           <span style="font-size: 11px; color: var(--text-muted);">Pos en Liga: ${d.leaguePos}° | ${d.qualification}</span>
         </div>
         <div class="simple-season-stats">
@@ -364,12 +418,13 @@
     const list = el("offer-list");
     list.innerHTML = "";
     currentOffers.forEach((offer, i) => {
+      fetchTeamBadge(offer.club.nombre);
       const row = document.createElement("div");
       row.className = "offer-item";
       const budgetTxt = fmtMoney(offer.budget != null ? offer.budget : offer.salary);
       row.innerHTML = `
         <div class="offer-item-body">
-          <div class="offer-item-club">🛡️ ${offer.club.nombre}</div>
+          <div class="offer-item-club">${badgeHTML(offer.club.nombre)} 🛡️ ${offer.club.nombre}</div>
           <div class="offer-item-salary">💰 <strong>${fmtMoney(offer.salary)}</strong> / temporada</div>
           <div class="offer-power">Presupuesto del club: ${budgetTxt}</div>
         </div>
@@ -467,7 +522,7 @@
     renderShop();
   });
 
-// --- LÓGICA DE LA VITRINA ---
+
   function trophyIconHTML(name, type) {
     switch (type) {
       case "league": {
@@ -550,7 +605,7 @@
     }
   }
 
-  // --- EVENTOS DE LA VITRINA ---
+  
   el("btn-vitrina").addEventListener("click", () => {
     renderVitrina();
     el("modal-vitrina").classList.remove("hidden");
@@ -560,7 +615,7 @@
     el("modal-vitrina").classList.add("hidden");
   });
 
-  // --- EVENTOS DE LA TIENDA (ventana modal) ---
+  
   el("btn-open-shop").addEventListener("click", () => {
     renderShop();
     el("modal-shop").classList.remove("hidden");
@@ -570,7 +625,7 @@
     el("modal-shop").classList.add("hidden");
   });
 
-  // --- EVENTOS DE INSTRUCCIONES (ventana modal) ---
+  
   el("btn-instructions").addEventListener("click", () => {
     el("modal-instructions").classList.remove("hidden");
   });

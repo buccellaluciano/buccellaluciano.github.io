@@ -248,7 +248,7 @@ bealegend/
 ## 🗄️ Datos de configuración (`js/data.js`)
 
 - **`NATIONALITIES`**: nacionalidades jugables con bandera, liga, región y rating de selección.
-- **`TEAMS_BY_COUNTRY`**: clubes por país (381 clubes) con `rating`, `color` y `budget`.
+- **`TEAMS_BY_COUNTRY`**: clubes por país (381 clubes) con `rating`, `color`, `budget` y opcionalmente `apiname`.
 - **`ALL_TEAMS`**: lista plana de todos los clubes.
 - **`FORMATION_433`**: layout de la alineación 4-3-3 usada en la pantalla de creación.
 - **`PREFERRED`**: estadísticas primaria/secundaria por posición.
@@ -259,6 +259,15 @@ bealegend/
 ### Escala de ratings de clubes
 
 Los clubes tienen ratings entre **65 y 99** (ej. Riestra 65, Boca 93, River 95, Flamengo/Real Madrid/Man City/Inter 99). Esto determina posiciones en liga, probabilidades de copa y atractivo de las ofertas.
+
+### 🛡️ Escudos de clubes (híbrido con API)
+
+Los escudos se cargan de forma dinámica desde **TheSportsDB** (gratis, sin API key, CORS habilitado) con cache en `localStorage` y fallback a un placeholder si no hay conexión o no se encuentra el club:
+
+- Cada equipo puede tener un atributo **`apiname`** con el nombre exacto que usa la API (ej. si el nombre local no coincide con el de la db). Si falta, se usa el `nombre` normal.
+- Solo se consultan los clubes que se muestran (tu equipo + las 3 ofertas + los de tu historial), y solo la primera vez; después se lee del cache.
+- Si falla la red o no hay coincidencia, el escudo simplemente no se muestra (la interfaz sigue de pie gracias al fallback).
+- Para depurar o forzar recarga de un escudo, borrá la clave `badge:<nombre>` del `localStorage`.
 
 ---
 

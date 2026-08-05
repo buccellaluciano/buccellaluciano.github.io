@@ -21,7 +21,7 @@ const NATIONALITIES = [
   { name: "Irán", flag: "🇮🇷", liga: "Persian Gulf Pro League", region: "AFC", rating: 68, icon: "<img src='assets/trophies/PersianGulfProLeague.png' class='trophy-img'>" },
   { name: "Dinamarca", flag: "🇩🇰", liga: "Superliga", region: "UEFA", rating: 75, icon: "<img src='assets/trophies/Superliga_DK.png' class='trophy-img'>" }
 ];
-// js/data.js
+
 
 const TEAMS_BY_COUNTRY = {
   "Argentina": [
@@ -449,7 +449,7 @@ const TEAMS_BY_COUNTRY = {
   ]
 };
 
-// Generamos ALL_TEAMS dinámicamente agregando el país a cada club
+
 const ALL_TEAMS = Object.entries(TEAMS_BY_COUNTRY).flatMap(([pais, equipos]) =>
   equipos.map(e => ({ ...e, pais }))
 );
