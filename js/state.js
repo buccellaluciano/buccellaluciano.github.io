@@ -7,13 +7,23 @@ function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function fmtMoney(v) { return "$" + v.toLocaleString("es-AR"); }
 function calcSalary(rating, age) {
-  const MIN_SALARY = 120000;
+  const MIN_SALARY = 15000;
   const MAX_SALARY = 40000000;
 
   const ratingFactor = clamp((rating - 50) / 49, 0, 1);
-  const ratingGrowth = Math.pow(2, 7.8 * ratingFactor) - 1;
+  const ratingGrowth = Math.pow(2, 10.8 * ratingFactor) - 1;
   const base = MIN_SALARY * (1 + ratingGrowth * youthFactorFor(age));
   return Math.round(clamp(base, MIN_SALARY, MAX_SALARY));
+}
+
+function calcMarketValue(rating, age) {
+  const MIN_VALUE = 100000;
+  const MAX_VALUE = 220000000;
+
+  const ratingFactor = clamp((rating - 50) / 49, 0, 1);
+  const ratingGrowth = Math.pow(2, 13.84 * ratingFactor) - 1;
+  const value = MIN_VALUE * (1 + ratingGrowth * youthFactorFor(age));
+  return Math.round(clamp(value, MIN_VALUE, MAX_VALUE));
 }
 
 function youthFactorFor(age) {
@@ -30,9 +40,15 @@ function getTeamCountry(teamName) {
   return team ? team.pais : "España"; 
 }
 
-function getRegionPower(teamName) {
-  const country = getTeamCountry(teamName);
-  return REGION_PURCHASING_POWER[country] ?? 1;
+function getTeamBudget(teamName) {
+  const team = ALL_TEAMS.find(t => t.nombre === teamName);
+  return team ? (team.budget ?? null) : null;
+}
+
+function calcEffectiveSalary(rating, age, teamName) {
+  const worth = calcSalary(rating, age);
+  const budget = getTeamBudget(teamName);
+  return Math.round(budget == null ? worth : Math.min(worth, budget));
 }
 
 function createPlayer(name, nationalityData, posCode, posName, careerType = "normal") {
@@ -54,7 +70,7 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
     teamRating: club.rating,
     teamCountry: nationalityData.name,
     seasonsPlayed: 0,
-    salary: Math.round(calcSalary(startRating, 15) * getRegionPower(club.nombre)),
+    salary: calcEffectiveSalary(startRating, 15, club.nombre),
     balance: 0, 
     totalMatches: 0,
     year: 2026,
@@ -394,7 +410,7 @@ function simulateSeason(times = 1) {
   });
 
   player.balance += player.salary;
-  player.salary = Math.round(calcSalary(player.rating, player.age) * getRegionPower(player.team));
+  player.salary = calcEffectiveSalary(player.rating, player.age, player.team);
   checkRetirement();
 
   lastInjury = injuryHappened;
@@ -410,32 +426,25 @@ function cofre(pending) {
   }
 }
 
-function generateOffer(performance = 50) {
-  let maxRating = player.rating + 2;
-  let minRating = player.rating - 10;
-
-  if (player.rating < 81) {
-    maxRating = player.rating; 
-  } else if (performance >= 82) {
-    maxRating += 4; 
+function generateOffer() {
+  const worth = calcSalary(player.rating, player.age);
+  console.log(worth)
+  let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && (t.budget ?? worth) >= worth && player.rating >= t.rating - 15);
+  if (candidates.length === 0) {
+    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
   }
-
-  let candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating >= minRating && t.rating <= maxRating);
-  if (player.rating < 65){
-    candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= 70);
-  }
-  
-  // if (Math.random() < 0.15 || candidates.length === 0) {
-  //   candidates = ALL_TEAMS.filter(t => t.nombre !== player.team && t.rating <= maxRating + 2);
-  // }
-  
-  // if (candidates.length === 0) candidates = ALL_TEAMS.filter(t => t.nombre !== player.team);
 
   const club = pickRandom(candidates);
-  const regionPower = getRegionPower(club.nombre);
-  const baseSalary = calcSalary(clamp(player.rating, club.rating - 10, club.rating + 10), player.age);
-  const bonus = 1 + (club.rating - player.teamRating) * 0.01 + Math.random() * 0.15;
-  currentOffer = { club, salary: Math.round(baseSalary * Math.max(0.2, bonus) * regionPower / 2) };
+  const budget = getTeamBudget(club.nombre);
+  const myBudget = getTeamBudget(player.team);
+
+  const relDiff = budget != null && myBudget != null && myBudget > 0
+    ? (budget - myBudget) / myBudget
+    : 0;
+  let salary = Math.round(worth * (1 + relDiff * 0.5));
+  if (budget != null) salary = Math.min(salary, budget);
+
+  currentOffer = { club, salary, budget };
   return currentOffer;
 }
 

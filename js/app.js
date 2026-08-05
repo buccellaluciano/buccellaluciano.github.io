@@ -181,6 +181,7 @@
     el("rating-badge").innerHTML = `${player.rating} ${arrowHTML}`;
 
     el("p-earnings").textContent = fmtMoney(player.balance);
+    el("p-value").textContent = fmtMoney(calcMarketValue(player.rating, player.age));
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
     el("p-position").textContent = `${player.positionName} (${player.position})`;
     el("p-team").textContent = `🛡️ ${player.team}`;
@@ -349,12 +350,7 @@
       el("offer-team").textContent = offer.club.nombre;
       el("offer-salary").textContent = fmtMoney(offer.salary);
 
-      const power = getRegionPower(offer.club.nombre);
-      let powerLabel = "Bajo";
-      if (power >= 1.8) powerLabel = "Muy Alto";
-      else if (power >= 1.2) powerLabel = "Alto";
-      else if (power >= 0.8) powerLabel = "Medio";
-      el("offer-power").innerHTML = `💪 Poder adquisitivo del club: <strong>${powerLabel}</strong> (x${power.toFixed(2)})`;
+      el("offer-power").innerHTML = `💰 Presupuesto del club: <strong>${fmtMoney(offer.budget != null ? offer.budget : offer.salary)}</strong>`;
       
       el("action-bar").classList.add("hidden");
       el("offer-panel").classList.remove("hidden");
