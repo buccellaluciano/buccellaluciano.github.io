@@ -44,6 +44,7 @@
           img.setAttribute("src", url);
           img.style.display = "";
         }
+        img.classList.add("loaded");
       }
     });
   }
@@ -51,7 +52,9 @@
   function badgeHTML(teamName, extraClass = "") {
     const safe = teamName.replace(/"/g, "&quot;");
     const cls = extraClass ? `team-badge ${extraClass}` : "team-badge";
-    return `<img class="${cls}" data-badge-team="${safe}" src="${getCachedBadge(teamName)}" alt="" onerror="this.style.display='none'">`;
+    const cached = getCachedBadge(teamName);
+    const loaded = cached ? " loaded" : "";
+    return `<img class="${cls}${loaded}" data-badge-team="${safe}" src="${cached}" alt="" onerror="this.style.display='none'" onload="this.classList.add('loaded')">`;
   }
 
   let contextualOn = localStorage.getItem("contextual") === "on";
@@ -119,6 +122,17 @@
     root.setProperty('--input-bg', hexToRgba(mixBlack(color, 0.82), 0.35));
     root.setProperty('--blob-1', `radial-gradient(circle, ${shadeHex(color, 0.35)} 0%, transparent 70%)`);
     root.setProperty('--blob-2', `radial-gradient(circle, ${hexToRgba(color, 0.55)} 0%, transparent 70%)`);
+  }
+
+  function flashTeamColor(teamName) {
+    const team = ALL_TEAMS.find(t => t.nombre === teamName);
+    if (!team || !team.color) return;
+    const fade = el("team-fade");
+    const color = ensureReadable(team.color);
+    fade.style.background = `linear-gradient(160deg, ${color}, ${mixBlack(color, 0.7)})`;
+    fade.classList.remove("active");
+    void fade.offsetWidth;
+    fade.classList.add("active");
   }
 
   const STAT_LABELS = {
@@ -445,11 +459,13 @@
   }
 
   function handleAccept(index) {
+    const prevTeam = player.team;
     acceptOffer(index);
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     renderPlayer();
     renderLastSeasonEvents();
+    if (player.team !== prevTeam) flashTeamColor(player.team);
     el("btn-advance").disabled = false;
     el("btn-advance-2").disabled = false;
   }
@@ -522,6 +538,7 @@
     renderSummaries();
     renderPlayer();
     renderShop();
+    flashTeamColor(player.team);
   });
 
 

@@ -154,8 +154,8 @@ p { color: var(--text-secondary); line-height: 1.5; }
 }
 
 .team-badge {
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: contain;
   vertical-align: -5px;
@@ -163,6 +163,11 @@ p { color: var(--text-secondary); line-height: 1.5; }
   padding: 1px;
   
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.team-badge.loaded {
+  opacity: 1;
 }
 #p-team-badge {
   display: flex;
@@ -250,6 +255,22 @@ p { color: var(--text-secondary); line-height: 1.5; }
   gap: 12px;
   justify-content: flex-end;
   flex-wrap: wrap;
+}
+
+#team-fade {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+}
+#team-fade.active {
+  animation: teamFadeIn 0.9s ease-out forwards;
+}
+@keyframes teamFadeIn {
+  0% { opacity: 0; }
+  30% { opacity: 0.28; }
+  100% { opacity: 0; }
 }
 
 .theme-bar button {
