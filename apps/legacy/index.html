@@ -34,6 +34,13 @@
           <select id="input-nationality"></select>
         </div>
         <div class="field">
+          <label for="input-foot">Pierna hábil</label>
+          <select id="input-foot">
+            <option value="derecha">Derecha</option>
+            <option value="izquierda">Izquierda</option>
+          </select>
+        </div>
+        <div class="field">
           <label>Tipo de carrera</label>
           <div class="career-type-selector">
             <label class="career-type-option">
@@ -94,6 +101,7 @@
           <div style="padding: 0 14px 10px 14px; display: flex; flex-direction: column;">
             <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
             <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
+            <div class="stat-row"><span>🦵 Pierna hábil</span><span id="p-foot">-</span></div>
             <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
             <div class="stat-row"><span>💵 Salario</span><span id="p-salary">-</span></div>
             <div class="stat-row hidden" id="row-balon"><span>🌕 Balones de Oro</span><span id="p-balon">0</span></div>
@@ -120,7 +128,7 @@
     <div id="panel-main">
       
       <div id="offer-panel" class="hidden panel highlight offer-banner">
-        <h3 class="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
+        <h3 class="offer-title" id="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
         <div id="offer-list"></div>
       </div>
 
@@ -184,6 +192,7 @@
           <h3>👤 Creación del jugador</h3>
           <ul>
             <li>Elegí tu <strong>nombre</strong> (o dejalo al azar).</li>
+            <li>Elegí tu <strong>pierna hábil</strong>: zurdo o derecho (dato informativo).</li>
             <li>Elegí tu <strong>nacionalidad</strong>: define tu país, la liga de debut, tu región y el nivel de tu selección nacional.</li>
             <li>Elegí tu <strong>posición</strong> tocando un punto en la cancha. Cada posición tiene dos estadísticas principales distintas (goles, atajadas, recuperaciones, etc.).</li>
             <li>Al crear, debutás automáticamente en un club aleatorio de tu país.</li>
@@ -210,6 +219,7 @@
         <section>
           <h3>🤝 Ofertas de fichaje</h3>
           <p>Al avanzar, puede aparecer un lote de <strong>3 ofertas</strong> de otros clubes. Cada una podés <strong>Aceptar</strong> (cambiás de club y salario) o <strong>Rechazar</strong>. El salario depende del <strong>presupuesto</strong> de cada club frente al tuyo: un club con más presupuesto te ofrece más, y uno con menos, menos.</p>
+          <p>Cuando fichás por un club, ese momento fija tu <strong>valor de referencia</strong> (tu media al llegar). Si al terminar una temporada tu media quedó más de un <strong>5% por debajo</strong> de ese valor, quedás <strong>obligado a fichar</strong>: se generan <strong>5 ofertas obligatorias</strong> y si rechazás todas, tu jugador se retira.</p>
         </section>
 
         <section>
@@ -244,7 +254,7 @@
 
         <section>
           <h3>🚪 Retiro</h3>
-          <p>Tu carrera termina si tenés 40 años o más, si con 35+ años tu media baja de 55, o si tu media baja de 28. También podés retirarte cuando quieras con <strong>🚪 Retirarse</strong>. Al final se muestra el resumen completo de tu carrera.</p>
+          <p>Tu carrera termina si tenés 40 años o más, si con 35+ años tu media baja de 55, o si tu media baja de 28. También podés retirarte cuando quieras con <strong>🚪 Retirarse</strong>, o quedando <strong>obligado a fichar</strong> al no aceptar ninguna de las ofertas obligatorias. Al final se muestra el resumen completo de tu carrera.</p>
         </section>
 
         <section>

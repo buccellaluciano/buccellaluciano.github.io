@@ -21,7 +21,7 @@ function calcMarketValue(rating, age) {
   const MAX_VALUE = 220000000;
 
   const ratingFactor = clamp((rating - 50) / 49, 0, 1);
-  const ratingGrowth = Math.pow(2, 13.84 * ratingFactor) - 1;
+  const ratingGrowth = Math.pow(2, 11.46 * ratingFactor) - 1;
   const value = MIN_VALUE * (1 + ratingGrowth * youthFactorFor(age));
   return Math.round(clamp(value, MIN_VALUE, MAX_VALUE));
 }
@@ -64,7 +64,7 @@ function calcEffectiveSalary(rating, age, teamName) {
   return Math.round(budget == null ? worth : Math.min(worth, budget));
 }
 
-function createPlayer(name, nationalityData, posCode, posName, careerType = "normal", dorsal = null) {
+function createPlayer(name, nationalityData, posCode, posName, careerType = "normal", dorsal = null, foot = "derecha") {
   const club = pickDebutTeam(nationalityData.name);
   const startRating = 50; 
   
@@ -74,6 +74,7 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
     name,
     dorsal,
     careerType: careerType,
+    foot: foot,
     nationality: nationalityData.name,
     region: nationalityData.region,
     flag: nationalityData.flag,
@@ -81,6 +82,7 @@ function createPlayer(name, nationalityData, posCode, posName, careerType = "nor
     positionName: posName,
     age: 15,
     rating: startRating,
+    teamRatingRef: startRating,
     team: club.nombre,
     teamRating: club.rating,
     teamCountry: nationalityData.name,
@@ -315,6 +317,10 @@ function checkRetirement() {
   }
 }
 
+function checkForcedTransfer() {
+  return player.rating < player.teamRatingRef * 0.95;
+}
+
 function simulateSeason(times = 1) {
   player.year +=1;
   let lastInjury = false;
@@ -490,6 +496,7 @@ function acceptOffer(index) {
   player.teamRating = offer.club.rating;
   player.teamCountry = getTeamCountry(player.team);
   player.salary = offer.salary;
+  player.teamRatingRef = player.rating;
   player.idolatria[offer.club.nombre] = Math.max(getIdolatry(offer.club.nombre), 5);
   currentOffers = [];
 }

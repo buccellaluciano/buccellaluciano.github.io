@@ -801,6 +801,13 @@ select {
   border: 1px solid var(--offer-border);
   background: var(--offer-bg);
 }
+.offer-banner.offer-forced {
+  border-color: #e95420;
+  background: rgba(233, 84, 32, 0.12);
+}
+.offer-banner.offer-forced .offer-title {
+  color: #e95420;
+}
 .offer-title {
   color: var(--offer-text);
 }

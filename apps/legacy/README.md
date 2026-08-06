@@ -45,6 +45,13 @@ Al avanzar una temporada hay un 75% de probabilidad de recibir un lote de **3 of
 - **Rechazar**: descartás esa oferta y siguen disponibles las demás; si rechazás todas, seguís en tu club.
 - El salario se calcula según el presupuesto del club oferente frente al tuyo: clubes con más presupuesto ofrecen más, y viceversa.
 
+#### Fichaje obligatorio
+Cuando fichás por un club, queda fijado tu **valor de referencia** (la media con la que llegaste a ese equipo). Al terminar una temporada, si tu media cayó más de un **5%** por debajo de ese valor, quedás **obligado a fichar**:
+
+- Se genera un lote de **5 ofertas obligatorias** (sin reemplazarlas por el azar del 75%).
+- Podés **Aceptar** una (fichás y el valor de referencia se resetea a tu media actual) o **Rechazar** las que quieras.
+- Si rechazás **las 5**, tu jugador se **retira**.
+
 ### 4. Tienda 🛒
 Se abre como modal. Con el balance acumulado por salarios puedes comprar:
 
@@ -65,6 +72,7 @@ Un jugador se retira si:
 - Tiene **40 años o más**, o
 - Tiene **35+ años y media menor a 55**, o
 - Su media baja de **28**.
+- Queda **obligado a fichar** y rechaza todas las ofertas obligatorias.
 
 Al retirarse se muestra el resumen final de su carrera.
 
@@ -204,11 +212,12 @@ Cada club de `TEAMS_BY_COUNTRY` tiene un atributo **`budget`** individual (entre
 
 ### 💎 Valor de mercado (`calcMarketValue`)
 
-Usa la misma lógica exponencial que el salario, pero con rango **$10.000–$220.000.000** (exponente 13.84). Es **informativo**: se muestra en el panel del jugador como referencia y no afecta ofertas ni salarios.
+Usa la misma lógica exponencial que el salario, pero con rango **$10.000–$220.000.000** (exponente 11.46). Es **informativo**: se muestra en el panel del jugador como referencia y no afecta ofertas ni salarios. Con este exponente, el valor máximo se alcanza recién a partir de **rating 95** (en edad de plenitud); un veterano necesita media más alta para tocar el tope.
 
 ### 🤝 Ofertas de fichaje (`generateOffer` / `generateOffers`)
 
 - Un 75% de probabilidad al avanzar temporada (si no hubo lesión), se generan **3 ofertas distintas** a la vez.
+- Si la media cayó más de un **5%** respecto del `teamRatingRef` (la media al llegar al club), se generan **5 ofertas obligatorias** y rechazarlas todas retira al jugador (`checkForcedTransfer`).
 - Candidatos: clubes cuyo `budget` cubre el salario del jugador (`budget >= calcSalary(rating, edad)`) y de nivel cercano (`player.rating >= club.rating − 15`). Si no hay candidatos, se cae a cualquier club (menos el actual).
 - El salario de la oferta se calcula por la diferencia de **presupuesto** entre el club oferente y el del jugador: `worth × (1 + (budgetOferente − budgetActual) / budgetActual × 0.5)`, topeado al presupuesto del oferente.
 - Podés **aceptar** una oferta (fichás por ese club) o **rechazar** las que quieras; si rechazás todas, seguís en tu club.
@@ -272,7 +281,7 @@ Los escudos se cargan de forma dinámica desde **TheSportsDB** (gratis, sin API 
 ## 🧩 Cómo modificar el balance
 
 - **Salarios**: ajusta `MIN_SALARY`, `MAX_SALARY`, `youthFactorFor` o el exponente `10.8` en `calcSalary`.
-- **Valor de mercado**: ajusta `MIN_VALUE`, `MAX_VALUE` o el exponente `13.84` en `calcMarketValue`.
+- **Valor de mercado**: ajusta `MIN_VALUE`, `MAX_VALUE` o el exponente `11.46` en `calcMarketValue`.
 - **Títulos**: cambia las bases/crecimiento de `titleChance` en `calcSeasonStats`, o el umbral 75 en `titleChance`.
 - **Progresión**: ajusta `ageFactorFor`, la probabilidad de explosión o los dados en `simulateSeason`.
 - **Lesiones**: cambia el `0.09` de probabilidad o las penalizaciones.

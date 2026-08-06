@@ -2,6 +2,7 @@
 (function () {
   const el = id => document.getElementById(id);
   let selectedPosition = null;
+  let forcedOffers = false;
 
   const badgePending = new Set();
   const badgeFailed = new Set();
@@ -252,6 +253,7 @@
     el("p-value").textContent = fmtMoney(calcMarketValue(player.rating, player.age));
     el("p-nationality").textContent = `${player.flag} ${player.nationality}`;
     el("p-position").textContent = `${player.positionName} (${player.position})`;
+    el("p-foot").textContent = player.foot === "izquierda" ? "Izquierda" : "Derecha";
     el("p-team").textContent = `${player.team}`;
     el("p-idolatry").textContent = `${getIdolatry(player.team)}%`;
     el("idolatry-fill").style.width = `${getIdolatry(player.team)}%`;
@@ -419,12 +421,22 @@
     renderPlayer();
     renderShop(); 
 
-    if (!injuryHappened && Math.random() < 0.75) {
+    if (checkForcedTransfer()) {
+      forcedOffers = true;
+      addHistoryToLastSeason("transfer", "⚠️ Obligado a fichar", `Su media cayó más de un 5% por debajo del valor con el que llegó al club. Está <strong>obligado a fichar</strong> por otro equipo.`);
+      renderLastSeasonEvents();
+      generateOffers(5);
+      renderOffers();
+      el("action-bar").classList.add("hidden");
+      el("offer-panel").classList.remove("hidden");
+    } else if (!injuryHappened && Math.random() < 0.75) {
+      forcedOffers = false;
       generateOffers(3);
       renderOffers();
       el("action-bar").classList.add("hidden");
       el("offer-panel").classList.remove("hidden");
     } else {
+      forcedOffers = false;
       el("btn-advance").disabled = false;
       el("btn-advance-2").disabled = false;
     }
@@ -433,6 +445,13 @@
   function renderOffers() {
     const list = el("offer-list");
     list.innerHTML = "";
+    const title = el("offer-title");
+    if (title) {
+      title.textContent = forcedOffers
+        ? "⚠️ Ofertas Obligatorias de Fichaje"
+        : "🤝 Nuevas Ofertas de Fichaje";
+    }
+    el("offer-panel").classList.toggle("offer-forced", forcedOffers);
     currentOffers.forEach((offer, i) => {
       fetchTeamBadge(offer.club.nombre);
       const row = document.createElement("div");
@@ -461,6 +480,7 @@
   function handleAccept(index) {
     const prevTeam = player.team;
     acceptOffer(index);
+    forcedOffers = false;
     el("offer-panel").classList.add("hidden");
     el("action-bar").classList.remove("hidden");
     renderPlayer();
@@ -478,6 +498,12 @@
     } else {
       el("offer-panel").classList.add("hidden");
       el("action-bar").classList.remove("hidden");
+      if (forcedOffers) {
+        forcedOffers = false;
+        renderPlayer();
+        showRetireScreen("Al rechazar todas las ofertas obligatorias, el jugador decidió retirarse");
+        return;
+      }
       el("btn-advance").disabled = false;
       el("btn-advance-2").disabled = false;
     }
@@ -529,7 +555,7 @@
     let dorsal = parseInt(dorsalRaw, 10);
     if (!(dorsal >= 1 && dorsal <= 99)) dorsal = Math.floor(Math.random() * 99) + 1;
     
-    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre, careerType, dorsal);
+    player = createPlayer(name, nationalityData, selectedPosition.code, selectedPosition.nombre, careerType, dorsal, el("input-foot").value);
 
     el("screen-create").classList.add("hidden");
     el("screen-game").classList.remove("hidden");
