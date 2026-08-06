@@ -218,7 +218,7 @@
       div.className = "shop-item";
       
       const canAfford = player.balance >= item.price;
-      const isMaxFitness = (item.id === 'rest' && player.fitness >= 100);
+      const isMaxFitness = (item.repeatable === true && player.fitness >= 100);
       const isBought = player.boughtItems.includes(item.id);
       const isDisabled = (!canAfford || isMaxFitness || isBought);
       
