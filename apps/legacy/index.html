@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy</title>
+<link rel="icon" type="image/png" href="assets/icon/4457184.png">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+  <div id="team-fade"></div>
+  <div class="theme-bar">
+    <button id="btn-instructions">❓ Instrucciones</button>
+    <button id="btn-contextual">🎨 Color Contextual: OFF</button>
+  </div>
+
+  
+  <div id="screen-create" class="fade-in panel">
+    <h1>⚽ Crear Futbolista</h1>
+    <div class="create-layout">
+      <div class="create-inputs">
+        <div class="field">
+          <label for="input-name">Nombre</label>
+          <input type="text" id="input-name" placeholder="Ej: Diego Martínez" maxlength="24">
+        </div>
+        <div class="field">
+          <label for="input-dorsal">Dorsal (1–99)</label>
+          <input type="text" id="input-dorsal" placeholder="Ej: 10" maxlength="2" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="input-nationality">Nacionalidad</label>
+          <select id="input-nationality"></select>
+        </div>
+        <div class="field">
+          <label>Tipo de carrera</label>
+          <div class="career-type-selector">
+            <label class="career-type-option">
+              <input type="radio" name="career-type" value="normal" checked>
+              <span>⚽ <strong>Normal</strong></span>
+            </label>
+            <label class="career-type-option">
+              <input type="radio" name="career-type" value="prodigio">
+              <span>🌟 <strong>Prodigio</strong></span>
+            </label>
+          </div>
+        </div>
+        <button id="btn-create" disabled>🚀 Comenzar carrera</button>
+      </div>
+      <div class="create-pitch-section">
+        <label>Posición (elegí en la cancha)</label>
+        <div class="pitch-wrap">
+          <div id="pitch" class="pitch"></div>
+        </div>
+        <div id="selected-position-label">Seleccioná una posición</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="screen-game" class="hidden fade-in">
+    
+    <div class="left-col">
+      <div id="panel-player" class="panel">
+        <h2 id="p-name">-</h2>
+        <div id="player-head">
+          <div id="p-team-badge"></div>
+          <div id="rating-badge">--</div>
+        </div>
+        <div class="stat-row highlight"><span>👕 Dorsal</span><span id="p-dorsal">-</span></div>
+        <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
+        <div class="stat-row highlight"><span>💎 Valor de mercado</span><span id="p-value">-</span></div>
+        <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
+        <div id="distinto-tag" class="hidden pulse">🔥 JUGADOR DISTINTO</div>
+        <div id="convocado-tag" class="hidden pulse">🌍 CONVOCADO</div>
+        <button id="btn-chest" class="chest-btn hidden" type="button">🎁 ¡Cofre misterioso!</button>
+        
+        
+        <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
+        <div class="idolatry-row">
+          <span>❤️ Idolatría</span>
+          <div class="idolatry-bar"><div id="idolatry-fill"></div></div>
+          <span id="p-idolatry">0%</span>
+        </div>
+        <div class="stat-row"><span>🎂 Edad</span><span id="p-age">-</span></div>
+        
+        
+        <details class="shop-panel" style="margin-top: 8px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--input-bg);">
+          <summary class="shop-summary" style="padding: 10px 14px;">
+            <span class="shop-summary-title" style="font-size: 12px;">📋 Más detalles</span>
+            <span class="chevron">▼</span>
+          </summary>
+          <div style="padding: 0 14px 10px 14px; display: flex; flex-direction: column;">
+            <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
+            <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
+            <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
+            <div class="stat-row"><span>💵 Salario</span><span id="p-salary">-</span></div>
+            <div class="stat-row hidden" id="row-balon"><span>🌕 Balones de Oro</span><span id="p-balon">0</span></div>
+            <div class="stat-row hidden" id="row-bota"><span>🥇 Botas de Oro</span><span id="p-bota">0</span></div>
+          </div>
+        </details>
+        
+        
+        <div class="stat-row highlight" style="margin-top: 8px;"><span>🏃‍♂️ Partidos (Total)</span><span id="p-matches">0</span></div>
+        <div class="stat-row highlight"><span id="lbl-stat1">⚽ Stat 1 (Total)</span><span id="p-stat1">0</span></div>
+        <div class="stat-row highlight"><span id="lbl-stat2">👟 Stat 2 (Total)</span><span id="p-stat2">0</span></div>
+
+        <div class="stat-row" style="margin-top: 8px;"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
+      </div>
+
+      
+      <div id="btn-open-shop" class="panel shop-summary" role="button" tabindex="0">
+        <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
+        <span class="chevron">⮕</span>
+      </div>
+    </div>
+
+    
+    <div id="panel-main">
+      
+      <div id="offer-panel" class="hidden panel highlight offer-banner">
+        <h3 class="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
+        <div id="offer-list"></div>
+      </div>
+
+      <div class="panel" id="action-bar">
+        <button id="btn-advance">⏭️ Avanzar temporada</button>
+        <button id="btn-advance-2">⏭️⏭️ Avanzar 2 temporadas</button>
+        <button id="btn-retire-early" class="btn-danger">🚪 Retirarse</button>
+        <button id="btn-vitrina" style="background-color: #f59e0b;">🏆 Vitrina</button>
+      </div>
+      
+      <div class="panel summaries-panel">
+        <h3 class="panel-subtitle">📊 Resumen de Temporadas</h3>
+        <div id="simplified-summaries"></div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="screen-retire" class="hidden fade-in panel">
+    <h1>👞 Fin de carrera</h1>
+    <p id="retire-reason"></p>
+    <div id="retire-summary"></div>
+    <button id="btn-restart">🔄 Nueva carrera</button>
+  </div>
+
+  <div id="modal-vitrina" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel">
+      <div class="vitrina-header">
+        <h2>🏆 Vitrina Personal</h2>
+        <button id="btn-close-vitrina">❌</button>
+      </div>
+      <div class="shelf-container" id="vitrina-shelf">
+        
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-shop" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel shop-modal-panel">
+      <div class="vitrina-header">
+        <h2>🛒 Tienda (Mejoras)</h2>
+        <button id="btn-close-shop">❌</button>
+      </div>
+      <div id="shop-items" class="shop-items-body"></div>
+    </div>
+  </div>
+
+  <div id="modal-instructions" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel instructions-panel">
+      <div class="vitrina-header">
+        <h2>❓ Instrucciones</h2>
+        <button id="btn-close-instructions">❌</button>
+      </div>
+      <div class="instructions-body">
+        <section>
+          <h3>🎮 Objetivo</h3>
+          <p>Creá un futbolista de 15 años y gestioná su carrera hasta el retiro. Avanzá temporada a temporada, mejorá tu media, ganá títulos, cambiá de club y convertite en una leyenda.</p>
+        </section>
+
+        <section>
+          <h3>👤 Creación del jugador</h3>
+          <ul>
+            <li>Elegí tu <strong>nombre</strong> (o dejalo al azar).</li>
+            <li>Elegí tu <strong>nacionalidad</strong>: define tu país, la liga de debut, tu región y el nivel de tu selección nacional.</li>
+            <li>Elegí tu <strong>posición</strong> tocando un punto en la cancha. Cada posición tiene dos estadísticas principales distintas (goles, atajadas, recuperaciones, etc.).</li>
+            <li>Al crear, debutás automáticamente en un club aleatorio de tu país.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>⏭️ Avanzar temporadas</h3>
+          <ul>
+            <li><strong>▶ Avanzar 1 temporada</strong>: simula una temporada completa.</li>
+            <li><strong>⏩ Avanzar 2 temporadas</strong>: simula dos temporadas seguidas de una vez.</li>
+          </ul>
+          <p>Cada temporada:</p>
+          <ul>
+            <li>Sube tu edad y tus temporadas jugadas.</li>
+            <li>Se calcula tu <strong>rendimiento</strong> según tu forma física.</li>
+            <li>Tu <strong>media</strong> puede subir o bajar según la edad, el rendimiento y la suerte. Podés "explotar" tu potencial (🔥) y progresar mucho más rápido.</li>
+            <li>Hay un <strong>9% de probabilidad de lesionarte</strong>: perdés media y forma física.</li>
+            <li>Se simulan tus partidos, la posición en liga, los títulos y tus estadísticas.</li>
+            <li>Recibís tu <strong>salario</strong> y se recalcula tu nuevo salario.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🤝 Ofertas de fichaje</h3>
+          <p>Al avanzar, puede aparecer un lote de <strong>3 ofertas</strong> de otros clubes. Cada una podés <strong>Aceptar</strong> (cambiás de club y salario) o <strong>Rechazar</strong>. El salario depende del <strong>presupuesto</strong> de cada club frente al tuyo: un club con más presupuesto te ofrece más, y uno con menos, menos.</p>
+        </section>
+
+        <section>
+          <h3>🏆 Títulos y trofeos</h3>
+          <ul>
+            <li><strong>Liga</strong>: salís 1° en la clasificación de tu liga.</li>
+            <li><strong>Copa nacional</strong>: probabilidad según el nivel de tu equipo.</li>
+            <li><strong>Competiciones internacionales</strong>: clasificás según tu posición en liga (4 primeros → torneo élite; 5° a 7° → torneo secundario).</li>
+            <li><strong>Copa del Mundo 🌍</strong>: cada 4 temporadas si tu media alcanza el nivel de tu selección.</li>
+            <li><strong>Premios individuales</strong>: Bota de Oro 🥇 (si marcás muchos goles) y Balón de Oro 🌕 (si tu media es muy alta).</li>
+          </ul>
+          <p>Presioná <strong>🏆 Vitrina</strong> para ver todos tus trofeos.</p>
+        </section>
+
+        <section>
+          <h3>💰 Salario y valor de mercado</h3>
+          <p>Tu salario crece con tu media y edad (desde $15.000 hasta $40.000.000). Además, cada club tiene un <strong>presupuesto</strong> individual que limita cuánto puede ofrecerte. En tu panel también ves tu <strong>💎 Valor de mercado</strong> (de $10.000 a $220.000.000) como referencia de tu valor. Usá tu dinero en la tienda.</p>
+        </section>
+
+        <section>
+          <h3>🛒 Tienda</h3>
+          <ul>
+            <li>💤 <strong>Descanso</strong> ($150.000): recupera tu forma física al 100% (repetible).</li>
+            <li>🛁 <strong>Spa de Recuperación</strong> ($100.000): recupera tu forma física al 100% (repetible).</li>
+            <li>👟 <strong>Botas nuevas</strong> ($750.000): +1 a tu media (una sola vez).</li>
+            <li>🎓 <strong>Mejor entrenador</strong> ($1.500.000): +2 a tu media (una sola vez).</li>
+            <li>🏫 <strong>Academia de Elite</strong> ($900.000): +1 a tu media (una sola vez).</li>
+            <li>🧪 <strong>Suero de Potencial</strong> ($3.000.000): +4 a tu media, pero envejece 3 años (una sola vez).</li>
+            <li>🏋️ <strong>Métodos Extremos</strong> ($5.000.000): +6 a tu media, pero envejece 4 años (una sola vez).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🚪 Retiro</h3>
+          <p>Tu carrera termina si tenés 40 años o más, si con 35+ años tu media baja de 55, o si tu media baja de 28. También podés retirarte cuando quieras con <strong>🚪 Retirarse</strong>. Al final se muestra el resumen completo de tu carrera.</p>
+        </section>
+
+        <section>
+          <h3>🎨 Temas y apariencia</h3>
+          <ul>
+            <li><strong>🎨 Color Contextual</strong>: tiñe la interfaz con el color del club actual.</li>
+            <li><strong>🌙 Tema Oscuro</strong>: alterna entre el tema claro y el oscuro.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-chest" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel chest-modal-panel">
+      <div class="vitrina-header">
+        <h2>🎁 Cofre Misterioso</h2>
+        <button id="btn-close-chest">❌</button>
+      </div>
+      <div class="chest-modal-body">
+        <p>Encontraste un cofre misterioso en tu carrera.</p>
+        <p>Al abrirlo puede pasar una de dos cosas:</p>
+        <ul>
+          <li>💀 <strong>50% de probabilidad</strong> — el cofre te obliga a retirarte del fútbol.</li>
+          <li>💰 <strong>50% de probabilidad</strong> — ganás <strong>$20.000.000</strong> para tu balance.</li>
+        </ul>
+        <div class="offer-actions">
+          <button id="btn-chest-leave" class="btn-danger">🚪 Dejarlo</button>
+          <button id="btn-chest-open" class="btn-success">🗝️ Abrir cofre</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

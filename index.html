@@ -1,288 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Legacy</title>
-<link rel="icon" type="image/png" href="assets/icon/4457184.png">
+<title>Portfolio · Luciano Buccella</title>
+<link rel="icon" type="image/png" href="apps/legacy/assets/icon/4457184.png">
 <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div id="app">
-  <div id="team-fade"></div>
-  <div class="theme-bar">
-    <button id="btn-instructions">❓ Instrucciones</button>
-    <button id="btn-contextual">🎨 Color Contextual: OFF</button>
-  </div>
+<body class="dock-closed">
+<iframe class="app-frame" id="appFrame" title="Aplicación del portfolio"></iframe>
 
-  
-  <div id="screen-create" class="fade-in panel">
-    <h1>⚽ Crear Futbolista</h1>
-    <div class="create-layout">
-      <div class="create-inputs">
-        <div class="field">
-          <label for="input-name">Nombre</label>
-          <input type="text" id="input-name" placeholder="Ej: Diego Martínez" maxlength="24">
-        </div>
-        <div class="field">
-          <label for="input-dorsal">Dorsal (1–99)</label>
-          <input type="text" id="input-dorsal" placeholder="Ej: 10" maxlength="2" inputmode="numeric">
-        </div>
-        <div class="field">
-          <label for="input-nationality">Nacionalidad</label>
-          <select id="input-nationality"></select>
-        </div>
-        <div class="field">
-          <label>Tipo de carrera</label>
-          <div class="career-type-selector">
-            <label class="career-type-option">
-              <input type="radio" name="career-type" value="normal" checked>
-              <span>⚽ <strong>Normal</strong></span>
-            </label>
-            <label class="career-type-option">
-              <input type="radio" name="career-type" value="prodigio">
-              <span>🌟 <strong>Prodigio</strong></span>
-            </label>
-          </div>
-        </div>
-        <button id="btn-create" disabled>🚀 Comenzar carrera</button>
-      </div>
-      <div class="create-pitch-section">
-        <label>Posición (elegí en la cancha)</label>
-        <div class="pitch-wrap">
-          <div id="pitch" class="pitch"></div>
-        </div>
-        <div id="selected-position-label">Seleccioná una posición</div>
-      </div>
-    </div>
-  </div>
-
-  
-  <div id="screen-game" class="hidden fade-in">
-    
-    <div class="left-col">
-      <div id="panel-player" class="panel">
-        <h2 id="p-name">-</h2>
-        <div id="player-head">
-          <div id="p-team-badge"></div>
-          <div id="rating-badge">--</div>
-        </div>
-        <div class="stat-row highlight"><span>👕 Dorsal</span><span id="p-dorsal">-</span></div>
-        <div class="stat-row highlight"><span>💰 Saldo Disponible</span><span id="p-earnings">$0</span></div>
-        <div class="stat-row highlight"><span>💎 Valor de mercado</span><span id="p-value">-</span></div>
-        <div id="injury-tag" class="hidden pulse">🚑 LESIONADO</div>
-        <div id="distinto-tag" class="hidden pulse">🔥 JUGADOR DISTINTO</div>
-        <div id="convocado-tag" class="hidden pulse">🌍 CONVOCADO</div>
-        <button id="btn-chest" class="chest-btn hidden" type="button">🎁 ¡Cofre misterioso!</button>
-        
-        
-        <div class="stat-row"><span>🛡️ Equipo</span><span id="p-team">-</span></div>
-        <div class="idolatry-row">
-          <span>❤️ Idolatría</span>
-          <div class="idolatry-bar"><div id="idolatry-fill"></div></div>
-          <span id="p-idolatry">0%</span>
-        </div>
-        <div class="stat-row"><span>🎂 Edad</span><span id="p-age">-</span></div>
-        
-        
-        <details class="shop-panel" style="margin-top: 8px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--input-bg);">
-          <summary class="shop-summary" style="padding: 10px 14px;">
-            <span class="shop-summary-title" style="font-size: 12px;">📋 Más detalles</span>
-            <span class="chevron">▼</span>
-          </summary>
-          <div style="padding: 0 14px 10px 14px; display: flex; flex-direction: column;">
-            <div class="stat-row"><span>🌍 Nacionalidad</span><span id="p-nationality">-</span></div>
-            <div class="stat-row"><span>👟 Posición</span><span id="p-position">-</span></div>
-            <div class="stat-row"><span>📅 Temporadas</span><span id="p-seasons">-</span></div>
-            <div class="stat-row"><span>💵 Salario</span><span id="p-salary">-</span></div>
-            <div class="stat-row hidden" id="row-balon"><span>🌕 Balones de Oro</span><span id="p-balon">0</span></div>
-            <div class="stat-row hidden" id="row-bota"><span>🥇 Botas de Oro</span><span id="p-bota">0</span></div>
-          </div>
-        </details>
-        
-        
-        <div class="stat-row highlight" style="margin-top: 8px;"><span>🏃‍♂️ Partidos (Total)</span><span id="p-matches">0</span></div>
-        <div class="stat-row highlight"><span id="lbl-stat1">⚽ Stat 1 (Total)</span><span id="p-stat1">0</span></div>
-        <div class="stat-row highlight"><span id="lbl-stat2">👟 Stat 2 (Total)</span><span id="p-stat2">0</span></div>
-
-        <div class="stat-row" style="margin-top: 8px;"><span>🏃‍♂️ Forma física</span><span id="p-fitness">-</span></div>
-      </div>
-
-      
-      <div id="btn-open-shop" class="panel shop-summary" role="button" tabindex="0">
-        <span class="shop-summary-title">🛒 Tienda (Mejoras)</span>
-        <span class="chevron">⮕</span>
-      </div>
-    </div>
-
-    
-    <div id="panel-main">
-      
-      <div id="offer-panel" class="hidden panel highlight offer-banner">
-        <h3 class="offer-title">🤝 Nuevas Ofertas de Fichaje</h3>
-        <div id="offer-list"></div>
-      </div>
-
-      <div class="panel" id="action-bar">
-        <button id="btn-advance">⏭️ Avanzar temporada</button>
-        <button id="btn-advance-2">⏭️⏭️ Avanzar 2 temporadas</button>
-        <button id="btn-retire-early" class="btn-danger">🚪 Retirarse</button>
-        <button id="btn-vitrina" style="background-color: #f59e0b;">🏆 Vitrina</button>
-      </div>
-      
-      <div class="panel summaries-panel">
-        <h3 class="panel-subtitle">📊 Resumen de Temporadas</h3>
-        <div id="simplified-summaries"></div>
-      </div>
-    </div>
-  </div>
-
-  
-  <div id="screen-retire" class="hidden fade-in panel">
-    <h1>👞 Fin de carrera</h1>
-    <p id="retire-reason"></p>
-    <div id="retire-summary"></div>
-    <button id="btn-restart">🔄 Nueva carrera</button>
-  </div>
-
-  <div id="modal-vitrina" class="hidden vitrina-overlay fade-in">
-    <div class="vitrina-panel">
-      <div class="vitrina-header">
-        <h2>🏆 Vitrina Personal</h2>
-        <button id="btn-close-vitrina">❌</button>
-      </div>
-      <div class="shelf-container" id="vitrina-shelf">
-        
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-shop" class="hidden vitrina-overlay fade-in">
-    <div class="vitrina-panel shop-modal-panel">
-      <div class="vitrina-header">
-        <h2>🛒 Tienda (Mejoras)</h2>
-        <button id="btn-close-shop">❌</button>
-      </div>
-      <div id="shop-items" class="shop-items-body"></div>
-    </div>
-  </div>
-
-  <div id="modal-instructions" class="hidden vitrina-overlay fade-in">
-    <div class="vitrina-panel instructions-panel">
-      <div class="vitrina-header">
-        <h2>❓ Instrucciones</h2>
-        <button id="btn-close-instructions">❌</button>
-      </div>
-      <div class="instructions-body">
-        <section>
-          <h3>🎮 Objetivo</h3>
-          <p>Creá un futbolista de 15 años y gestioná su carrera hasta el retiro. Avanzá temporada a temporada, mejorá tu media, ganá títulos, cambiá de club y convertite en una leyenda.</p>
-        </section>
-
-        <section>
-          <h3>👤 Creación del jugador</h3>
-          <ul>
-            <li>Elegí tu <strong>nombre</strong> (o dejalo al azar).</li>
-            <li>Elegí tu <strong>nacionalidad</strong>: define tu país, la liga de debut, tu región y el nivel de tu selección nacional.</li>
-            <li>Elegí tu <strong>posición</strong> tocando un punto en la cancha. Cada posición tiene dos estadísticas principales distintas (goles, atajadas, recuperaciones, etc.).</li>
-            <li>Al crear, debutás automáticamente en un club aleatorio de tu país.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3>⏭️ Avanzar temporadas</h3>
-          <ul>
-            <li><strong>▶ Avanzar 1 temporada</strong>: simula una temporada completa.</li>
-            <li><strong>⏩ Avanzar 2 temporadas</strong>: simula dos temporadas seguidas de una vez.</li>
-          </ul>
-          <p>Cada temporada:</p>
-          <ul>
-            <li>Sube tu edad y tus temporadas jugadas.</li>
-            <li>Se calcula tu <strong>rendimiento</strong> según tu forma física.</li>
-            <li>Tu <strong>media</strong> puede subir o bajar según la edad, el rendimiento y la suerte. Podés "explotar" tu potencial (🔥) y progresar mucho más rápido.</li>
-            <li>Hay un <strong>9% de probabilidad de lesionarte</strong>: perdés media y forma física.</li>
-            <li>Se simulan tus partidos, la posición en liga, los títulos y tus estadísticas.</li>
-            <li>Recibís tu <strong>salario</strong> y se recalcula tu nuevo salario.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3>🤝 Ofertas de fichaje</h3>
-          <p>Al avanzar, puede aparecer un lote de <strong>3 ofertas</strong> de otros clubes. Cada una podés <strong>Aceptar</strong> (cambiás de club y salario) o <strong>Rechazar</strong>. El salario depende del <strong>presupuesto</strong> de cada club frente al tuyo: un club con más presupuesto te ofrece más, y uno con menos, menos.</p>
-        </section>
-
-        <section>
-          <h3>🏆 Títulos y trofeos</h3>
-          <ul>
-            <li><strong>Liga</strong>: salís 1° en la clasificación de tu liga.</li>
-            <li><strong>Copa nacional</strong>: probabilidad según el nivel de tu equipo.</li>
-            <li><strong>Competiciones internacionales</strong>: clasificás según tu posición en liga (4 primeros → torneo élite; 5° a 7° → torneo secundario).</li>
-            <li><strong>Copa del Mundo 🌍</strong>: cada 4 temporadas si tu media alcanza el nivel de tu selección.</li>
-            <li><strong>Premios individuales</strong>: Bota de Oro 🥇 (si marcás muchos goles) y Balón de Oro 🌕 (si tu media es muy alta).</li>
-          </ul>
-          <p>Presioná <strong>🏆 Vitrina</strong> para ver todos tus trofeos.</p>
-        </section>
-
-        <section>
-          <h3>💰 Salario y valor de mercado</h3>
-          <p>Tu salario crece con tu media y edad (desde $15.000 hasta $40.000.000). Además, cada club tiene un <strong>presupuesto</strong> individual que limita cuánto puede ofrecerte. En tu panel también ves tu <strong>💎 Valor de mercado</strong> (de $10.000 a $220.000.000) como referencia de tu valor. Usá tu dinero en la tienda.</p>
-        </section>
-
-        <section>
-          <h3>🛒 Tienda</h3>
-          <ul>
-            <li>💤 <strong>Descanso</strong> ($150.000): recupera tu forma física al 100% (repetible).</li>
-            <li>🛁 <strong>Spa de Recuperación</strong> ($100.000): recupera tu forma física al 100% (repetible).</li>
-            <li>👟 <strong>Botas nuevas</strong> ($750.000): +1 a tu media (una sola vez).</li>
-            <li>🎓 <strong>Mejor entrenador</strong> ($1.500.000): +2 a tu media (una sola vez).</li>
-            <li>🏫 <strong>Academia de Elite</strong> ($900.000): +1 a tu media (una sola vez).</li>
-            <li>🧪 <strong>Suero de Potencial</strong> ($3.000.000): +4 a tu media, pero envejece 3 años (una sola vez).</li>
-            <li>🏋️ <strong>Métodos Extremos</strong> ($5.000.000): +6 a tu media, pero envejece 4 años (una sola vez).</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3>🚪 Retiro</h3>
-          <p>Tu carrera termina si tenés 40 años o más, si con 35+ años tu media baja de 55, o si tu media baja de 28. También podés retirarte cuando quieras con <strong>🚪 Retirarse</strong>. Al final se muestra el resumen completo de tu carrera.</p>
-        </section>
-
-        <section>
-          <h3>🎨 Temas y apariencia</h3>
-          <ul>
-            <li><strong>🎨 Color Contextual</strong>: tiñe la interfaz con el color del club actual.</li>
-            <li><strong>🌙 Tema Oscuro</strong>: alterna entre el tema claro y el oscuro.</li>
-          </ul>
-        </section>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-chest" class="hidden vitrina-overlay fade-in">
-    <div class="vitrina-panel chest-modal-panel">
-      <div class="vitrina-header">
-        <h2>🎁 Cofre Misterioso</h2>
-        <button id="btn-close-chest">❌</button>
-      </div>
-      <div class="chest-modal-body">
-        <p>Encontraste un cofre misterioso en tu carrera.</p>
-        <p>Al abrirlo puede pasar una de dos cosas:</p>
-        <ul>
-          <li>💀 <strong>50% de probabilidad</strong> — el cofre te obliga a retirarte del fútbol.</li>
-          <li>💰 <strong>50% de probabilidad</strong> — ganás <strong>$20.000.000</strong> para tu balance.</li>
-        </ul>
-        <div class="offer-actions">
-          <button id="btn-chest-leave" class="btn-danger">🚪 Dejarlo</button>
-          <button id="btn-chest-open" class="btn-success">🗝️ Abrir cofre</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div class="desktop-clock" id="desktopClock">
+  <span class="clock-time" id="clockTime">--:--</span>
+  <span class="clock-date" id="clockDate"></span>
 </div>
 
-<script src="js/data.js"></script>
-<script src="js/state.js"></script>
-<script src="js/app.js"></script>
+<nav class="ubuntu-dock" id="dock" aria-label="Dock">
+  <button type="button" class="dock-close" id="dockClose" aria-label="Cerrar el dock">▼</button>
+  <button type="button" class="dock-item" data-app="legacy" title="BeALegacy" aria-label="BeALegacy">
+    <span class="dock-icon" aria-hidden="true">⚽</span>
+    <span class="dock-dot"></span>
+  </button>
+  <button type="button" class="dock-item dock-placeholder" title="Próximamente" aria-label="Próximo proyecto">
+    <span class="dock-icon" aria-hidden="true">🖥️</span>
+    <span class="dock-dot"></span>
+  </button>
+  <button type="button" class="dock-item dock-placeholder" title="Próximamente" aria-label="Próximo proyecto">
+    <span class="dock-icon" aria-hidden="true">🌐</span>
+    <span class="dock-dot"></span>
+  </button>
+  <span class="dock-separator"></span>
+  <button type="button" class="dock-item" data-panel="proyectos" title="Sobre los proyectos" aria-label="Información de los proyectos">
+    <span class="dock-icon" aria-hidden="true">📁</span>
+  </button>
+  <button type="button" class="dock-item" data-panel="contacto" title="Contacto" aria-label="Información de contacto">
+    <span class="dock-icon" aria-hidden="true">⚙️</span>
+  </button>
+</nav>
+
+<div class="music-widget" id="musicWidget">
+  <button type="button" class="music-toggle" id="musicToggle" aria-label="Ocultar o mostrar reproductor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+  </button>
+  <div class="music-panel" id="musicPanel">
+    <div class="music-cover" id="musicCover">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <span class="music-now" data-now>Reproduciendo</span>
+    <div class="music-info">
+      <span class="music-title" id="musicTitle">Tema de ejemplo</span>
+      <span class="music-artist" id="musicArtist">Artista</span>
+    </div>
+    <div class="music-progress">
+      <span class="music-time" id="musicCur">0:00</span>
+      <div class="music-bar" id="musicBar"><div class="music-fill" id="musicFill"></div></div>
+      <span class="music-time" id="musicDur">3:24</span>
+    </div>
+    <div class="music-controls">
+      <button type="button" class="music-btn" data-act="shuffle" aria-label="Aleatorio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      </button>
+      <button type="button" class="music-btn" data-act="prev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+      </button>
+      <button type="button" class="music-btn music-play" id="musicPlay" data-act="play" aria-label="Reproducir o pausar">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <button type="button" class="music-btn" data-act="next" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+      <button type="button" class="music-btn" data-act="repeat" aria-label="Repetir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+    </div>
+    <div class="music-volume">
+      <button type="button" class="music-vol-icon" id="musicVolIcon" aria-label="Silenciar o activar volumen" aria-pressed="false">
+        <svg id="musicVolSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <div class="music-bar music-volume-bar" id="musicVolumeBar"><div class="music-fill music-vol-fill" id="musicVolFill"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="yt-host" id="ytHost"></div>
+
+<button type="button" class="dock-handle" id="dockHandle" aria-label="Abrir o cerrar el dock">▲</button>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    <h2 id="modalTitle"></h2>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/main.js"></script>
 </body>
 </html>
