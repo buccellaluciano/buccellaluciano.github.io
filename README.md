@@ -1,6 +1,6 @@
 # 🖥️ Portfolio — Desktop
 
-Portafolio presentado como un **desktop de Ubuntu**: fondo tipo wallpaper + reloj central, un dock de tareas con las apps y un widget de música conectado a YouTube.
+Portafolio presentado como un **desktop de Ubuntu**: fondo tipo wallpaper + reloj central y un dock de tareas con las apps.
 
 Es 100% estático (CSS/JS vanilla), pensado para GitHub Pages, sin build ni recarga de página entre apps.
 
@@ -17,8 +17,8 @@ Es 100% estático (CSS/JS vanilla), pensado para GitHub Pages, sin build ni reca
 │  │  app activa (#appFrame — iframe)      │  │
 │  │                           (z:40)      │  │
 │  └───────────────────────────────────────┘  │
-│         música (z:90)    dock (z:100)       │
-│                          flecha (z:110)     │
+│             dock (z:100)                     │
+│             flecha (z:110)                   │
 │  modales (z:200) · toast (z:300)            │
 └─────────────────────────────────────────────┘
 ```
@@ -33,31 +33,19 @@ Es 100% estático (CSS/JS vanilla), pensado para GitHub Pages, sin build ni reca
   - 1 botón **Contacto** (`data-panel="contacto"`) → modal de información.
 - **Interacción del dock**: tocar la app activa la cierra y vuelve al escritorio; `Escape` también la cierra.
 
-### Widget de música 🎵 (YouTube IFrame API)
-
-Reproduce audio real desde YouTube sin API key:
-
-- Carga `https://www.youtube.com/iframe_api` y crea un `YT.Player` en un contenedor **oculto y fuera de pantalla** (`#ytHost`), de modo que se comporta como *solo audio* (el video nunca se ve).
-- **Playlist**: el arreglo global `TRACKS` en `js/data.js` (IDs de video). Cada track rellena título, artista y portada con la miniatura `https://i.ytimg.com/vi/<id>/hqdefault.jpg`.
-- **Controles**: play/pause (SVG), previo/next (ciclo), `repeat` (y `shuffle` visual) y **volumen** (barra clicable + botón de mute → `setVolume`/`mute` del player).
-- Progreso en vivo leyendo `getCurrentTime()`/`getDuration()`.
-- Parámetros clave del embebido: `enablejsapi:1` (obligatorio para que los comandos funcionen), `controls:0`, `playsinline:1`, `fs:0`, `modestbranding:1`.
-- Nota: YouTube no ofrece "audio puro"; se logra *audio-only de facto* ocultando el video.
-
 ---
 
 ## 📁 Estructura
 
 ```
 .
-├── index.html        # Shell del escritorio: wallpaper, reloj, dock, música, iframe
+├── index.html        # Shell del escritorio: wallpaper, reloj, dock, iframe
 ├── README.md         # Este archivo
 ├── .gitignore
 ├── css/
 │   └── main.css      # Estilos del desktop
-├── js/
-│   ├── data.js         # Playlist del reproductor (arreglo `TRACKS`)
-│   └── main.js         # Dock, modales, iframe, reloj, reproductor YouTube
+└── js/
+    └── main.js       # Dock, modales, iframe, reloj
 └── apps/
     └── legacy/       # Aplicación: BeALegend (simulador de fútbol)
         ├── index.html
