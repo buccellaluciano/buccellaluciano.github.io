@@ -22,7 +22,17 @@ function calcMarketValue(rating, age) {
 
   const ratingFactor = clamp((rating - 50) / 49, 0, 1);
   const ratingGrowth = Math.pow(2, 11.46 * ratingFactor) - 1;
-  const value = MIN_VALUE * (1 + ratingGrowth * youthFactorFor(age));
+  let value = MIN_VALUE * (1 + ratingGrowth * youthFactorFor(age));
+
+  switch (player.position) {
+    case "POR":
+      value *= 0.65;
+      break;
+    case "DEF":
+      value *= 0.85;
+      break;
+  }
+
   return Math.round(clamp(value, MIN_VALUE, MAX_VALUE));
 }
 
