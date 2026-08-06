@@ -3,15 +3,15 @@
     proyectos: {
       title: "Proyectos",
       html: "<p>Estas son las aplicaciones del portafolio. Por ahora solo hay una app publicada:</p>" +
-            "<ul><li><strong>BeALegacy</strong> - simulador de carrera futbolística (⚽).</li></ul>" +
+            "<ul><li><strong>Legacy</strong> - simulador de carrera futbolística (⚽).</li></ul>" +
             "<p>El resto de los íconos del dock son placeholders para futuros proyectos.</p>"
     },
     contacto: {
       title: "Contacto",
-      html: "<p>Estos datos son placeholders. Reemplazá esta sección con tus datos reales:</p>" +
-            "<ul><li>Email: <strong>tuemail@ejemplo.com</strong></li>" +
-            "<li>GitHub: <strong>github.com/tuusuario</strong></li>" +
-            "<li>LinkedIn: <strong>linkedin.com/in/tuusuario</strong></li></ul>"
+      html: "<p></p>" +
+            "<ul><li>Email: <strong>falta captcha</strong></li>" +
+            "<li>GitHub: <strong>x2</strong></li>" +
+            "<li>LinkedIn: <strong>x3</strong></li></ul>"
     }
   };
 
@@ -146,12 +146,6 @@
   var volumeFill = document.getElementById("musicVolFill");
   var volumeIcon = document.getElementById("musicVolIcon");
   var volumeSvg = document.getElementById("musicVolSvg");
-
-  var TRACKS = [
-    { id: "dQw4w9WgXcQ", title: "Never Gonna Give You Up", artist: "Rick Astley" },
-    { id: "kJQP7kiw5Fk", title: "Despacito", artist: "Luis Fonsi" },
-    { id: "9bZkp7q19f0", title: "Gangnam Style", artist: "PSY" }
-  ];
 
   var trackIndex = 0;
   var volume = 65;

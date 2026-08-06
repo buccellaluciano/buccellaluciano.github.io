@@ -38,7 +38,7 @@ Es 100% estático (CSS/JS vanilla), pensado para GitHub Pages, sin build ni reca
 Reproduce audio real desde YouTube sin API key:
 
 - Carga `https://www.youtube.com/iframe_api` y crea un `YT.Player` en un contenedor **oculto y fuera de pantalla** (`#ytHost`), de modo que se comporta como *solo audio* (el video nunca se ve).
-- **Playlist**: el arreglo `TRACKS` en `js/main.js` (IDs de video). Cada track rellena título, artista y portada con la miniatura `https://i.ytimg.com/vi/<id>/hqdefault.jpg`.
+- **Playlist**: el arreglo global `TRACKS` en `js/data.js` (IDs de video). Cada track rellena título, artista y portada con la miniatura `https://i.ytimg.com/vi/<id>/hqdefault.jpg`.
 - **Controles**: play/pause (SVG), previo/next (ciclo), `repeat` (y `shuffle` visual) y **volumen** (barra clicable + botón de mute → `setVolume`/`mute` del player).
 - Progreso en vivo leyendo `getCurrentTime()`/`getDuration()`.
 - Parámetros clave del embebido: `enablejsapi:1` (obligatorio para que los comandos funcionen), `controls:0`, `playsinline:1`, `fs:0`, `modestbranding:1`.
@@ -56,7 +56,8 @@ Reproduce audio real desde YouTube sin API key:
 ├── css/
 │   └── main.css      # Estilos del desktop
 ├── js/
-│   └── main.js       # Dock, modales, iframe, reloj, reproductor YouTube
+│   ├── data.js         # Playlist del reproductor (arreglo `TRACKS`)
+│   └── main.js         # Dock, modales, iframe, reloj, reproductor YouTube
 └── apps/
     └── legacy/       # Aplicación: BeALegend (simulador de fútbol)
         ├── index.html
