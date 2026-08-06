@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Dependencias / build (si algún día se agregan)
+node_modules/
+dist/
+build/
+
+# Logs y temporales
+*.log
+npm-debug.log*

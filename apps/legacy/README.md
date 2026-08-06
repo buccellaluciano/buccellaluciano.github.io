@@ -8,15 +8,13 @@ No usa frameworks ni requiere servidor: es HTML, CSS y JavaScript vanilla.
 
 ## 🚀 Cómo ejecutarlo
 
-El proyecto es 100% estático. Solo abre el archivo:
+El proyecto es 100% estático. Es una de las apps del **portfolio-desktop** y se lanza desde el dock de la página principal:
 
-```bash
-open index.html        # macOS
-xdg-open index.html    # Linux
-start index.html       # Windows
-```
+1. Abrí el `index.html` de la **raíz** del repositorio (o el host de GitHub Pages).
+2. Hacé clic en el ícono **⚽** del dock → se abre dentro del `<iframe>` del escritorio.
+3. Tocalo de nuevo para volver al desktop, o presioná `Escape`.
 
-O simplemente haz doble clic sobre `index.html` en el explorador de archivos. No hay build, dependencias ni instalación.
+También podés abrir directamente este `apps/legacy/index.html` en el navegador (`xdg-open`/`open`/doble clic) para verlo aislado. No hay build, dependencias ni instalación.
 
 ---
 
