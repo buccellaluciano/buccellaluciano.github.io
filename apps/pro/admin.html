@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; object-src 'none';">
+    <title>Panel — Booking SaaS</title>
+    <script src="js/zoom-adjust.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="tail-admin-body">
+
+    <div id="toast-container" class="toast-container"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div class="tail-admin-layout">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="tail-sidebar" id="tail-sidebar">
+            <div class="tail-sidebar-header">
+                <a href="#" class="tail-logo">
+                    <span class="tail-logo-text">Booking<strong>Admin</strong></span>
+                </a>
+                <span class="header-badge">SaaS</span>
+            </div>
+
+            <nav class="tail-sidebar-nav">
+                <!-- Caja de Link Público -->
+                <div class="public-link-box sidebar-public-link">
+                    <small>Link para clientes</small>
+                    <a id="public-link" href="#" target="_blank" rel="noopener noreferrer">Generando…</a>
+                    <button id="copy-link-btn" class="btn btn-sm btn-copy" title="Copiar link">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        Copiar
+                    </button>
+                </div>
+
+                <ul class="tail-sidebar-menu">
+                    <li><a href="#" class="active" id="sidebar-main-btn"><span class="icon">📊</span> Panel Principal</a></li>
+                    <li><a href="#" id="sidebar-config-btn"><span class="icon">⚙️</span> Configuración</a></li>
+                </ul>
+
+                <div class="divider"></div>
+
+                <ul class="tail-sidebar-menu">
+                    <li><a href="landing.html"><span class="icon">←</span> Volver a Inicio</a></li>
+                    <li><a href="index.html" target="_blank" rel="noopener noreferrer"><span class="icon">🌐</span> Vista pública</a></li>
+                    <li>
+                        <button id="logout-btn" class="btn btn-danger btn-sm w-full mt-sm" title="Salir">
+                            <span class="icon">🚪</span> Salir
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+        <div class="tail-main-content">
+            <!-- NAVBAR SUPERIOR -->
+            <header class="tail-navbar">
+                <button class="tail-mobile-toggle" id="mobile-toggle-btn" aria-label="Abrir menú">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+
+                <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" aria-label="Colapsar menú lateral" title="Colapsar menú lateral">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="9" y1="3" x2="9" y2="21"/>
+                    </svg>
+                </button>
+
+                <div class="tail-search-wrap">
+                    <span class="tail-search-icon">🔍</span>
+                    <input type="search" placeholder="Buscar en el panel..." class="tail-search-input">
+                </div>
+
+                <div class="tail-navbar-actions">
+                    <button id="theme-toggle" class="btn-theme-toggle" aria-label="Cambiar tema">
+                        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                        </svg>
+                        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENIDO DE TRABAJO -->
+            <main class="tail-content-area">
+                <div class="page-header">
+                    <h1 class="page-title">Gestión del Negocio</h1>
+                    <p class="page-subtitle">Administra la configuración, tu equipo de trabajo y los servicios prestados.</p>
+                </div>
+
+                <!-- CONTENEDOR UNIFICADO CON PESTAÑAS (TABS) -->
+                <div class="card tail-card main-tabs-card">
+                    <!-- NAVEGACIÓN POR PESTAÑAS -->
+                    <div class="tabs-nav-container">
+                        <button type="button" class="tab-btn active" data-tab="tab-reservas">
+                            <span class="tab-icon">📅</span> Reservas
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="tab-staff">
+                            <span class="tab-icon">👥</span> Personal
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="tab-services">
+                            <span class="tab-icon">🛍️</span> Servicios
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="tab-subscriptions">
+                            <span class="tab-icon">💎</span> Suscripciones
+                        </button>
+                    </div>
+
+                    <!-- CONTENIDO DE PESTAÑAS -->
+                    <div class="tabs-content-body">
+                        
+                        <!-- TAB 1: RESERVAS ACTIVAS -->
+                        <div class="tab-panel active" id="tab-reservas">
+                            <section id="reservas-section">
+                                <div class="panel-section-title">
+                                    <h3>Reservas Activas</h3>
+                                    <span id="bookings-count" class="badge badge-brand">0</span>
+                                </div>
+
+                                <div class="bookings-toolbar">
+                                    <label for="bookings-sort">Ordenar por</label>
+                                    <select id="bookings-sort">
+                                        <option value="closest">Más cercanos</option>
+                                        <option value="farthest">Más lejanos</option>
+                                        <option value="turns-desc">Más turnos</option>
+                                        <option value="turns-asc">Menos turnos</option>
+                                    </select>
+                                </div>
+
+                                <div class="table-wrap">
+                                    <table id="bookings-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>Servicio</th>
+                                                <th>Cliente</th>
+                                                <th>Personal asignado</th>
+                                                <th>Contacto</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr id="no-bookings-row">
+                                                <td colspan="7" class="empty-state">No hay reservas aún.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- TAB 2: GESTIÓN DE PERSONAL -->
+                        <div class="tab-panel" id="tab-staff">
+                            <section id="staff-section">
+                                <div class="panel-section-title">
+                                    <h3>Personal</h3>
+                                    <span id="staff-count" class="badge badge-brand">0</span>
+                                </div>
+
+                                <div class="panel-actions">
+                                    <button type="button" id="open-staff-modal-btn" class="btn btn-primary">+ Agregar empleado</button>
+                                </div>
+
+                                <div class="table-wrap mt-md">
+                                    <table id="staff-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Contacto</th>
+                                                <th>Asignación</th>
+                                                <th>Turnos</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr id="no-staff-row">
+                                                <td colspan="5" class="empty-state">No hay empleados registrados aún.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- TAB 3: CATÁLOGO DE SERVICIOS -->
+                        <div class="tab-panel" id="tab-services">
+                            <section id="services-section">
+                                <div class="panel-section-title">
+                                    <h3>Servicios</h3>
+                                    <span class="text-muted" style="font-size: 0.85rem;">Utilizado en modo "Por servicio"</span>
+                                </div>
+
+                                <div class="panel-actions">
+                                    <button type="button" id="open-service-modal-btn" class="btn btn-primary">+ Agregar servicio</button>
+                                </div>
+
+                                <div class="table-wrap mt-md">
+                                    <table id="services-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Servicio</th>
+                                                <th>Duración</th>
+                                                <th>Precio</th>
+                                                <th>Personal asignado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr id="no-services-row">
+                                                <td colspan="5" class="empty-state">Aún no hay servicios cargados.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- TAB 4: SUSCRIPCIONES / MENSUALIDAD -->
+                        <div class="tab-panel" id="tab-subscriptions">
+                            <section id="subscriptions-section">
+
+                                <!-- KPI stats -->
+                                <div class="subs-stats">
+                                    <div class="subs-stat">
+                                        <span class="subs-stat-label">Suscriptores activos</span>
+                                        <span class="subs-stat-value" id="subs-active">0</span>
+                                    </div>
+                                    <div class="subs-stat">
+                                        <span class="subs-stat-label">Ingreso mensual (MRR)</span>
+                                        <span class="subs-stat-value" id="subs-mrr">$0</span>
+                                    </div>
+                                    <div class="subs-stat">
+                                        <span class="subs-stat-label">Vencen en 7 días</span>
+                                        <span class="subs-stat-value" id="subs-expiring">0</span>
+                                    </div>
+                                </div>
+
+                                <!-- Planes -->
+                                <div class="panel-section-title mt-lg">
+                                    <h3>Planes de suscripción</h3>
+                                    <button type="button" id="open-plan-modal-btn" class="btn btn-primary">+ Crear plan</button>
+                                </div>
+
+                                <div id="plans-grid" class="plans-grid">
+                                    <div class="subs-empty">
+                                        Aún no hay planes creados. Creá un plan mensual (ej. Yoga 8 clases) para que tus clientes se suscriban.
+                                    </div>
+                                </div>
+
+                                <!-- Suscriptores -->
+                                <div class="panel-section-title mt-lg">
+                                    <h3>Suscriptores</h3>
+                                    <span id="subs-count" class="badge badge-brand">0</span>
+                                </div>
+
+                                <div class="table-wrap">
+                                    <table id="subs-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Cliente</th>
+                                                <th>Plan</th>
+                                                <th>Inicio</th>
+                                                <th>Próximo cobro</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr id="no-subs-row">
+                                                <td colspan="6" class="empty-state">No hay suscriptores aún.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </section>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL TURNOS DE PERSONAL -->
+    <div id="shifts-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Turnos de <span id="shift-staff-name"></span></h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+            <form id="shift-form">
+                <input type="hidden" id="shift-staff-id">
+                <div id="shift-hours-hint" class="alert alert-info shift-hint"></div>
+
+                <div class="grid-2col">
+                    <div class="form-group">
+                        <label>Inicio</label>
+                        <input type="time" id="shift-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fin</label>
+                        <input type="time" id="shift-end" required>
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Fecha <span class="text-muted">(Dejar vacío para turno recurrente)</span></label>
+                        <input type="date" id="shift-date">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Días recurrentes</label>
+                        <div class="check-group" id="shift-days">
+                            <label><input type="checkbox" value="1"><span>Lun</span></label>
+                            <label><input type="checkbox" value="2"><span>Mar</span></label>
+                            <label><input type="checkbox" value="3"><span>Mié</span></label>
+                            <label><input type="checkbox" value="4"><span>Jue</span></label>
+                            <label><input type="checkbox" value="5"><span>Vie</span></label>
+                            <label><input type="checkbox" value="6"><span>Sáb</span></label>
+                            <label><input type="checkbox" value="0"><span>Dom</span></label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-sm">Agregar turno</button>
+            </form>
+
+            <div class="table-wrap mt-md">
+                <table id="shifts-table">
+                    <thead>
+                        <tr>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Tipo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="no-shifts-row">
+                            <td colspan="4" class="empty-state">Sin turnos registrados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ASIGNACIÓN DE PERSONAL -->
+    <div id="assignment-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar a <span id="assignment-staff-name"></span></h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+            <form id="assignment-form">
+                <input type="hidden" id="assignment-staff-id">
+                
+                <div class="form-group">
+                    <label>Tipo de asignación</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="assignment-type" value="generic">
+                            <span class="radio-label">Genérico</span>
+                            <span class="radio-desc">Disponible para turnos sin servicio</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="assignment-type" value="specific">
+                            <span class="radio-label">Específico</span>
+                            <span class="radio-desc">Asignar a servicios específicos</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="generic-assignment" class="hidden">
+                    <div class="alert alert-info">
+                        ✓ Este empleado estará disponible para todos los turnos sin selección de servicio.
+                    </div>
+                </div>
+
+                <div id="specific-assignment" class="hidden">
+                    <div class="form-group">
+                        <label>Servicios</label>
+                        <div class="check-group" id="assignment-services"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-md">Guardar asignación</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AGREGAR EMPLEADO -->
+    <div id="staff-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Empleado</h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+            <form id="staff-form">
+                <div class="grid-2col">
+                    <div class="form-group col-span-2">
+                        <label>Nombre del empleado</label>
+                        <input type="text" id="staff-name" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span class="text-muted">opcional</span></label>
+                        <input type="email" id="staff-email" placeholder="juan@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono <span class="text-muted">opcional</span></label>
+                        <input type="tel" id="staff-phone" placeholder="5491123456789">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-sm">Agregar empleado</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AGREGAR SERVICIO -->
+    <div id="service-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Servicio</h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+            <form id="service-form">
+                <div class="grid-2col">
+                    <div class="form-group col-span-2">
+                        <label>Nombre del servicio</label>
+                        <input type="text" id="srv-name" placeholder="Ej: Corte Premium" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duración (min)</label>
+                        <input type="number" id="srv-duration" placeholder="45" min="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio ($) <span class="text-muted">opcional</span></label>
+                        <input type="number" id="srv-price" placeholder="3500" min="0">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Descripción breve <span class="text-muted">opcional</span></label>
+                        <input type="text" id="srv-desc" placeholder="Ej: Incluye lavado y secado">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-sm">Agregar servicio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO PLAN DE SUSCRIPCIÓN (maqueta) -->
+    <div id="plan-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nuevo plan de suscripción</h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+            <form id="plan-form">
+                <div class="grid-2col">
+                    <div class="form-group col-span-2">
+                        <label>Nombre del plan</label>
+                        <input type="text" id="plan-name" placeholder="Ej: Yoga Mensual · 8 clases" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio mensual ($)</label>
+                        <input type="number" id="plan-price" placeholder="15000" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Día de cobro</label>
+                        <input type="number" id="plan-billing-day" placeholder="1" min="1" max="28">
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Estilo del plan</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="plan-style" value="pilates" checked>
+                                <span class="radio-label">Por clase (Pilates)</span>
+                                <span class="radio-desc">Clases semanales con cupo por horario</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="plan-style" value="gym">
+                                <span class="radio-label">Acceso libre (Gimnasio)</span>
+                                <span class="radio-desc">Pase ilimitado durante el horario de apertura</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-span-2" id="plan-slots-group">
+                        <label>Clases semanales</label>
+                        <span class="field-hint">Definí días, horarios y cupo de cada clase. El usuario elige a cuáles anotarse.</span>
+                        <div id="plan-slots-list" class="plan-slots-list"></div>
+                        <button type="button" id="add-plan-slot-btn" class="btn btn-ghost btn-sm mt-sm">+ Agregar clase</button>
+                    </div>
+
+                    <div class="form-group col-span-2 hidden" id="plan-gym-note">
+                        <div class="alert alert-info">
+                            ✓ Este plan otorga acceso libre todos los días y horarios de apertura del local.
+                        </div>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Beneficios / descripción <span class="text-muted">(Opcional)</span></label>
+                        <textarea id="plan-desc" rows="3" placeholder="Ej: Acceso ilimitado + 1 clase personalizada por mes"></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-sm">Crear plan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURACIÓN (abierto desde la sidebar) -->
+    <div id="config-modal" class="modal hidden">
+        <div class="modal-content modal-content--config">
+            <div class="modal-header">
+                <h3>Configuración</h3>
+                <button type="button" class="btn-close">×</button>
+            </div>
+
+            <form id="config-form">
+                <div class="form-group">
+                    <label for="cfg-name">Nombre del negocio</label>
+                    <input type="text" id="cfg-name" placeholder="Ej: Barbería El Maestro" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cfg-desc">Descripción <span class="text-muted">(Opcional)</span></label>
+                    <textarea id="cfg-desc" rows="3" placeholder="Ej: El mejor lugar para relajarse y cambiar tu look…"></textarea>
+                </div>
+
+                <div class="grid-2col">
+                    <div class="form-group">
+                        <label for="cfg-zone">Zona / Barrio <span class="text-muted">(Opcional)</span></label>
+                        <input type="text" id="cfg-zone" placeholder="Ej: Palermo">
+                    </div>
+                    <div class="form-group">
+                        <label for="cfg-address">Dirección <span class="text-muted">(Opcional)</span></label>
+                        <input type="text" id="cfg-address" placeholder="Ej: Av. Santa Fe 1234">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cfg-whatsapp">WhatsApp <span class="text-muted">(Solo números, incl. código país)</span></label>
+                    <input type="tel" id="cfg-whatsapp" placeholder="Ej: 5491123456789">
+                </div>
+
+                <div class="form-group">
+                    <label>Modo de reserva</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="cfg-mode" value="direct">
+                            <span class="radio-label">Turno directo</span>
+                            <span class="radio-desc">Sin selección de servicio</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="cfg-mode" value="service">
+                            <span class="radio-label">Por servicio</span>
+                            <span class="radio-desc">Catálogo con duración propia</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Horario de atención</label>
+                    <div class="flex-row">
+                        <input type="time" id="cfg-open" required>
+                        <span class="text-muted">a</span>
+                        <input type="time" id="cfg-close" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cfg-duration">Duración base del turno (min)</label>
+                    <input type="number" id="cfg-duration" min="5" max="480" placeholder="Ej: 60" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Días laborables</label>
+                    <div class="check-group" id="cfg-days">
+                        <label><input type="checkbox" value="1"><span>Lun</span></label>
+                        <label><input type="checkbox" value="2"><span>Mar</span></label>
+                        <label><input type="checkbox" value="3"><span>Mié</span></label>
+                        <label><input type="checkbox" value="4"><span>Jue</span></label>
+                        <label><input type="checkbox" value="5"><span>Vie</span></label>
+                        <label><input type="checkbox" value="6"><span>Sáb</span></label>
+                        <label><input type="checkbox" value="0"><span>Dom</span></label>
+                    </div>
+                </div>
+
+                <div class="form-group color-picker-group">
+                    <label>Color de marca</label>
+                    <input type="hidden" id="cfg-color" value="#6366f1">
+
+                    <div class="color-swatches" role="radiogroup" aria-label="Color de marca">
+                        <button type="button" class="color-swatch" data-color="#6366f1" aria-label="Índigo" style="--sw:#6366f1"></button>
+                        <button type="button" class="color-swatch" data-color="#8b5cf6" aria-label="Violeta" style="--sw:#8b5cf6"></button>
+                        <button type="button" class="color-swatch" data-color="#ec4899" aria-label="Rosa" style="--sw:#ec4899"></button>
+                        <button type="button" class="color-swatch" data-color="#f97316" aria-label="Naranja" style="--sw:#f97316"></button>
+                        <button type="button" class="color-swatch" data-color="#eab308" aria-label="Amarillo" style="--sw:#eab308"></button>
+                        <button type="button" class="color-swatch" data-color="#10b981" aria-label="Verde esmeralda" style="--sw:#10b981"></button>
+                        <button type="button" class="color-swatch" data-color="#06b6d4" aria-label="Cian" style="--sw:#06b6d4"></button>
+                        <button type="button" class="color-swatch" data-color="#3b82f6" aria-label="Azul" style="--sw:#3b82f6"></button>
+                        <button type="button" class="color-swatch" data-color="#64748b" aria-label="Pizarra" style="--sw:#64748b"></button>
+                        <button type="button" class="color-swatch" data-color="#0f172a" aria-label="Noche" style="--sw:#0f172a"></button>
+                    </div>
+
+                    <div class="color-preview-bar" id="color-preview-bar">
+                        <span class="color-preview-dot" id="color-preview-dot"></span>
+                        <span class="color-preview-name" id="color-preview-name">Índigo</span>
+                        <span class="color-preview-hex" id="color-preview-hex">#6366f1</span>
+                    </div>
+                </div>
+
+                <div class="form-actions flex-row mt-md">
+                    <button type="submit" class="btn btn-primary">Guardar configuración</button>
+                    <button type="button" id="open-branding-btn" class="btn btn-ghost">🎨 Apariencia visual →</button>
+                    <button type="button" id="confirm-logout" class="btn btn-danger ml-auto">Cerrar sesión</button>
+                </div>
+            </form>
+
+            <!-- SECCIÓN BRANDING -->
+            <section class="card hidden mt-md" id="branding-section">
+                <div class="card-header">
+                    <span class="card-title">Apariencia visual</span>
+                    <button type="button" id="close-branding-btn" class="btn-close" aria-label="Cerrar">×</button>
+                </div>
+                <p class="text-muted" style="font-size:.85rem;margin-bottom:1.5rem;">
+                    Estos activos se muestran en la página pública de reservas y en el panel.
+                </p>
+
+                <div class="branding-grid">
+                    <div class="branding-slot" id="branding-slot-favicon">
+                        <div class="branding-slot-header">
+                            <span class="branding-slot-label">Ícono del navegador</span>
+                            <span class="branding-slot-hint">PNG/ICO/SVG</span>
+                        </div>
+                        <label class="branding-dropzone" id="dz-favicon" tabindex="0">
+                            <input type="file" class="branding-file-input" id="file-favicon" accept="image/png,image/x-icon,image/svg+xml,image/webp">
+                            <div class="branding-dropzone-inner" id="dz-favicon-inner">
+                                <span class="branding-dz-icon">🔖</span>
+                                <span class="branding-dz-text">Subir ícono</span>
+                            </div>
+                        </label>
+                        <div id="branding-err-favicon" class="alert alert-error hidden"></div>
+                        <div class="branding-preview hidden" id="prev-favicon">
+                            <img id="prev-favicon-img" src="" alt="Vista previa favicon">
+                            <div class="branding-preview-meta" id="prev-favicon-meta"></div>
+                            <button type="button" class="branding-remove-btn" data-asset="favicon">× Quitar</button>
+                        </div>
+                    </div>
+
+                    <div class="branding-slot" id="branding-slot-logo">
+                        <div class="branding-slot-header">
+                            <span class="branding-slot-label">Logo del negocio</span>
+                            <span class="branding-slot-hint">PNG/SVG/WEBP</span>
+                        </div>
+                        <label class="branding-dropzone" id="dz-logo" tabindex="0">
+                            <input type="file" class="branding-file-input" id="file-logo" accept="image/png,image/svg+xml,image/webp,image/jpeg">
+                            <div class="branding-dropzone-inner" id="dz-logo-inner">
+                                <span class="branding-dz-icon">🖼</span>
+                                <span class="branding-dz-text">Subir logo</span>
+                            </div>
+                        </label>
+                        <div id="branding-err-logo" class="alert alert-error hidden"></div>
+                        <div class="branding-preview hidden" id="prev-logo">
+                            <img id="prev-logo-img" src="" alt="Vista previa logo">
+                            <div class="branding-preview-meta" id="prev-logo-meta"></div>
+                            <button type="button" class="branding-remove-btn" data-asset="logo">× Quitar</button>
+                        </div>
+                    </div>
+
+                    <div class="branding-slot branding-slot--wide" id="branding-slot-background">
+                        <div class="branding-slot-header">
+                            <span class="branding-slot-label">Imagen de fondo</span>
+                            <span class="branding-slot-hint">JPG/PNG/WEBP</span>
+                        </div>
+                        <label class="branding-dropzone branding-dropzone--wide" id="dz-background" tabindex="0">
+                            <input type="file" class="branding-file-input" id="file-background" accept="image/jpeg,image/png,image/webp">
+                            <div class="branding-dropzone-inner" id="dz-background-inner">
+                                <span class="branding-dz-icon">🏞</span>
+                                <span class="branding-dz-text">Subir imagen de fondo</span>
+                            </div>
+                        </label>
+                        <div id="branding-err-background" class="alert alert-error hidden"></div>
+                        <div class="branding-preview branding-preview--bg hidden" id="prev-background">
+                            <img id="prev-background-img" src="" alt="Vista previa fondo">
+                            <div class="branding-preview-meta" id="prev-background-meta"></div>
+                            <button type="button" class="branding-remove-btn" data-asset="background">× Quitar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="branding-actions mt-md">
+                    <button type="button" id="save-branding-btn" class="btn btn-primary">Guardar apariencia</button>
+                    <span id="branding-save-status" class="text-muted ml-sm"></span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/demo-data.js"></script>
+    <script src="js/local-mode.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

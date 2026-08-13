@@ -1,0 +1,3360 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ============================================================
+   DESIGN TOKENS — Light  (warm paper palette, matching landing)
+   ============================================================ */
+:root {
+    /* Brand — same purple as landing --qr1 / --qr2 */
+    --brand-color: #6366f1;
+    --brand-hover: #4f46e5;
+    --brand-light: rgba(99, 102, 241, 0.1);
+    --brand-mid:   #818cf8;
+
+    /* Orange accent — same as landing --turn1 / --turn2 */
+    --orange:      #f97316;
+    --orange-2:    #fb923c;
+    --orange-bg:   rgba(249, 115, 22, 0.1);
+
+    /* Surfaces — warm paper palette */
+    --bg:        #f5f2ec;
+    --surface:   #faf8f4;
+    --surface-2: #edeae2;
+
+    /* Ink */
+    --ink:   #0a0a0f;
+    --ink-2: #3a3840;
+    --ink-3: #9090a0;
+
+    /* Borders — ink-based for light mode */
+    --border:       rgba(10, 10, 15, 0.1);
+    --border-focus: #818cf8;
+
+    /* Status */
+    --red:      #c94c4c;
+    --red-bg:   rgba(201, 76, 76, 0.1);
+    --green:    #16a34a;
+    --green-bg: rgba(22, 163, 74, 0.1);
+
+    /* Shape */
+    --radius:    16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --radius-pill: 100px;
+
+    /* Shadows */
+    --shadow:       0 1px 3px rgba(10,10,15,.06), 0 4px 16px rgba(10,10,15,.05);
+    --shadow-md:    0 4px 16px rgba(99,102,241,.2);
+    --shadow-brand: 0 4px 20px rgba(99,102,241,.35);
+    --shadow-lg:    0 12px 32px rgba(10,10,15,.1);
+
+    /* Fonts */
+    --font-head:  'Syne', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-body:  'Inter', sans-serif;
+    --font-mono:  'Inter', sans-serif; /* neutral, readable */
+
+    /* Motion */
+    --transition:        0.18s ease;
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Grain — lighter in light mode */
+    --grain-opacity: 0.18;
+}
+
+/* ============================================================
+   DESIGN TOKENS — Dark  (exact landing page ink palette)
+   ============================================================ */
+body.dark-mode {
+    /* Surfaces */
+    --bg:        #0a0a0f;
+    --surface:   #12121a;
+    --surface-2: #1c1c26;
+
+    /* Ink flipped to paper */
+    --ink:   #f5f2ec;
+    --ink-2: #b8b4ac;
+    --ink-3: #9090a0;
+
+    /* Borders — subtle white, exact landing value */
+    --border:       rgba(255, 255, 255, 0.07);
+    --border-focus: #818cf8;
+
+    /* Brand light tint for dark surfaces */
+    --brand-light: rgba(99, 102, 241, 0.15);
+    --orange-bg:   rgba(249, 115, 22, 0.12);
+
+    /* Status — dark surface variants */
+    --red-bg:   rgba(201, 76, 76, 0.12);
+    --green-bg: rgba(22, 163, 74, 0.12);
+
+    /* Shadows — deeper on dark */
+    --shadow:       0 1px 4px rgba(0,0,0,.5), 0 4px 20px rgba(0,0,0,.4);
+    --shadow-md:    0 4px 20px rgba(99,102,241,.3);
+    --shadow-brand: 0 4px 24px rgba(99,102,241,.55);
+    --shadow-lg:    0 12px 40px rgba(0,0,0,.5);
+
+    /* Heavier grain in dark mode, matching landing */
+    --grain-opacity: 0.45;
+
+    /* Zoom del navegador — sobreescrito por zoom-adjust.js */
+    --zoom: 1;
+    --zoom-scale: 1;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    scroll-behavior: smooth;
+    /* Compensa el zoom del navegador (ver zoom-adjust.js) */
+    font-size: clamp(13px, calc(16px * var(--zoom-scale, 1)), 19px);
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    transition: background var(--transition), color var(--transition);
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Grain — same data URI as landing */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: var(--grain-opacity);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--brand-color); border-radius: 99px; opacity: 0.5; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-hover); }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header {
+    background: linear-gradient(to bottom, rgba(10,10,15,0.69), rgba(10,10,15,0.56));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #f5f2ec;
+    padding: 1.1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    gap: 1rem;
+    will-change: transform;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.28s ease;
+}
+
+/* Scrolled-away state — same mechanism as #mini-nav */
+header.header--hidden {
+    transform: translateY(-100%);
+    box-shadow: none;
+}
+
+/* In light mode, use a warm paper-tinted header */
+body:not(.dark-mode) header {
+    background: linear-gradient(to bottom, rgba(245,242,236,0.71), rgba(245,242,236,0.60));
+    border-bottom: 1px solid rgba(10,10,15,.08);
+    color: var(--ink);
+}
+
+header h1 {
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.header-badge {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 500;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    color: rgba(255,255,255,.65);
+    margin-left: 8px;
+    vertical-align: middle;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+body:not(.dark-mode) .header-badge {
+    background: rgba(10,10,15,.07);
+    border-color: rgba(10,10,15,.12);
+    color: var(--ink-3);
+}
+
+/* Logo image injected into header h1 by branding JS */
+.header-logo-img {
+    height: 32px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+body.dark-mode .header-logo-img { filter: brightness(1.15); }
+
+/* Theme toggle */
+.btn-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.8);
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.btn-theme-toggle:hover {
+    background: rgba(255,255,255,.15);
+    border-color: rgba(255,255,255,.3);
+    transform: scale(1.05);
+}
+
+body:not(.dark-mode) .btn-theme-toggle {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+}
+
+body:not(.dark-mode) .btn-theme-toggle:hover {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+body:not(.dark-mode) .icon-moon,
+body.dark-mode        .icon-sun { display: none; }
+
+/* Floating variant for login page */
+.btn-theme-toggle--float {
+    position: fixed;
+    top: 1rem; right: 1rem;
+    z-index: 200;
+    box-shadow: var(--shadow);
+}
+
+/* ============================================================
+   MINI-NAV — fixed floating navbar for the client page
+   Hidden by default, slides in from the top when the banner
+   scrolls out of view (toggled via .mini-nav--visible from JS).
+   Uses position:fixed so it never affects layout → no flicker.
+   ============================================================ */
+.mini-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;                     /* above banner (100) and admin header */
+    transform: translateY(-100%);     /* hidden off-screen by default */
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.28s ease;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.82), rgba(10,10,15,0.68));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    pointer-events: none;             /* don't trap clicks when hidden */
+    will-change: transform;
+}
+
+.mini-nav--visible {
+    transform: translateY(0);
+    pointer-events: auto;
+    box-shadow: 0 2px 18px rgba(0,0,0,0.18);
+}
+
+body:not(.dark-mode) .mini-nav {
+    background: linear-gradient(to bottom, rgba(245,242,236,0.88), rgba(245,242,236,0.74));
+    border-bottom: 1px solid rgba(10,10,15,.08);
+}
+
+body:not(.dark-mode) .mini-nav--visible {
+    box-shadow: 0 2px 14px rgba(10,10,15,0.08);
+}
+
+/* Inner row: constrained to the same max-width as the banner/container
+   so the home link aligns vertically with the banner nav below.         */
+.mini-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    /* Override container's vertical padding — nav stays compact */
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+/* The mini-nav home link and title reuse .banner-nav-home / .banner-nav-title
+   base rules, but those are designed for glass-on-image.  In the mini-nav
+   the surface is already paper/ink, so we override to the solid variant.  */
+.mini-nav .mini-nav-home {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.88);
+    border-color: rgba(255,255,255,0.16);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.mini-nav .mini-nav-home:hover {
+    background: rgba(255,255,255,0.16);
+    transform: translateX(-2px);
+}
+
+.flex-row input, 
+.flex-row select {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.3rem;
+}
+
+body:not(.dark-mode) .mini-nav .mini-nav-home {
+    background: rgba(10,10,15,0.05);
+    color: var(--ink-2);
+    border-color: var(--border);
+}
+
+body:not(.dark-mode) .mini-nav .mini-nav-home:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+    border-color: var(--ink-3);
+}
+
+.mini-nav .mini-nav-title {
+    color: rgba(255,255,255,0.92);
+    text-shadow: none;
+    font-size: 0.95rem;
+}
+
+body:not(.dark-mode) .mini-nav .mini-nav-title {
+    color: var(--ink);
+}
+
+/* Compact sizing on small screens — matches the banner-nav mobile rules */
+@media (max-width: 600px) {
+    .mini-nav-inner { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+    .mini-nav .mini-nav-title { font-size: 0.88rem; }
+    .mini-nav .mini-nav-home { font-size: 0.78rem; padding: 0.28rem 0.7rem; }
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container {
+    padding: 2rem 1rem;
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+.admin-layout {
+    max-width: 1180px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 2rem 1rem;
+    margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+    .admin-layout { grid-template-columns: 340px 1fr; padding: 2rem 1.5rem; }
+}
+
+/* ============================================================
+   CARDS — landing-style with glow on hover
+   ============================================================ */
+.card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glow overlay — revealed on hover (display cards only) */
+.card:not(:has(form))::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: var(--brand-color);
+    filter: blur(60px);
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+    pointer-events: none;
+}
+
+.card:not(:has(form)):hover { border-color: var(--brand-mid); box-shadow: var(--shadow-lg); }
+.card:not(:has(form)):hover::after { opacity: 0.12; }
+
+.card + .card { margin-top: 1.5rem; }
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+}
+
+/* ─── CARD COLAPSIBLE (MOBILE) ─── */
+.card.collapsible .card-header {
+    cursor: pointer;
+    margin-bottom: 0;
+    border-bottom: none;
+    transition: border-color var(--transition);
+}
+
+.card.collapsible .card-header:hover {
+    border-bottom-color: var(--brand-mid);
+}
+
+.card.collapsible .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Ícono de flecha */
+.card.collapsible .card-title::after {
+    content: '↓';
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 400;
+    transition: transform var(--transition);
+}
+
+.card.collapsible.open .card-title::after {
+    transform: rotate(180deg);
+}
+
+.card.collapsible .card-body {
+    display: none;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.card.collapsible.open .card-body {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* ============================================================
+   FORMS & INPUTS
+   ============================================================ */
+.form-group {
+    margin-bottom: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+label, .label {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    letter-spacing: 0.01em;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.72rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: var(--font-body);
+    background: var(--surface-2);
+    color: var(--ink);
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brand-color);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--brand-light);
+}
+
+input[type="color"] { height: 42px; padding: 4px; cursor: pointer; }
+
+input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 0.6; }
+
+.flex-row { display: flex; align-items: center; gap: 0.75rem; }
+.flex-row > span { font-family: var(--font-body); font-size: 0.85rem; color: var(--ink-3); flex-shrink: 0; }
+
+/* ============================================================
+   BUTTONS — pill-shaped, matching landing page style
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.72rem 1.4rem;
+    border-radius: var(--radius-pill);   /* ← pill shape from landing */
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: var(--font-head);
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+}
+
+.btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* Primary — paper on brand (light) / brand on paper (dark) */
+.btn-primary {
+    background: var(--brand-color);
+    color: #fff;
+    box-shadow: var(--shadow-brand);
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+.btn-primary:hover {
+    background: var(--brand-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(99,102,241,.5);
+}
+
+.btn-primary:active { transform: translateY(0); box-shadow: var(--shadow-brand); }
+
+/* Ghost */
+.btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+    background: var(--brand-light);
+    transform: translateY(-1px);
+}
+
+/* Danger */
+.btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid rgba(201,76,76,.3);
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-danger:hover { background: var(--red-bg); border-color: var(--red); transform: translateY(-1px); }
+
+/* Header outline buttons */
+.btn-outline-white {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #f5f2ec;
+    font-size: 0.82rem;
+    padding: 0.45rem 1rem;
+}
+
+.btn-outline-white:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+
+body:not(.dark-mode) .btn-outline-white {
+    background: rgba(10,10,15,.05);
+    border-color: var(--border);
+    color: var(--ink-2);
+}
+
+body:not(.dark-mode) .btn-outline-white:hover {
+    background: var(--surface-2);
+    border-color: var(--ink-3);
+}
+
+/* Brand outline — profile / maps buttons */
+.btn-outline-brand {
+    background: transparent;
+    border: 1px solid var(--brand-color);
+    color: var(--brand-color);
+    padding: 0.4rem 0.9rem;
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    letter-spacing: 0.02em;
+}
+
+.btn-outline-brand:hover { background: var(--brand-light); transform: translateY(-1px); }
+
+.btn-sm { padding: 0.32rem 0.75rem; font-size: 0.75rem; }
+
+/* Copy button */
+.btn-copy {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--ink-3);
+    padding: 0.28rem 0.65rem;
+    font-size: 0.72rem;
+    font-family: var(--font-body);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-copy:hover { border-color: var(--brand-color); color: var(--brand-color); background: var(--brand-light); }
+
+/* Modal close */
+.btn-close {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: all var(--transition);
+    padding: 0;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    line-height: 1;
+}
+
+.btn-close:hover { color: var(--ink); background: var(--surface-2); }
+
+/* ============================================================
+   CHECKBOXES & RADIO
+   ============================================================ */
+.check-group { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem; }
+
+.check-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    color: var(--ink-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.75rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all var(--transition);
+    user-select: none;
+}
+
+.check-group label:hover { border-color: var(--brand-mid); color: var(--ink); }
+
+.check-group label:has(input:checked) {
+    background: var(--brand-light);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.check-group input { display: none; }
+
+.radio-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.radio-option {
+    flex: 1;
+    min-width: 140px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-option:has(input:checked) {
+    border-color: var(--brand-color);
+    background: var(--brand-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.radio-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.radio-label { font-family: var(--font-head); font-weight: 700; color: var(--ink); font-size: 0.88rem; display: block; letter-spacing: -0.01em; }
+.radio-desc  { font-family: var(--font-body); font-size: 0.78rem; color: var(--ink-3); margin-top: 0.25rem; display: block; }
+
+.radio-option:has(input:checked) .radio-label { color: var(--brand-color); }
+.radio-option:has(input:checked) .radio-desc  { color: var(--brand-mid); }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.88rem; }
+
+th {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    background: var(--surface-2);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-2);
+    vertical-align: middle;
+}
+
+td strong { color: var(--ink); font-weight: 600; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface-2); }
+
+/* ============================================================
+   SLOTS & BOOKING FLOW
+   ============================================================ */
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* .slot-btn base, :hover, and .active rules moved to the
+   "TIME SLOT PICKER" section at the bottom of this file.   */
+
+.slots-loading { display: flex; align-items: center; gap: 0.6rem; padding: 1rem 0; color: var(--ink-3); font-family: var(--font-body); font-size: 0.85rem; }
+
+/* ============================================================
+   SERVICE CARDS — landing product-card style
+   ============================================================ */
+.service-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 600px) {
+    .service-grid { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+}
+
+.service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Colored glow — same as landing .card-glow  (on ::after) */
+.service-card::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: var(--orange);
+    filter: blur(50px);
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+    pointer-events: none;
+}
+
+/* Checkmark badge — no extra HTML needed  (on ::before) */
+.service-card::before {
+    content: "✓";
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity var(--transition), transform var(--transition-smooth);
+    z-index: 1;                      /* keep above ::after glow */
+}
+
+.service-card:hover {
+    border-color: rgba(249,115,22,.35);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(249,115,22,.15);
+}
+
+.service-card:hover::after { opacity: 0.18; }
+
+/* Left accent bar via inset box-shadow
+   (both pseudo-elements are taken — glow + checkmark) */
+.service-card.active {
+    border-color: var(--orange);
+    background: var(--orange-bg);
+    transform: translateY(-8px);
+    box-shadow: 0 14px 36px rgba(249,115,22,.2), inset 3px 0 0 var(--orange);
+}
+
+.service-card.active::before { opacity: 1; transform: scale(1); }
+
+.service-card h4 {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+}
+
+.service-card p {
+    font-size: 0.85rem;
+    color: var(--ink-3);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    min-height: 1.2em;
+}
+
+.service-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--orange);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-brand  { background: var(--brand-light); color: var(--brand-color); }
+.badge-green  { background: var(--green-bg);    color: var(--green); }
+.badge-orange { background: var(--orange-bg);   color: var(--orange); }
+.badge-gray   { background: var(--surface-2);   color: var(--ink-3); border: 1px solid var(--border); }
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+.alert {
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-top: 0.75rem;
+    animation: slideDown 0.3s ease-out;
+    border-left: 3px solid transparent;
+}
+
+.alert-error   { background: var(--red-bg);     color: var(--red);         border-left-color: var(--red); }
+.alert-success { background: var(--green-bg);   color: var(--green);       border-left-color: var(--green); }
+.alert-info    { background: var(--brand-light); color: var(--brand-color); border-left-color: var(--brand-color); }
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    z-index: 9999;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.8rem 1.1rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    opacity: 0;
+    transform: translateX(1.5rem);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: auto;
+    max-width: 300px;
+    border: 1px solid transparent;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.toast-visible { opacity: 1; transform: translateX(0); }
+.toast-success { background: var(--green-bg);   color: var(--green);       border-color: rgba(22,163,74,.3); }
+.toast-error   { background: var(--red-bg);     color: var(--red);         border-color: rgba(201,76,76,.3); }
+.toast-info    { background: var(--brand-light); color: var(--brand-color); border-color: rgba(99,102,241,.3); }
+.toast-icon    { font-size: 0.9rem; flex-shrink: 0; font-weight: 700; }
+
+/* ============================================================
+   BOOKING SUMMARY BOX
+   ============================================================ */
+.summary-box {
+    background: var(--brand-light);
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.25rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.summary-main {
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--brand-color);
+    font-size: 0.9rem;
+}
+.summary-service { font-family: var(--font-body); font-size: 0.8rem; color: var(--brand-mid); margin-top: 0.2rem; }
+
+/* ============================================================
+   PUBLIC LINK BOX
+   ============================================================ */
+.public-link-box {
+    background: var(--surface-2);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.public-link-box:hover { border-color: var(--brand-mid); }
+
+.public-link-box small {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.public-link-box a {
+    font-size: 0.82rem;
+    color: var(--brand-color);
+    word-break: break-all;
+    font-weight: 500;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.public-link-box a:hover { text-decoration: underline; }
+.public-link-box .btn-copy { align-self: flex-start; margin-top: 0.2rem; }
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+.login-wrap {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+    background: var(--bg);
+    transition: background var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Blobs — same approach as landing .blob */
+.login-wrap::before,
+.login-wrap::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.login-wrap::before {
+    width: 380px; height: 380px;
+    background: var(--brand-color);
+    top: -10%; left: -8%;
+}
+
+.login-wrap::after {
+    width: 320px; height: 320px;
+    background: var(--orange);
+    bottom: -12%; right: -6%;
+}
+
+body:not(.dark-mode) .login-wrap::before,
+body:not(.dark-mode) .login-wrap::after { opacity: 0.08; }
+
+.login-logo {
+    font-family: var(--font-serif);   /* Instrument Serif — same as landing .logo */
+    font-size: 2rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+}
+
+.login-logo span { color: var(--brand-color); }
+
+.login-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-lg);
+    animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+    position: relative;
+    z-index: 1;
+}
+
+.login-title { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: var(--ink); margin-bottom: 0.25rem; letter-spacing: -0.03em; }
+.login-sub   { font-family: var(--font-body); font-size: 0.88rem; color: var(--ink-3); margin-bottom: 2rem; }
+
+.login-toggle { text-align: center; margin-top: 1.5rem; font-family: var(--font-body); font-size: 0.85rem; color: var(--ink-3); }
+.login-toggle a { color: var(--brand-color); font-weight: 500; text-decoration: none; }
+.login-toggle a:hover { text-decoration: underline; }
+
+/* ============================================================
+   STEP INDICATOR
+   ============================================================ */
+.step-title {
+    font-family: var(--font-head);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.7rem;
+    letter-spacing: -0.02em;
+}
+
+.step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--brand-color);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--ink-3);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+.modal {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+    animation: fadeIn 0.2s ease-out;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal.hidden { display: none !important; }
+
+.modal-content {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    max-width: 520px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.4);
+    position: relative;
+    animation: fadeUp 0.25s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 { font-family: var(--font-head); font-size: 1.15rem; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+
+/* ============================================================
+   CLIENT LAYOUT
+   ============================================================ */
+.client-layout { display: flex; flex-direction: column; gap: 1.5rem; max-width: 1180px; }
+
+@media (min-width: 900px) {
+    .client-layout { display: grid; grid-template-columns: 1fr 320px; align-items: start; }
+}
+
+@media (max-width: 899px) {
+    /* Cart panel stays below the booking flow on mobile */
+}
+
+.profile-content { font-size: 0.95rem; line-height: 1.6; }
+
+/* ============================================================
+   SPINNER
+   ============================================================ */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--brand-color);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp    { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn   { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.fade-in { animation: fadeUp 0.4s cubic-bezier(0.4,0,0.2,1) both; }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.hidden     { display: none !important; }
+.w-full     { width: 100%; }
+.mt-sm      { margin-top: 0.75rem; }
+.mt-md      { margin-top: 1.25rem; }
+.text-muted { color: var(--ink-3); font-size: 0.85rem; }
+.divider    { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+    header { padding: 1rem 1.25rem; }
+    .card  { padding: 1.5rem; }
+    .login-card { padding: 2rem 1.5rem; }
+    .admin-layout { padding: 1.25rem 0.75rem; gap: 1rem; }
+    .container { padding: 1.25rem 0.75rem; }
+    .btn-primary { padding: 0.8rem 1.25rem; }
+    
+    /* Responsive header changes */
+    header .flex-row { gap: 0.5rem; }
+    .btn-home span, .btn-outline-white span { display: none; }
+}
+/* ============================================================
+   LAYOUT UTILITIES — extracted from inline styles
+   ============================================================ */
+
+/* Two-column form grid (admin forms) */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+/* Span both columns in a .grid-2col */
+.col-span-2 { grid-column: span 2; }
+
+/* Margin-top overrides */
+.mt-0       { margin-top: 0; }
+.mt-xs      { margin-top: 0.35rem; }
+.mt-section { margin-top: 1.5rem; }
+
+/* Margin-bottom overrides */
+.mb-step    { margin-bottom: 0.75rem; }
+.mb-md      { margin-bottom: 1rem; }
+.mb-section { margin-bottom: 1.5rem; }
+
+/* Margin reset */
+.m-0        { margin: 0; }
+
+/* Display */
+.inline-flex { display: inline-flex; }
+
+/* Shift-hours hint bar inside the modal */
+.shift-hint {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 0.82rem;
+}
+
+/* Booking confirmed alert — slightly larger text */
+.alert-success-lg { font-size: 1rem; }
+
+/* WhatsApp contact button */
+.btn-wa {
+    border-color: #25D366 !important;
+    color: #25D366 !important;
+}
+
+/* "Ir al inicio" back-link in headers */
+.btn-home {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.8);
+    font-size: 0.82rem;
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    font-family: var(--font-head);
+    font-weight: 700;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.btn-home:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+/* Light-mode variant — header becomes paper-colored, so the button
+   needs dark ink tones to be legible (mirrors .btn-outline-white) */
+body:not(.dark-mode) .btn-home {
+    background: rgba(10,10,15,.05);
+    border-color: var(--border);
+    color: var(--ink-2);
+}
+body:not(.dark-mode) .btn-home:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+
+/* Login page back link (below logo, light palette) */
+.login-back {
+    display: block;
+    margin-bottom: 1.5rem;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    text-decoration: none;
+    text-align: center;
+    transition: color var(--transition);
+    position: relative;
+    z-index: 1;
+}
+.login-back:hover { color: var(--brand-color); }
+
+/* ============================================================
+   REGISTER PAGE — expanded card
+   ============================================================ */
+.register-card { max-width: 480px; }
+
+.register-section-label {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--brand-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.register-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.field-hint {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    line-height: 1.4;
+    margin-top: -0.1rem;
+}
+
+
+/* ============================================================
+   CART SYSTEM
+   ============================================================ */
+
+/* ── Service card qty controls ─────────────────────────────── */
+
+.qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border);
+}
+
+.qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.qty-btn:hover:not(:disabled) {
+    border-color: var(--brand-color);
+    background: var(--brand-light);
+    color: var(--brand-color);
+}
+
+.qty-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.qty-value {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 1.4rem;
+    text-align: center;
+}
+
+.qty-limit-msg {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    margin-left: 0.25rem;
+}
+
+/* Service card active state for cart (replaces old single-select .active) */
+.service-card.in-cart {
+    border-color: var(--brand-mid);
+    background: var(--brand-light);
+    box-shadow: var(--shadow-md);
+}
+
+.service-card.in-cart .qty-btn:not(:disabled) {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.service-card.in-cart .qty-value {
+    color: var(--brand-color);
+}
+
+/* ── Cart panel (aside) ─────────────────────────────────────── */
+
+.cart-panel {
+    margin-bottom: 0;
+}
+
+.cart-empty-msg {
+    font-size: 0.85rem;
+    padding: 0.5rem 0 0.25rem;
+}
+
+.cart-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-bottom: 1.25rem;
+}
+
+.cart-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.cart-item-row:last-child { border-bottom: none; }
+
+.cart-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.cart-item-name {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cart-item-meta {
+    font-size: 0.75rem;
+}
+
+.cart-item-qty-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.cart-item-qty-wrap .qty-btn {
+    width: 24px; height: 24px;
+    font-size: 1rem;
+}
+
+.cart-item-qty-wrap .qty-value {
+    font-size: 0.88rem;
+    min-width: 1.1rem;
+}
+
+.cart-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: 0.25rem;
+}
+
+.cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    margin-bottom: 0.85rem;
+    color: var(--ink-2);
+}
+
+.cart-total-row strong {
+    color: var(--ink);
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+}
+
+/* ── Cart step header (inside #date-selection) ─────────────── */
+
+.cart-step-header {
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+}
+
+.cart-step-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+}
+
+.cart-step-labels {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cart-step-label {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.cart-step-progress-bar {
+    width: 100%;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--border);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.cart-step-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--brand-color);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cart-step-service-name {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+/* ── "Siguiente turno" confirmation ────────────────────────── */
+
+.cart-slot-summary {
+    margin-bottom: 0.85rem;
+}
+
+.cart-slot-confirmed {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: var(--green-bg);
+    border: 1px solid rgba(22,163,74,.25);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+}
+
+.cart-slot-check {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--green);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.cart-slot-confirmed-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.88rem;
+}
+
+.cart-slot-confirmed-info strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* ── Multi-item cart summary (inside booking form) ─────────── */
+
+.cart-summary-box-multi {
+    background: var(--brand-light);
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.cart-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0.75rem;
+}
+
+.cart-summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(99,102,241,.12);
+}
+
+.cart-summary-row:last-child { border-bottom: none; }
+
+.cart-summary-num {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--brand-color);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.1rem;
+}
+
+.cart-summary-detail {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.83rem;
+    min-width: 0;
+}
+
+.cart-summary-detail strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.cart-summary-time-pill {
+    display: inline-block;
+    background: var(--brand-color);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: var(--radius-pill);
+    margin-left: 0.25rem;
+    font-family: var(--font-body);
+}
+
+.cart-summary-dur {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.cart-summary-total {
+    font-size: 0.82rem;
+    margin: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(99,102,241,.15);
+}
+
+/* ── Sticky mobile bar ─────────────────────────────────────── */
+
+.cart-mobile-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,.1);
+    gap: 1rem;
+    animation: slideUp 0.25s ease-out both;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.cart-mobile-bar.hidden { display: none !important; }
+
+.cart-mobile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--ink-3);
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.cart-mobile-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    min-width: 0;
+}
+
+.cart-mobile-text strong {
+    font-family: var(--font-head);
+    font-size: 0.88rem;
+    color: var(--ink);
+    white-space: nowrap;
+}
+
+.cart-mobile-text span {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cart-mobile-bar .btn-primary {
+    width: auto;
+    margin-top: 0;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* Hide on wide screens — the cart panel in the aside is always visible */
+@media (min-width: 900px) {
+    .cart-mobile-bar { display: none !important; }
+}
+
+/* Add bottom padding to main content so the mobile bar doesn't overlap */
+@media (max-width: 899px) {
+    body:has(.cart-mobile-bar:not(.hidden)) main {
+        padding-bottom: 5rem;
+    }
+}
+
+/* ── Success bookings list ──────────────────────────────────── */
+
+.success-bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.success-booking-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 0.875rem;
+    animation: fadeUp 0.3s ease both;
+}
+
+.success-booking-ok  { background: var(--green-bg);  border-color: rgba(22,163,74,.25); }
+.success-booking-err { background: var(--red-bg);    border-color: rgba(201,76,76,.25); }
+
+.success-booking-icon {
+    flex-shrink: 0;
+    font-weight: 700;
+    width: 20px;
+    text-align: center;
+    margin-top: 0.1rem;
+}
+
+.success-booking-ok  .success-booking-icon { color: var(--green); }
+.success-booking-err .success-booking-icon { color: var(--red); }
+
+.success-booking-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.success-booking-info strong { color: var(--ink); font-weight: 600; }
+.success-booking-info span   { font-size: 0.8rem; }
+.success-booking-error-msg   { color: var(--red); font-size: 0.78rem; }
+
+/* ── Responsive tweaks for cart ─────────────────────────────── */
+
+@media (max-width: 600px) {
+    .cart-step-meta { flex-wrap: wrap; }
+    .cart-summary-row { flex-wrap: wrap; }
+    .cart-summary-dur { display: none; }
+}
+
+/* ============================================================
+   STAFF PICKER — between slots and next/confirm button
+   ============================================================ */
+
+.staff-pick-section {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    background: var(--surface-2);
+    animation: slideDown 0.25s ease-out;
+}
+
+.staff-pick-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.staff-pick-label {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--brand-color);
+}
+
+/* The select itself inherits global input styles — just remove the extra margin */
+.staff-pick-section select { margin-top: 0; }
+
+/* ── Staff name in confirmed-slot summary ───────────────────── */
+
+.cart-slot-staff {
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.3rem;
+}
+
+/* ── Staff column in full cart summary ──────────────────────── */
+
+.cart-summary-staff {
+    font-size: 0.78rem;
+    display: block;
+    color: var(--ink-3);
+    margin-top: 0.15rem;
+}
+
+/* ── Staff name in success list rows ────────────────────────── */
+
+.success-booking-info span { display: block; }
+
+/* ============================================================
+   CUSTOM CALENDAR WIDGET
+   ============================================================ */
+
+/* The native input is kept in the DOM for JS event compatibility
+   but is completely invisible and non-interactive */
+.cal-hidden-input {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.custom-calendar {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    user-select: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.custom-calendar:focus-within {
+    border-color: var(--brand-mid);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Navigation row ─────────────────────────────────────────── */
+
+.cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+}
+
+.cal-nav-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.cal-nav-btn:hover:not(:disabled) {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+    background: var(--brand-light);
+}
+
+.cal-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.cal-month-label {
+    font-family: var(--font-head);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    text-align: center;
+    flex: 1;
+}
+
+/* ── Weekday header row ─────────────────────────────────────── */
+
+.cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 0.6rem 0.5rem 0.2rem;
+    gap: 2px;
+}
+
+.cal-weekdays span {
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0.15rem 0;
+}
+
+/* Saturday + Sunday: slightly different hue */
+.cal-weekdays span:nth-child(6),
+.cal-weekdays span:nth-child(7) { color: var(--brand-mid); }
+
+/* ── Day grid ───────────────────────────────────────────────── */
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 0.2rem 0.5rem 0.75rem;
+}
+
+.cal-day {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), color var(--transition),
+                transform 0.15s ease, box-shadow var(--transition);
+    position: relative;
+    outline: none;
+}
+
+.cal-day:focus-visible {
+    box-shadow: 0 0 0 2px var(--brand-color);
+}
+
+.cal-day:hover:not(:disabled):not(.cal-day--selected):not(.cal-day--other) {
+    background: var(--brand-light);
+    color: var(--brand-color);
+    transform: scale(1.08);
+}
+
+/* Today — subtle dot indicator */
+.cal-day--today {
+    font-weight: 700;
+    color: var(--brand-color);
+}
+
+.cal-day--today::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--brand-color);
+}
+
+/* Selected — filled brand circle */
+.cal-day--selected,
+.cal-day--selected:hover {
+    background: var(--brand-color) !important;
+    color: #fff !important;
+    font-weight: 700;
+    box-shadow: var(--shadow-brand);
+    transform: scale(1.1);
+}
+
+.cal-day--selected::after { display: none; }
+
+/* Disabled (past dates or non-working days) */
+.cal-day--disabled {
+    opacity: 0.22;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Adjacent-month padding days */
+.cal-day--other {
+    opacity: 0.12;
+    pointer-events: none;
+    cursor: default;
+}
+
+/* ============================================================
+   TIME SLOT PICKER — grouped by time of day
+   ============================================================ */
+
+/* Remove the step-title inside #slots-container —
+   replaced by section group labels */
+.slots-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: var(--font-head);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+
+.slots-section {
+    margin-bottom: 1.1rem;
+}
+
+.slots-section:last-child { margin-bottom: 0; }
+
+.slots-section-label {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 0.55rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.slots-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.slots-inner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 0.4rem;
+}
+
+/* ── Individual slot button ─────────────────────────────────── */
+
+/* Override the old pill-shaped .slot-btn entirely */
+.slot-btn {
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--ink-2);
+    font-family: var(--font-head);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    padding: 0.55rem 0.3rem;
+    text-align: center;
+    transition: all var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-xs);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle shimmer on hover */
+.slot-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--brand-color);
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+}
+
+.slot-btn:hover {
+    border-color: var(--brand-mid);
+    color: var(--brand-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99,102,241,.15);
+}
+
+.slot-btn:hover::before { opacity: 0.06; }
+
+.slot-btn.active {
+    background: var(--brand-color);
+    border-color: var(--brand-color);
+    color: #fff;
+    box-shadow: var(--shadow-brand);
+    transform: translateY(-3px) scale(1.04);
+}
+
+.slot-btn.active::before { opacity: 0; }
+
+.slot-time {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 400px) {
+    .cal-day { font-size: 0.78rem; }
+    .slots-inner-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+}
+
+/* ============================================================
+   BOOKINGS TABLE — client stack / group rows
+   ============================================================ */
+
+/* ── Stack header row ───────────────────────────────────────── */
+
+.booking-stack-header .booking-stack-cell {
+    padding: 0;
+}
+
+.booking-stack-header {
+    background: var(--surface-2);
+    border-bottom: 2px solid var(--border);
+    transition: background var(--transition);
+}
+
+.booking-stack-header:hover {
+    background: var(--surface-2);
+}
+
+/* Left accent bar — brand color, grows on open */
+.booking-stack-header td {
+    background: var(--surface-2);   /* explicit on <td> — covers full colspan width */
+    border-left: 3px solid transparent;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.booking-stack-header.booking-stack-open td {
+    border-left-color: var(--brand-color);
+    background: color-mix(in srgb, var(--brand-light) 40%, var(--surface-2) 60%);
+}
+
+/* The full-width clickable toggle button.
+   flex:1 1 0 makes it grow to fill whatever space the cancel button leaves. */
+.booking-stack-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1 1 0;         /* grow to fill — replaces the old width:100% that got flex-shrunk */
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    flex-wrap: wrap;
+}
+
+.booking-stack-toggle:hover {
+    background: rgba(99,102,241,.04);
+}
+
+/* Chevron — rotates 90° when expanded */
+.booking-stack-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--ink-3);
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                color var(--transition);
+}
+
+.booking-stack-open .booking-stack-chevron {
+    transform: rotate(90deg);
+    color: var(--brand-color);
+}
+
+/* Client name + phone */
+.booking-stack-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.booking-stack-identity strong {
+    font-size: 0.9rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.booking-stack-identity span {
+    font-size: 0.75rem;
+}
+
+/* Count badge */
+.booking-stack-count {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+}
+
+/* Service badges inline */
+.booking-stack-services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+/* Next appointment preview */
+.booking-stack-next {
+    font-size: 0.78rem;
+    margin-left: auto;       /* push to the right of the toggle area */
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* "Cancelar todos" button lives beside the toggle in a flex container */
+.booking-stack-cell {
+    padding: 0;
+}
+
+.booking-stack-inner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.booking-stack-cancel-all {
+    flex-shrink: 0;      /* never compress — keeps toggle's flex:1 working correctly */
+    margin-right: 1rem;
+}
+
+/* ── Child rows ─────────────────────────────────────────────── */
+
+.booking-child {
+    background: var(--surface);
+}
+
+/* Indent via a subtle left border on the first cell */
+.booking-child-indent {
+    padding-left: 2.25rem !important;
+    position: relative;
+}
+
+.booking-child-indent::before {
+    content: '';
+    position: absolute;
+    left: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+/* Fade-in animation for child rows on expand */
+@keyframes childRowIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.booking-child-visible {
+    animation: childRowIn 0.2s ease both;
+}
+
+/* Last child row gets a stronger bottom separator before the next group */
+.booking-child:last-child,
+.booking-child + tr:not(.booking-child) {
+    border-bottom: 2px solid var(--border);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    .booking-stack-next    { display: none; }
+    .booking-stack-services { display: none; }
+}
+
+/* ============================================================
+   ADMIN — BRAND COLOR PICKER
+   ============================================================ */
+
+.color-picker-group { gap: 0.65rem; }
+
+/* ── Swatch grid ────────────────────────────────────────────── */
+
+.color-swatches {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    padding: 0.85rem;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.color-swatch {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    background: var(--sw);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    position: relative;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.color-swatch:hover {
+    transform: scale(1.18);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--sw) 55%, transparent);
+}
+
+.color-swatch:focus-visible {
+    box-shadow: 0 0 0 3px var(--sw);
+}
+
+/* Active / selected state */
+.color-swatch--active {
+    border-color: var(--ink);
+    transform: scale(1.18);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sw) 35%, transparent);
+}
+
+/* Tick mark on active swatch */
+.color-swatch--active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12l5 5L20 7' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 60% no-repeat;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+}
+
+/* Dark swatch (Noche) needs a dark tick */
+.color-swatch[data-color="#0f172a"].color-swatch--active::after {
+    filter: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12l5 5L20 7' stroke='%23cbd5e1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ── Preview bar ────────────────────────────────────────────── */
+
+.color-preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+    transition: border-color var(--transition);
+}
+
+.color-preview-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background var(--transition);
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+
+.color-preview-name {
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+}
+
+.color-preview-hex {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   CLIENT PAGE — BRAND COLOR PRESENCE
+   ============================================================ */
+
+/* ── Header: accent strip at the bottom of the sticky bar ───── */
+
+header {
+    border-bottom-width: 0;                     /* remove old 1px border */
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--brand-header-strip, var(--brand-color));
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Business name colored with brand — scoped to #business-name (index.html only)
+   so it never affects the admin h1 which contains .header-badge text */
+#business-name {
+    background: linear-gradient(
+        135deg,
+        var(--brand-color) 0%,
+        var(--brand-mid, #818cf8) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: var(--brand-color);
+}
+
+body:not(.dark-mode) #business-name {
+    -webkit-text-fill-color: transparent;
+}
+
+/* ── Step number circles — already brand-colored; add glow ───── */
+
+.step-num {
+    box-shadow: 0 0 0 4px var(--brand-light, rgba(99,102,241,.12)),
+                0 2px 8px  var(--brand-light, rgba(99,102,241,.12));
+}
+
+/* ── Calendar: stronger brand presence ───────────────────────── */
+
+/* Selected day pill gets a glow ring */
+.cal-day--selected,
+.cal-day--selected:hover {
+    box-shadow: var(--shadow-brand), 0 0 0 3px var(--brand-light) !important;
+}
+
+/* Month label takes brand tint */
+.cal-month-label {
+    color: var(--brand-color);
+}
+
+/* Nav buttons filled with brand-light on active month */
+.cal-nav {
+    background: linear-gradient(
+        to bottom,
+        var(--brand-light, rgba(99,102,241,.08)) 0%,
+        var(--surface-2) 100%
+    );
+}
+
+/* ── Time slots: active gets brand glow ring ─────────────────── */
+
+.slot-btn.active {
+    box-shadow: var(--shadow-brand), 0 0 0 2px var(--brand-light) !important;
+}
+
+/* Section labels mirror brand color */
+.slots-section-label {
+    color: var(--brand-color);
+}
+
+.slots-section-label::after {
+    background: var(--brand-light);
+    height: 1.5px;
+}
+
+/* ── Summary box: left border uses brand color ───────────────── */
+
+.summary-box {
+    border-left: 3px solid var(--brand-color);
+    border-color: var(--brand-color);          /* overrides --border-focus for full brand sync */
+}
+
+/* ── Staff picker section label ─────────────────────────────── */
+
+.staff-pick-label {
+    color: var(--brand-color);
+}
+
+.staff-pick-section {
+    border-color: var(--brand-light);
+}
+
+.staff-pick-section:focus-within {
+    border-color: var(--brand-mid);
+    background: color-mix(in srgb, var(--brand-light) 30%, var(--surface-2) 70%);
+}
+
+/* ── Cart step progress bar ─────────────────────────────────── */
+
+.cart-step-label,
+.cart-step-service-name {
+    color: var(--brand-color);
+}
+
+/* ── Slot confirmed green badge → inherit brand for pill ──────── */
+
+.cart-summary-time-pill {
+    background: var(--brand-color);
+}
+
+/* ── Cart proceed button and mobile bar ──────────────────────── */
+
+.cart-mobile-bar {
+    border-top-color: var(--brand-light);
+}
+
+/* ============================================================
+   BRANDING SECTION — admin uploaders
+   ============================================================ */
+
+#branding-section {
+    animation: fadeUp 0.3s ease both;
+}
+
+.branding-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 700px) {
+    .branding-grid { grid-template-columns: 1fr; }
+}
+
+/* Wide slot spans both columns (background image) */
+.branding-slot--wide {
+    grid-column: 1 / -1;
+}
+
+/* ── Slot wrapper ───────────────────────────────────────────── */
+
+.branding-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.branding-slot-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.branding-slot-label {
+    font-family: var(--font-head);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+}
+
+.branding-slot-hint {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+}
+
+/* ── Drop zone ──────────────────────────────────────────────── */
+
+.branding-dropzone {
+    display: block;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-height: 96px;
+}
+
+.branding-dropzone--wide { min-height: 80px; }
+
+.branding-dropzone:hover,
+.branding-dropzone--drag {
+    border-color: var(--brand-color);
+    background: var(--brand-light);
+}
+
+.branding-dropzone--has-file {
+    border-style: solid;
+    border-color: var(--brand-mid);
+    min-height: unset;
+}
+
+/* Hide the native file input */
+.branding-file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.branding-dropzone-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.5rem 1rem;
+    pointer-events: none;
+}
+
+.branding-dz-icon { font-size: 1.6rem; line-height: 1; }
+
+.branding-dz-text {
+    font-size: 0.8rem;
+    color: var(--ink-3);
+    font-family: var(--font-body);
+}
+
+/* ── Preview ────────────────────────────────────────────────── */
+
+.branding-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.branding-preview img {
+    display: block;
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    border-radius: var(--radius-xs);
+    background: repeating-conic-gradient(var(--surface-2) 0% 25%, transparent 0% 50%)
+                0 0 / 14px 14px;   /* checkerboard for transparency */
+}
+
+.branding-preview--bg img { max-height: 160px; object-fit: cover; width: 100%; }
+
+.branding-preview-meta {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    font-family: var(--font-body);
+}
+
+.branding-remove-btn {
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid rgba(201,76,76,.4);
+    color: var(--red);
+    font-size: 0.72rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.branding-remove-btn:hover {
+    background: var(--red-bg);
+    border-color: var(--red);
+}
+
+/* ── Save row ───────────────────────────────────────────────── */
+
+.branding-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+}
+
+/* ============================================================
+   BUSINESS BANNER
+   Full-width strip between header and main.
+   Shows background image + business info on top.
+   ============================================================ */
+
+.business-banner {
+    position: relative;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    min-height: 0;        /* collapses to nav height when no branding loaded */
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;   /* content sits at the bottom of the banner */
+    background: var(--surface-2);
+    border-bottom: 0px solid var(--border);
+    animation: fadeIn 0.5s ease both;
+}
+
+/* When background image is present: expand to full banner height */
+.business-banner.banner--has-bg { min-height: 220px; }
+
+/* ── Nav row — always visible at top of banner ──────────────── */
+
+.banner-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.9rem 0;
+    flex-shrink: 0;
+}
+
+/* Home link — glass pill matching landing style */
+.banner-nav-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    transition: all var(--transition);
+    flex-shrink: 0;
+    /* Glass on image banner */
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.22);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.banner-nav-home:hover {
+    background: rgba(255,255,255,0.22);
+    transform: translateX(-2px);
+}
+
+/* Solid style when no background image */
+.business-banner:not(.banner--has-bg) .banner-nav-home {
+    background: var(--surface);
+    color: var(--ink-2);
+    border-color: var(--border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.business-banner:not(.banner--has-bg) .banner-nav-home:hover {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+/* Business name in navbar — center slot */
+.banner-nav-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Glass text on image */
+    color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.45);
+}
+
+.business-banner:not(.banner--has-bg) .banner-nav-title {
+    color: var(--ink);
+    text-shadow: none;
+}
+
+/* Theme toggle inherits existing styles but needs white tint on image */
+.business-banner.banner--has-bg .btn-theme-toggle {
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+}
+
+.business-banner.banner--has-bg .btn-theme-toggle:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.38);
+}
+
+/* Banner body (identity + info) — shown only when branding loads */
+.banner-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 1.5rem;
+    width: 100%;
+}
+
+/* ── No background image — whole banner looks like a navbar ─── */
+.business-banner:not(.banner--has-bg) {
+    background: linear-gradient(to bottom, rgba(245,242,236,0.71), rgba(245,242,236,0.60));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+body.dark-mode .business-banner:not(.banner--has-bg) {
+    background: linear-gradient(to bottom, rgba(10,10,15,0.69), rgba(10,10,15,0.56));
+}
+
+/* ── Background image layer ─────────────────────────────────── */
+
+.banner-bg {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transform: scale(1.03);          /* slight scale to hide any edge artefacts */
+    transition: transform 8s ease;   /* subtle slow-zoom on load */
+}
+
+.business-banner:hover .banner-bg { transform: scale(1.06); }
+
+/* ── Gradient overlay — readable text regardless of image ───── */
+
+.banner-overlay {
+    position: absolute;
+    inset: 0;
+    /* Dark vignette: strong at bottom where text sits, lighter at top */
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0)    0%,
+        rgba(0,0,0,0.18) 40%,
+        rgba(0,0,0,0.62) 100%
+    );
+    pointer-events: none;
+}
+
+/* When no background image, the banner itself already paints a paper/ink
+   gradient — the overlay must stay transparent so that gradient can show.
+   (Previously this was `background: var(--surface-2)`, which covered up the
+   banner's own gradient and made the navbar look like a flat block.)        */
+.business-banner:not(.banner--has-bg) .banner-overlay {
+    background: transparent;
+}
+
+/* ── Content ─────────────────────────────────────────────────── */
+
+.banner-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 100%;
+    /* Stretch content top-to-bottom inside the banner */
+    align-self: stretch;
+    justify-content: space-between;
+}
+
+/* Identity row: logo + name */
+.banner-identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.banner-logo {
+    height: 48px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+    border-radius: var(--radius-xs);
+    flex-shrink: 0;
+    /* Drop shadow so it reads on both light and dark images */
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+}
+
+.banner-name {
+    font-family: var(--font-head);
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin: 0;
+    /* White text with shadow when bg image is present */
+    color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.45);
+}
+
+/* When no bg image, use normal ink color */
+.business-banner:not(.banner--has-bg) .banner-name {
+    color: var(--ink);
+    text-shadow: none;
+}
+
+/* ── Info row ────────────────────────────────────────────────── */
+
+.banner-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.88);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    max-width: 640px;
+    margin: 0;
+}
+
+.business-banner:not(.banner--has-bg) .banner-desc {
+    color: var(--ink-3);
+    text-shadow: none;
+}
+
+/* Meta chips row */
+.banner-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.banner-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    padding: 0.28rem 0.75rem 0.28rem 0.5rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: background var(--transition), transform var(--transition);
+    /* Glass chip on image */
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.banner-meta-item:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+}
+
+/* On no-image banner: solid chip style */
+.business-banner:not(.banner--has-bg) .banner-meta-item {
+    background: var(--surface);
+    color: var(--ink-2);
+    border-color: var(--border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.business-banner:not(.banner--has-bg) .banner-meta-item:hover {
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+/* WhatsApp chip accent */
+.banner-wa { border-color: rgba(37,211,102,0.5); }
+.banner-wa:hover { background: rgba(37,211,102,0.2) !important; }
+
+.banner-meta-icon { font-size: 0.9rem; flex-shrink: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .business-banner.banner--has-bg { min-height: 160px; }
+    .banner-name { font-size: 1.25rem; }
+    .banner-logo { height: 36px; }
+    .banner-body { padding-bottom: 1rem; }
+    .banner-desc { font-size: 0.82rem; }
+    .banner-nav-title { font-size: 0.88rem; }
+    .banner-nav-home { font-size: 0.78rem; padding: 0.28rem 0.7rem; }
+}
+
+/* ============================================================
+   SITE FOOTER  (index.html)
+   Multi-column footer with brand block on the left, link columns
+   on the right, and a copyright bar at the bottom.  Uses the same
+   paper / ink palette as the rest of the page.
+   ============================================================ */
+
+/* Sticky-footer layout: only applied on pages that actually have a
+   .site-footer (index.html), so admin/login/register are untouched.
+   Body becomes a flex column, main grows to fill, footer sits at
+   the bottom on short pages.                                        */
+body:has(.site-footer) {
+    display: flex;
+    flex-direction: column;
+}
+
+body:has(.site-footer) > main {
+    flex: 1 0 auto;
+}
+
+body:has(.site-footer) > .site-footer {
+    flex-shrink: 0;
+}
+
+.site-footer {
+    margin-top: 4rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+}
+
+/* The inner row uses the .container class in HTML so it inherits
+   max-width and horizontal padding.  We override vertical padding
+   for a roomier footer, and turn it into a 1-col → 2-col grid.     */
+.site-footer-inner {
+    padding-top: 3rem;
+    padding-bottom: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    max-width: 1180px;              /* wider than banner container */
+}
+
+@media (min-width: 640px) {
+    .site-footer-inner {
+        grid-template-columns: 1.1fr 1.4fr;
+        gap: 3rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* ── Brand block ─────────────────────────────────────────────── */
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.footer-logo-text {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: 1;
+}
+
+.footer-logo-dot {
+    color: var(--brand-color);
+}
+
+.footer-tagline {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--ink-3);
+    margin: 0;
+    max-width: 22ch;
+}
+
+/* ── Link columns ────────────────────────────────────────────── */
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    align-content: start;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-col-title {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-2);
+    margin-bottom: 0.35rem;
+}
+
+.footer-col a {
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color var(--transition);
+    width: fit-content;
+}
+
+.footer-col a:hover {
+    color: var(--brand-color);
+}
+
+/* ── Bottom copyright bar ────────────────────────────────────── */
+.footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 1.1rem 1rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    font-family: var(--font-body);
+}
+
+/* ── Make room for the sticky mobile cart bar so it doesn't
+      cover the footer copyright on short pages ──────────────── */
+@media (max-width: 899px) {
+    body:has(.cart-mobile-bar:not(.hidden)) .site-footer {
+        padding-bottom: 70px;
+    }
+}
+
+/* ============================================================
+   CATÁLOGO DE SERVICIOS (contenedor ordenado)
+   ============================================================ */
+.service-catalog {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    max-height: 62vh;
+    overflow-y: auto;
+}
+
+.service-catalog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.service-catalog-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.service-catalog-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.service-catalog-hint {
+    font-size: 0.82rem;
+}
+
+/* Grid interno del catálogo: filas horizontales de a dos */
+.service-catalog .service-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+    .service-catalog .service-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.service-catalog .service-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.service-catalog .service-card p {
+    flex: 1;
+}
+/* ============================================================
+   PLANES DE SUSCRIPCIÓN (público)
+   ============================================================ */
+.plans-public-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.plan-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.plan-card .plan-name {
+    font-family: var(--font-head);
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.plan-card .plan-price {
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--brand-color);
+    letter-spacing: -0.02em;
+}
+
+.plan-card .plan-per {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-3);
+    margin-left: 0.15rem;
+}
+
+.plan-card .plan-meta {
+    color: var(--ink-3);
+    font-size: 0.85rem;
+}
+
+/* Selección de clases en la suscripción pública */
+.subs-slots-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+}
+
+.subs-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.subs-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.subs-slot:has(input:checked) {
+    border-color: var(--brand-color);
+    background: var(--brand-light);
+}
+
+.subs-slot-time {
+    flex: 1;
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.subs-slot-cap {
+    color: var(--ink-3);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.subs-slot--full {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   PESTAÑAS DE NAVEGACIÓN (página pública)
+   ============================================================ */
+.public-tabs-nav {
+    display: inline-flex;
+    gap: 0.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem;
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.public-tabs-nav .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-3);
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.public-tabs-nav .tab-btn:hover { color: var(--ink); }
+
+.public-tabs-nav .tab-btn.active {
+    background: var(--brand-color);
+    color: #fff;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeUp 0.3s ease; }
