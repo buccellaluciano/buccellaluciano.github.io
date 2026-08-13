@@ -46,7 +46,7 @@
 
   var appFrame = document.getElementById("appFrame");
   var APP_URLS = {
-    legacy: "apps/legacy/index.html",
+    legacy: "https://flegacy.netlify.app/",
     pro: "apps/pro/landing.html"
   };
   var activeApp = null;
