@@ -2,8 +2,9 @@
   var PANELS = {
     proyectos: {
       title: "Proyectos",
-      html: "<p>Estas son las aplicaciones del portafolio. Por ahora solo hay una app publicada:</p>" +
-            "<ul><li><strong>Legacy</strong> - simulador de carrera futbolística (⚽).</li></ul>" +
+      html: "<p>Estas son las aplicaciones del portafolio:</p>" +
+            "<ul><li><strong>Legacy</strong> - simulador de carrera futbolística (⚽).</li>" +
+            "<li><strong>Booking</strong> - turnos y suscripciones para negocios (📅).</li></ul>" +
             "<p>El resto de los íconos del dock son placeholders para futuros proyectos.</p>"
     },
     contacto: {
@@ -44,7 +45,10 @@
   var dockClose = document.getElementById("dockClose");
 
   var appFrame = document.getElementById("appFrame");
-  var APP_URLS = { legacy: "apps/legacy/index.html" };
+  var APP_URLS = {
+    legacy: "apps/legacy/index.html",
+    pro: "apps/pro/landing.html"
+  };
   var activeApp = null;
 
   function openApp(key) {
