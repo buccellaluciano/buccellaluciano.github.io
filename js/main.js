@@ -4,7 +4,7 @@
       title: "Proyectos",
       html: "<p>Estas son las aplicaciones del portafolio:</p>" +
             "<ul><li><strong>Legacy</strong> - simulador de carrera futbolística (⚽).</li>" +
-            "<li><strong>Booking</strong> - turnos y suscripciones para negocios (📅).</li></ul>" +
+            "<li><strong>ezbiz</strong> - turnos y suscripciones para negocios (📅).</li></ul>" +
             "<p>El resto de los íconos del dock son placeholders para futuros proyectos.</p>"
     },
     contacto: {
