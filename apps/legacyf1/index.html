@@ -15,15 +15,10 @@
     <span class="game-title">🏎️ LEGACY GP</span>
     <button id="btn-update">🆕 Update</button>
     <button id="btn-instructions">❓ Instrucciones</button>
-    <button id="btn-sim-mode">▶ Simular: 1 temporada</button>
-    <button id="btn-gpcard" class="hidden">🎬 Cards GP: ON</button>
-    <button id="btn-resultcard" class="hidden">🏁 Avisos: ON</button>
-    <button id="btn-mute">🔊 Sonido: ON</button>
-    <button id="btn-contextual">🎨 Color Contextual: OFF</button>
   </div>
 
   <div id="screen-create" class="fade-in panel">
-    <h1>🏎️ Crear Piloto</h1>
+    <h1> Crear Piloto</h1>
     <div class="create-layout">
       <div class="create-inputs">
         <div class="field">
@@ -197,10 +192,12 @@
       <footer class="game-footer">
         <div id="action-bar">
           <button id="btn-reject-all" class="btn-danger hidden">❌ Rechazar todas</button>
+          <button id="btn-sim-mode">▶ Simular: 1 temporada</button>
           <button id="btn-advance">▶ Simular</button>
-          <button id="btn-shop">🛒 Tienda</button>
-          <button id="btn-vitrina">🏆 Vitrina</button>
-          <button id="btn-retire-early" class="btn-danger">🚪 Retirarse</button>
+          <button id="btn-shop">Shop</button>
+          <button id="btn-vitrina">Vitrina</button>
+          <button id="btn-config">⚙️</button>
+          <button id="btn-retire-early" class="btn-danger">Retirarse</button>
           <div id="retired-notice" class="retired-notice hidden">
             <span>🏁 Tu piloto se retiró.</span>
             <button id="btn-view-summary" class="btn-success">📋 Ver resumen</button>
@@ -242,6 +239,9 @@
           <span id="gp-card-location"></span>
           <span id="gp-card-date"></span>
         </div>
+        <div class="gp-card-meta2">
+          <span id="gp-card-record"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -254,6 +254,23 @@
         <div class="gp-card-name" id="result-title"></div>
         <div class="gp-card-meta"><span id="result-gp"></span></div>
       </div>
+    </div>
+  </div>
+
+  <div id="live-overlay" class="hidden gp-overlay">
+    <div class="gp-card live-panel">
+      <div class="live-head">
+        <span id="live-gp">🏁 CARRERA EN VIVO</span>
+        <span id="live-lap">Vuelta 1/58</span>
+        <span id="live-fl">VR —</span>
+      </div>
+      <div class="live-table">
+        <div class="live-colhead">
+          <span>#</span><span>Piloto</span><span>Gap</span><span>VR</span><span>Ade</span>
+        </div>
+        <div id="live-rows"></div>
+      </div>
+      <div class="live-foot"><button id="btn-live-skip" class="btn-danger">⏩ Saltar</button></div>
     </div>
   </div>
 
@@ -472,9 +489,54 @@
     </div>
   </div>
 
+  <div id="modal-settings" class="hidden vitrina-overlay fade-in">
+    <div class="vitrina-panel settings-panel">
+      <div class="vitrina-header">
+        <h2>⚙️ Configuración</h2>
+        <button id="btn-close-settings">❌</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-row">
+          <span class="settings-label">🏁 Modo simular</span>
+          <div class="seg" id="settings-mode">
+            <button type="button" data-mode="race">Carrera</button>
+            <button type="button" data-mode="mid">Media temp.</button>
+            <button type="button" data-mode="season">Temporada</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🎬 Cards GP</span>
+          <label class="switch"><input type="checkbox" id="sw-gpcard"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🏁 Avisos de resultado</span>
+          <label class="switch"><input type="checkbox" id="sw-resultcard"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🎬 En vivo (vuelta a vuelta)</span>
+          <label class="switch"><input type="checkbox" id="sw-anim"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🔊 Sonido</span>
+          <label class="switch"><input type="checkbox" id="sw-mute"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🎨 Color contextual</span>
+          <label class="switch"><input type="checkbox" id="sw-contextual"><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">📌 Fijar grid en jugador</span>
+          <label class="switch"><input type="checkbox" id="sw-pinplayer"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/gp_records.js"></script>
+<script src="js/gp_records_f2.js"></script>
 <script src="js/state.js"></script>
 <script src="js/gp_info.js"></script>
 <script src="js/supabase.js"></script>

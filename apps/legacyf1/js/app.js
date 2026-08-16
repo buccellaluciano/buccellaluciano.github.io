@@ -2,6 +2,30 @@
 (function () {
   const el = id => document.getElementById(id);
 
+  /* Icono de página aleatorio: una pista al azar define el favicon (imagen de
+     OpenF1) y otra define la bandera que acompaña el título. */
+  function randomGp() { return pickRandom(GP_CALENDAR); }
+
+  const _gpFav = randomGp();
+  const _imgFav = _gpFav && GP_INFO[_gpFav.code] && GP_INFO[_gpFav.code].image;
+  if (_imgFav) {
+    const _linkFav = document.querySelector('link[rel="icon"]');
+    if (_linkFav) _linkFav.href = _imgFav;
+  }
+
+  /* Título de la página: icono de pista aleatorio acompañando "LEGACY GP". */
+  const _gpTitle = randomGp();
+  if (_gpTitle) {
+    const _titleEl = document.querySelector(".game-title");
+    const _iconTitle = _gpTitle.code && GP_INFO[_gpTitle.code] && GP_INFO[_gpTitle.code].image;
+    if (_titleEl) {
+      _titleEl.innerHTML = _iconTitle
+        ? `<img class="game-title-icon" src="${_iconTitle}" alt=""> LEGACY GP`
+        : `🏎️ LEGACY GP`;
+    }
+    if (_gpTitle.name) document.title = `${_gpTitle.name} · Legacy GP`;
+  }
+
   function escapeHTML(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -11,6 +35,18 @@
       .replace(/'/g, "&#39;");
   }
 
+  /* Tiempo de vuelta en M:SS.d (décimas). Internamente los tiempos son segundos. */
+  function fmtLapTime(s) {
+    if (s == null || !isFinite(s)) return "";
+    const m = Math.floor(s / 60);
+    return `${m}:${(s % 60).toFixed(1).padStart(4, "0")}`;
+  }
+
+  function driverNameOf(dorsal) {
+    const d = F1_DRIVERS.find(x => x.dorsal === dorsal);
+    return d ? d.name : (dorsal != null ? "#" + dorsal : null);
+  }
+
   let selectedStyle = null;
   let forcedOffers = false;
   let promotionOffers = false;
@@ -18,6 +54,8 @@
   let simMode = "season"; // race | mid | season
   let gpCardOn = localStorage.getItem("gpcard") !== "off";
   let resultCardOn = localStorage.getItem("resultcard") !== "off";
+  let animOn = localStorage.getItem("anim") === "on"; // vista vuelta a vuelta de la última carrera
+  let pinPlayerOn = localStorage.getItem("pinplayer") === "on"; // mantener la grilla centrada en el jugador
   let betweenSeasons = false; // entre temporadas: ofertas + evaluación, botón "Siguiente temporada"
   let inPreseason = false; // pre-season de una temporada nueva (sin simular todavía)
 
@@ -627,6 +665,15 @@
     el("gp-card-type").textContent = info.type || "";
     el("gp-card-location").textContent = info.location ? "📍 " + info.location : "";
     el("gp-card-date").textContent = "📅 " + player.year;
+    const record = (player.category === "F1" ? GP_RECORDS : GP_RECORDS_F2)[gp.code];
+    const recEl = el("gp-card-record");
+    if (record) {
+      const poleName = driverNameOf(record.poleDriver);
+      recEl.textContent = `${record.laps} vueltas · Pole ${fmtLapTime(record.pole)}${poleName ? " (" + poleName + ")" : ""} · VR ${fmtLapTime(record.fl)}`;
+      recEl.style.display = "";
+    } else {
+      recEl.style.display = "none";
+    }
     const img = el("gp-card-img");
     if (info.image) { img.src = info.image; img.style.display = ""; }
     else img.style.display = "none";
@@ -675,6 +722,147 @@
       overlay.classList.remove("active");
       overlay.classList.add("hidden");
     }, 2200);
+  }
+
+  /* --- Vista en vivo vuelta a vuelta --- */
+
+  const LIVE_MS = 240; // ponytail: ms por vuelta en la animación. Tope: más lento = más drama, más rápido = resumen ágil.
+  let liveCtl = null; // { gen, timer, grid, onDone }
+  let gapCache = {}; // nombre -> último gap mostrado (para el conteo animado)
+
+  function renderLivePanel(snap) {
+    el("live-lap").textContent = snap.lap != null ? `Vuelta ${snap.lap}/${snap.totalLaps}` : snap.title;
+    const vrTxt = snap.fl ? `${fmtLapTime(snap.fl.time)} (${snap.fl.name})` : (snap.flDriver || "");
+    el("live-fl").textContent = vrTxt ? `VR ${vrTxt}` : "VR —";
+    const rowsEl = el("live-rows");
+    /* FLIP: capturar posición previa de cada fila para animar el reordenamiento. */
+    const oldRects = {};
+    rowsEl.querySelectorAll(".live-row").forEach(r => {
+      oldRects[r.dataset.name] = r.getBoundingClientRect().top;
+    });
+    rowsEl.innerHTML = snap.order.map((d, i) => `
+      <div class="live-row${d.isPlayer ? " player" : ""}${d.out ? " out" : ""}" data-name="${escapeHTML(d.name)}">
+        <span class="live-pos">${d.out ? "OUT" : d.pos}</span>
+        <span class="live-name"><i style="background:${teamColorOf(d.team)}"></i>${escapeHTML(d.name)}</span>
+        <span class="live-gap" data-i="${i}"></span>
+        <span class="live-best">${d.best != null ? (typeof d.best === "number" ? fmtLapTime(d.best) : d.best) : ""}</span>
+        <span class="live-ov">${d.overtakes}</span>
+      </div>`).join("");
+    rowsEl.querySelectorAll(".live-gap").forEach(span => {
+      const d = snap.order[+span.dataset.i];
+      if (d) renderGap(span, d.name, d.gap);
+    });
+    /* FLIP: animar el movimiento de las filas a su nueva posición. */
+    rowsEl.querySelectorAll(".live-row").forEach(r => {
+      const prevTop = oldRects[r.dataset.name];
+      if (prevTop == null) return;
+      const delta = prevTop - r.getBoundingClientRect().top;
+      if (Math.abs(delta) < 1) return;
+      r.style.transition = "none";
+      r.style.transform = `translateY(${delta}px)`;
+      void r.offsetHeight;
+      r.style.transition = "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)";
+      r.style.transform = "";
+    });
+  }
+
+  /* Cuenta el gap desde el valor anterior hasta el nuevo (ease-out, 180ms).
+     Solo aplica al panel en vivo; la vista de resultado setea directo. */
+  function renderGap(span, name, gap) {
+    if (gap == null) { span.textContent = ""; return; }
+    if (gap === 0) { gapCache[name] = 0; span.textContent = "—"; return; }
+    const prev = gapCache[name];
+    gapCache[name] = gap;
+    if (prev == null || prev === 0) { span.textContent = "+" + gap.toFixed(1); return; }
+    const dur = 180;
+    const start = performance.now();
+    const step = t => {
+      const p = Math.min(1, (t - start) / dur);
+      const v = prev + (gap - prev) * (1 - Math.pow(1 - p, 3));
+      span.textContent = "+" + v.toFixed(1);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function openLivePanel() {
+    const overlay = el("live-overlay");
+    overlay.classList.remove("hidden");
+    void overlay.offsetWidth;
+    overlay.classList.add("active");
+  }
+
+  function closeLivePanel() {
+    const overlay = el("live-overlay");
+    overlay.classList.remove("active");
+    overlay.classList.add("hidden");
+    liveCtl = null;
+  }
+
+  /* Resultado final de un GP (clic en la race-cell de la tabla de posiciones). */
+  function showRaceResult(gpIdx) {
+    const len = player.seasons.length;
+    const prog = player.seasonProgress;
+    const inProgress = !!prog && prog.racesDone > 0 && prog.racesDone < prog.baseRaces;
+    const viewingCurrent = inProgress && seasonIdx === len;
+    const s = viewingCurrent ? null : (len ? player.seasons[clamp(seasonIdx, 0, len - 1)] : null);
+    const races = viewingCurrent ? prog.races : (s && s.grid);
+    const race = races && races[gpIdx];
+    if (!race || !race.length) return;
+    const isF1 = s ? s.category === "F1" : player.category === "F1";
+    const gp = (isF1 ? GP_CALENDAR : GP_CALENDAR.slice(0, 14))[gpIdx];
+    const sorted = race.slice().sort((a, b) => a.pos - b.pos);
+    const winner = sorted.find(x => x.pos === 1);
+    const flDriver = sorted.find(x => x.fl);
+    const order = sorted.map(x => ({
+      name: x.name, team: x.team, isPlayer: !!x.isPlayer,
+      pos: x.dnf ? "DNF" : x.pos,
+      gap: !x.dnf && winner && x.total != null && x.pos > 1 ? +(x.total - winner.total).toFixed(1) : null,
+      best: x.fl ? "★ VR" : null,
+      overtakes: x.overtakes || 0,
+      out: !!x.dnf
+    }));
+    el("btn-live-skip").classList.add("hidden");
+    gapCache = {};
+    renderLivePanel({ lap: null, title: gp ? `RESULTADO · ${gp.flag} ${gp.code}` : `RESULTADO GP ${gpIdx + 1}`, fl: null, flDriver: flDriver ? flDriver.name : "", order });
+    openLivePanel();
+  }
+
+  /* Anima la siguiente carrera vuelta a vuelta y, al terminar, llama onDone(seasonResult). */
+  function animateRace(onDone) {
+    const { grid, record } = prepareRace();
+    gapCache = {};
+    el("btn-live-skip").classList.remove("hidden");
+    openLivePanel();
+    const gen = raceLaps(grid, record);
+    const timer = setInterval(() => {
+      const step = gen.next();
+      if (step.done) {
+        clearInterval(timer);
+        closeLivePanel();
+        onDone(finishRace(grid));
+      } else {
+        renderLivePanel(step.value);
+      }
+    }, LIVE_MS);
+    liveCtl = { gen, timer, grid, onDone };
+  }
+
+  function skipLiveRace() {
+    if (!liveCtl) return;
+    const { gen, timer, grid, onDone } = liveCtl;
+    clearInterval(timer);
+    liveCtl = null;
+    for (const _ of gen) { /* drena: aplica la clasificación final */ }
+    closeLivePanel();
+    onDone(finishRace(grid));
+  }
+
+  /* Correr count carreras rápido y animar la última. */
+  function animateLastRaceOf(count, onDone) {
+    runNRaces(Math.max(0, count - 1));
+    if (player.retired || !count) { onDone(null); return; }
+    animateRace(onDone);
   }
 
   function handleAdvance() {
@@ -747,20 +935,35 @@
       }
     };
 
+    const finishFrom = r => afterSim(!!r, r ? r.injuryHappened : false, r ? r.promotionPending : false);
+
     if (simMode === "race") {
-      const runRace = () => {
-        const r = simulateRace();
-        afterSim(!!r, r ? r.injuryHappened : false, r ? r.promotionPending : false);
+      const finishRaceCard = r => {
+        finishFrom(r);
         if (resultCardOn) showResultCard();
+      };
+      const runRace = () => {
+        if (animOn) animateRace(finishRaceCard);
+        else finishRaceCard(simulateRace());
       };
       if (gpCardOn) showGpCard(nextGp(), runRace);
       else runRace();
     } else if (simMode === "mid") {
-      const r = simulateMidSeason();
-      afterSim(!!r, r ? r.injuryHappened : false, r ? r.promotionPending : false);
+      if (animOn) {
+        const base = seasonBase();
+        const done = player.seasonProgress ? player.seasonProgress.racesDone : 0;
+        animateLastRaceOf(Math.max(0, Math.min(Math.ceil(base / 2), base - done)), finishFrom);
+      } else {
+        finishFrom(simulateMidSeason());
+      }
     } else {
-      const r = simulateSeason(1);
-      afterSim(true, r.injuryHappened, r.promotionPending);
+      if (animOn) {
+        const base = seasonBase();
+        const done = player.seasonProgress ? player.seasonProgress.racesDone : 0;
+        animateLastRaceOf(Math.max(0, base - done), finishFrom);
+      } else {
+        finishFrom(simulateSeason(1));
+      }
     }
   }
 
@@ -818,21 +1021,10 @@
     }
   });
 
-  el("btn-contextual").addEventListener("click", () => {
-    contextualOn = !contextualOn;
-    localStorage.setItem("contextual", contextualOn ? "on" : "off");
-    el("btn-contextual").textContent = contextualOn ? "🎨 Color Contextual: ON" : "🎨 Color Contextual: OFF";
-    if (contextualOn) applyContextualColor();
-    else resetContextualColor();
-  });
-
   const SIM_MODE_LABELS = { race: "🏁 Simular: carrera", mid: "⏩ Simular: media temporada", season: "▶ Simular: temporada" };
   function updateSimMode() {
     el("btn-sim-mode").textContent = SIM_MODE_LABELS[simMode];
-    el("btn-gpcard").classList.toggle("hidden", simMode !== "race");
-    el("btn-gpcard").textContent = gpCardOn ? "🎬 Cards GP: ON" : "🎬 Cards GP: OFF";
-    el("btn-resultcard").classList.toggle("hidden", simMode !== "race");
-    el("btn-resultcard").textContent = resultCardOn ? "🏁 Avisos: ON" : "🏁 Avisos: OFF";
+    document.querySelectorAll("#settings-mode [data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === simMode));
   }
   function updateSimButton() {
     el("btn-advance").textContent = betweenSeasons ? "▶ Siguiente temporada" : "▶ Simular";
@@ -841,29 +1033,57 @@
     simMode = simMode === "race" ? "mid" : simMode === "mid" ? "season" : "race";
     updateSimMode();
   });
-  el("btn-gpcard").addEventListener("click", () => {
-    gpCardOn = !gpCardOn;
-    localStorage.setItem("gpcard", gpCardOn ? "on" : "off");
+
+  /* --- Ventana de configuración (todos los switches) --- */
+  function syncSettingsSwitches() {
+    el("sw-gpcard").checked = gpCardOn;
+    el("sw-resultcard").checked = resultCardOn;
+    el("sw-anim").checked = animOn;
+    el("sw-mute").checked = !muted;
+    el("sw-contextual").checked = contextualOn;
+    el("sw-pinplayer").checked = pinPlayerOn;
     updateSimMode();
-  });
-  el("btn-resultcard").addEventListener("click", () => {
-    resultCardOn = !resultCardOn;
-    localStorage.setItem("resultcard", resultCardOn ? "on" : "off");
-    updateSimMode();
-  });
-  function updateMuteButton() {
-    el("btn-mute").textContent = muted ? "🔇 Sonido: OFF" : "🔊 Sonido: ON";
   }
-  el("btn-mute").addEventListener("click", () => {
-    toggleMute();
-    updateMuteButton();
+  function openSettings() {
+    syncSettingsSwitches();
+    el("modal-settings").classList.remove("hidden");
+  }
+  el("btn-config").addEventListener("click", openSettings);
+  el("btn-close-settings").addEventListener("click", () => el("modal-settings").classList.add("hidden"));
+
+  el("sw-gpcard").addEventListener("change", e => {
+    gpCardOn = e.target.checked;
+    localStorage.setItem("gpcard", gpCardOn ? "on" : "off");
   });
-  updateMuteButton();
+  el("sw-resultcard").addEventListener("change", e => {
+    resultCardOn = e.target.checked;
+    localStorage.setItem("resultcard", resultCardOn ? "on" : "off");
+  });
+  el("sw-anim").addEventListener("change", e => {
+    animOn = e.target.checked;
+    localStorage.setItem("anim", animOn ? "on" : "off");
+  });
+  el("sw-mute").addEventListener("change", () => toggleMute());
+  el("sw-contextual").addEventListener("change", e => {
+    contextualOn = e.target.checked;
+    localStorage.setItem("contextual", contextualOn ? "on" : "off");
+    if (contextualOn) applyContextualColor();
+    else resetContextualColor();
+  });
+  el("sw-pinplayer").addEventListener("change", e => {
+    pinPlayerOn = e.target.checked;
+    localStorage.setItem("pinplayer", pinPlayerOn ? "on" : "off");
+    if (pinPlayerOn) centerPlayerRow();
+  });
+  el("settings-mode").addEventListener("click", e => {
+    const b = e.target.closest("[data-mode]");
+    if (b) { simMode = b.dataset.mode; updateSimMode(); }
+  });
+
+  el("btn-live-skip").addEventListener("click", skipLiveRace);
   updateSimMode();
   updateSimButton();
   updateRejectAllButton();
-
-  if (contextualOn) el("btn-contextual").textContent = "🎨 Color Contextual: ON";
 
   el("input-dorsal").addEventListener("input", () => {
     el("input-dorsal").value = el("input-dorsal").value.replace(/\D/g, "").slice(0, 2);
@@ -1138,30 +1358,6 @@
      STANDINGS — parrilla generada desde los datos del juego
      ===================================================================== */
 
-  const GP_CALENDAR = [
-    { name: "Australia", flag: "🇦🇺", code: "AUS" }, { name: "China", flag: "🇨🇳", code: "CHN" },
-    { name: "Japón", flag: "🇯🇵", code: "JPN" }, { name: "Bahréin", flag: "🇧🇭", code: "BHR" },
-    { name: "Arabia Saudita", flag: "🇸🇦", code: "KSA" }, { name: "Miami", flag: "🇺🇸", code: "MIA" },
-    { name: "Madrid", flag: "🇪🇸", code: "MAD" }, { name: "Mónaco", flag: "🇲🇨", code: "MCO" },
-    { name: "Canadá", flag: "🇨🇦", code: "CAN" }, { name: "España", flag: "🇪🇸", code: "ESP" },
-    { name: "Austria", flag: "🇦🇹", code: "AUT" }, { name: "Gran Bretaña", flag: "🇬🇧", code: "GBR" },
-    { name: "Bélgica", flag: "🇧🇪", code: "BEL" }, { name: "Hungría", flag: "🇭🇺", code: "HUN" },
-    { name: "Países Bajos", flag: "🇳🇱", code: "NED" }, { name: "Italia", flag: "🇮🇹", code: "ITA" },
-    { name: "Azerbaiyán", flag: "🇦🇿", code: "AZE" }, { name: "Singapur", flag: "🇸🇬", code: "SIN" },
-    { name: "Austin", flag: "🇺🇸", code: "USA" }, { name: "México", flag: "🇲🇽", code: "MEX" },
-    { name: "Brasil", flag: "🇧🇷", code: "BRA" }, { name: "Las Vegas", flag: "🇺🇸", code: "LVG" },
-    { name: "Qatar", flag: "🇶🇦", code: "QAT" }, { name: "Abu Dhabi", flag: "🇦🇪", code: "UAE" }
-  ];
-
-  function shuffle(a) {
-    const x = a.slice();
-    for (let i = x.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [x[i], x[j]] = [x[j], x[i]];
-    }
-    return x;
-  }
-
   function teamColorOf(teamName) {
     const t = ALL_TEAMS.find(x => x.nombre === teamName);
     return t && t.color ? t.color : "#555";
@@ -1181,7 +1377,6 @@
     const calendar = isF1 ? GP_CALENDAR : GP_CALENDAR.slice(0, 14);
     const ptsTable = isF1 ? POINTS_F1 : POINTS_F2;
     const grid = buildGrid(isF1, playerTeam);
-    const playerRow = grid.find(d => d.isPlayer);
 
     if (preseason) {
       // pre-temporada: calendario completo con celdas vacías ("–"), sin resultados
@@ -1209,7 +1404,7 @@
       }));
       stored.forEach((raceRes, r) => raceRes.forEach(x => {
         const d = roster.get(x.name);
-        if (d) d.cells[r] = x.pos;
+        if (d) d.cells[r] = x.dnf ? "DNF" : x.pos;
       }));
       const cat = isF1 ? "F1" : "F2";
       const statMap = {};
@@ -1226,55 +1421,15 @@
       return { races, done: stored.length, calendar, orderedList };
     }
 
-    const rivals = grid.filter(d => !d.isPlayer);
-    rivals.forEach(d => { d.cells = []; });
-    playerRow.cells = [];
-
-    /* Qué carreras corre el jugador, cuáles gana y cuáles hace podio (coherente con el motor). */
-    const allIdx = Array.from({ length: races }, (_, i) => i);
-    const ranRaces = new Set(shuffle(allIdx).slice(0, clamp(s.matches, 0, races)));
-    const winRaces = new Set(shuffle([...ranRaces]).slice(0, s.wins || 0));
-    const podLeft = Math.max(0, (s.podiums || 0) - (s.wins || 0));
-    const podiumRaces = new Set(shuffle([...ranRaces].filter(i => !winRaces.has(i))).slice(0, podLeft));
-
-    for (let r = 0; r < races; r++) {
-      const finishers = fillRace(grid, playerRow, rivals, r);
-
-      /* narrativa del jugador: DNS / victoria / podio mediante swaps (permutación, sin dups) */
-      if (!ranRaces.has(r)) {
-        playerRow.cells[r] = "DNS";
-      } else if (winRaces.has(r)) {
-        const winner = finishers[0];
-        winner.cells[r] = playerRow.cells[r];
-        playerRow.cells[r] = 1;
-      } else if (podiumRaces.has(r)) {
-        const target = Math.random() < 0.5 ? 2 : 3;
-        const occupant = finishers.find(d => d.cells[r] === target);
-        if (occupant && occupant !== playerRow) {
-          const prev = playerRow.cells[r];
-          occupant.cells[r] = prev;
-          playerRow.cells[r] = target;
-        }
-      } else {
-        // fuera de victorias/podios: el jugador no debe quedar en el top-3 (consistencia con el motor)
-        const p = playerRow.cells[r];
-        if (typeof p === "number" && p <= 3) {
-          const fourth = finishers.find(d => d.cells[r] === 4);
-          if (fourth && fourth !== playerRow) {
-            fourth.cells[r] = p;
-            playerRow.cells[r] = 4;
-          } else {
-            playerRow.cells[r] = 4;
-          }
-        }
-      }
-    }
-
-    /* TOT = suma de los puntos de cada carrera simulada (sin escalados ni offsets) */
-    grid.forEach(d => { d.rawTOT = d.cells.reduce((a, p) => a + (typeof p === "number" ? (ptsTable[p - 1] || 0) : 0), 0); });
-    const orderedList = grid.slice().sort((a, b) => b.rawTOT - a.rawTOT);
-    orderedList.forEach((d, i) => { d.pos = i + 1; d.tot = d.rawTOT; });
-    return { races, done: races, calendar, orderedList };
+    /* Fallback defensivo (no debería ocurrir: toda temporada guarda su grid).
+       Muestra la grilla sin resultados en lugar de re-simular la temporada. */
+    const orderedList = grid.slice();
+    orderedList.forEach((d, i) => {
+      d.pos = i + 1;
+      d.tot = 0;
+      d.cells = new Array(races).fill(null);
+    });
+    return { races, done: 0, calendar, orderedList };
   }
 
   let _stKey = "";
@@ -1314,13 +1469,21 @@
       html += `<td class="driver-cell"><span class="stripe" style="background:${team}"></span><span class="d-info"><span class="d-name">${escapeHTML(d.name)}</span><span class="d-team">${escapeHTML(d.team)}</span></span></td>`;
       d.cells.forEach((c, i) => {
         const isNew = !isFirstRender && i >= prevDone && i < data.done;
-        const anim = isNew ? ` race-in" style="animation-delay:${rowI * 18}ms"` : "";
-        if (c === "DNF") html += `<td class="race-cell dnf${anim}">DNF</td>`;
-        else if (c === "DNS" || c == null) html += `<td class="race-cell dns${anim}">–</td>`;
-        else if (c === 1) html += `<td class="race-cell p1${anim}">1</td>`;
-        else if (c === 2) html += `<td class="race-cell p2${anim}">2</td>`;
-        else if (c === 3) html += `<td class="race-cell p3${anim}">3</td>`;
-        else html += `<td class="race-cell${anim}">${c}</td>`;
+        let cls = "race-cell";
+        let content;
+        if (c === "DNF") { cls += " dnf"; content = "DNF"; }
+        else if (c === "DNS" || c == null) { cls += " dns"; content = "–"; }
+        else if (c === 1) { cls += " p1"; content = "1"; }
+        else if (c === 2) { cls += " p2"; content = "2"; }
+        else if (c === 3) { cls += " p3"; content = "3"; }
+        else content = c;
+        const hasResult = typeof c === "number" || c === "DNF";
+        if (hasResult) cls += " clickable";
+        if (isNew) cls += " race-in";
+        let extra = `class="${cls}"`;
+        if (hasResult) extra += ` data-gp="${i}"`;
+        if (isNew) extra += ` style="animation-delay:${rowI * 18}ms"`;
+        html += `<td ${extra}>${content}</td>`;
       });
       html += `<td class="tot-cell">${d.tot}</td></tr>`;
     });
@@ -1350,6 +1513,8 @@
     if (data.done > prevDone && prevDone > 0) {
       animateTots(wrap, prevTots, newTots);
     }
+
+    if (pinPlayerOn) centerPlayerRow();
   }
 
   /* Cuenta el TOT de su valor anterior al nuevo cuando se simula una carrera. */
@@ -1405,7 +1570,7 @@
   function stretchStandings(table) {
     const scroll = table.closest(".standings-scroll");
     if (!scroll) return;
-    const posW = 34, driverW = 250, totW = 64;
+    const posW = 34, driverW = 200, totW = 64;
     const races = table.querySelectorAll("thead th.race-cell");
     const containerW = scroll.getBoundingClientRect().width;
     const apply = (cls, w) => {
@@ -1441,6 +1606,17 @@
       apply("tot-cell", totW);
       apply("driver-cell", Math.max(driverW, containerW - posW - totW));
     }
+  }
+
+  /* Mantiene la fila del jugador centrada verticalmente en la grilla (setting "Fijar grid en jugador"). */
+  function centerPlayerRow() {
+    const wrap = el("standings-scroll");
+    if (!wrap) return;
+    const row = wrap.querySelector("tr.player-row");
+    if (!row) return;
+    const wr = wrap.getBoundingClientRect();
+    const rr = row.getBoundingClientRect();
+    wrap.scrollTop += (rr.top + rr.height / 2) - (wr.top + wr.height / 2);
   }
 
   function refreshSeasonNav(keepPosition = false) {
@@ -1486,6 +1662,7 @@
     const isStandingsView = activeHeader === "standings" && activeSub === "standings";
     el("season-bar").classList.toggle("hidden", !isStandingsView);
     el("btn-advance").classList.toggle("hidden", !isStandingsView);
+    el("btn-sim-mode").classList.toggle("hidden", !isStandingsView);
   }
 
   function showContent(view) {
@@ -1506,6 +1683,7 @@
     if (target === "standings" || target === "team") {
       const scroll = target === "standings" ? el("standings-scroll") : el("team-scroll");
       if (scroll && scroll.querySelector("table")) stretchStandings(scroll.querySelector("table"));
+      if (target === "standings" && pinPlayerOn) centerPlayerRow();
     }
     if (target === "rivals") renderRivals();
     if (target === "trophies") renderTrophiesView();
@@ -1673,6 +1851,17 @@
   updateSeasonBar();
   updateNewsTab();
   el("btn-season-next").addEventListener("click", () => { if (seasonIdx < player.seasons.length) { seasonIdx++; refreshSeasonNav(true); } });
+
+  /* Clic en una celda de carrera → resultado final del GP. */
+  el("standings-scroll").addEventListener("click", (e) => {
+    const cell = e.target.closest("td.race-cell[data-gp]");
+    if (cell) showRaceResult(parseInt(cell.dataset.gp, 10));
+  });
+
+  /* Cerrar el panel de resultado al hacer clic fuera (no durante la animación). */
+  el("live-overlay").addEventListener("click", (e) => {
+    if (!liveCtl && e.target === el("live-overlay")) closeLivePanel();
+  });
 
   window.addEventListener("resize", () => {
     updateClubs();

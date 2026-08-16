@@ -72,7 +72,14 @@ function createRivalGrid(category) {
 /* Cantera: pilotos sin butaca que esperan un hueco en la parrilla. Los prospectos
    arrancan más débiles que el grid actual y con alto potencial, ordenados por rating desc. */
 function generateProspects(count) {
+  /* Dedupe global: no repetir nombres de ningún piloto activo (rivales, reservas,
+     agentes libres). Evita que dos prospectos distintos compartan nombre. */
   const used = new Set();
+  if (player) {
+    ["F1", "F2"].forEach(cat => (player.rivals[cat] || []).forEach(d => used.add(d.name)));
+    (player.reserves || []).forEach(d => used.add(d.name));
+    ["F1", "F2"].forEach(cat => (player.waitingSeat[cat] || []).forEach(d => used.add(d.name)));
+  }
   const list = [];
   for (let i = 0; i < count; i++) {
     const base = randInt(42, 68);
@@ -95,6 +102,11 @@ function updatePotential(pot, initialPot, rating, age) {
   return clamp(pot - decay, Math.min(rating, initialPot), initialPot);
 }
 
+/* Regla de retiro compartida (jugador y rivales). */
+function isRetiredDriver(d) {
+  return d.age >= 50 || (d.age >= 38 && d.rating < 65) || d.rating <= 45;
+}
+
 /* Los rivales evolucionan con el MISMO código de progresión que el jugador:
    suman edad, su potencial puede "explotar" (dado grande) y su delta se calcula
    con seasonProgressionDelta. El potencial sigue siendo el tope de evolución. */
@@ -112,26 +124,15 @@ function evolveRivals(category) {
   });
 
   /* Retiros con las mismas condiciones que el jugador (checkRetirement).
-     El hueco lo ocupa el primer piloto del waiting seat: F1 sin butaca primero, luego F2. */
-  const isRetired = r => r.age >= 50 || (r.age >= 38 && r.rating < 65) || r.rating <= 45;
-  const kept = [];
-  for (const r of list) {
-    if (!isRetired(r)) {
-      kept.push(r);
-      continue;
-    }
-    const replacement = player.waitingSeat.F1.shift() || player.waitingSeat.F2.shift();
-    if (replacement) {
-      replacement.team = r.team;
-      kept.push(replacement);
-    }
-  }
+     El hueco queda VACANTE y lo llena resolveFreeAgents al final de la temporada
+     (folding): así el mejor agente libre va a la mejor vacante, no el primero FIFO. */
+  const kept = list.filter(r => !isRetiredDriver(r));
   list.length = 0;
   list.push(...kept);
 
   /* Reposición de cantera: el pool nunca debe quedarse vacío en una carrera larga. */
   if (player.waitingSeat.F2.length < 10) {
-    player.waitingSeat.F2.push(...generateProspects(3));
+    player.waitingSeat.F2.push(...generateProspects(10 - player.waitingSeat.F2.length));
     player.waitingSeat.F2.sort((a, b) => b.rating - a.rating);
   }
 }
@@ -160,27 +161,165 @@ function buildGrid(isF1, playerTeam) {
   return pool;
 }
 
-/* Score de carrera: stats del piloto + rating del equipo + factor random, menor = mejor.
-   Empate exacto de score se desempata con dado (random en el sort). */
-function raceScoreOf(d) {
+/* --- Motor de carrera (per-lap, calibrado a tiempos reales por GP) ---
+   Cada carrera: clasificación (1 vuelta) que define la parrilla y la pole, y
+   luego LAPS vueltas donde la posición se ordena por tiempo total acumulado.
+   Los tiempos se anclan a la pole real de cada circuito (GP_RECORDS / _F2). */
+
+const SIM_TUNING = {
+  SPREAD: 0.04,       //% que separa al peor del mejor auto+piloto (quali real ~1.5-2.5%). Tope: más paridad = más caos.
+  RACE_PENALTY: 0.012, //% más lento por vuelta en carrera vs quali (combustible + desgaste). Tope: la VR real ≈ pole + ~1s.
+  JITTER: 0.55,       //variación base por vuelta en segundos. Tope: pilotos top reales ~0.3-0.5s/vuelta.
+  FORM: 0.004,        //desvío fijo de ritmo por carrera (buen/mal finde). Evita el "yo-yo" de autos parejos repasándose sin parar.
+  MECH_DNF: 0.001,    //hazard mecánico por vuelta (≈6% en 60 vueltas, ~1.2 retiros/carrera). Tope: 4-8% de DNF por carrera.
+  LAP1_CRASH: 0.12,   //probabilidad de incidente en la vuelta 1 que saca 1-2 autos.
+  CRASH: 0.01         //probabilidad de toque por vuelta (≈0.6/carrera, ~1 auto más fuera). Víctima uniforme.
+};
+
+function abilityOf(d) {
   const st = d.stats || {};
   const skill = ((st.rtg || 50) + (st.exp || 50) + (st.rac || 50) + (st.awa || 50) + (st.pac || 50)) / 5 / 100;
-  const teamFactor = (d.teamRating != null ? d.teamRating : 75) / 100;
-  const ability = skill * 0.4 + teamFactor * 0.6;
-  const jitter = Math.random() * 0.12 - 0.06;
-  return clamp(1 - ability + jitter, 0, 1);
+  const team = (d.teamRating != null ? d.teamRating : 75) / 100;
+  return skill * 0.4 + team * 0.6;
 }
 
-/* Simula una carrera sobre la grilla: ~4% de DNF, ordena por score (menor a mayor),
-   posiciones únicas, y devuelve los clasificados ordenados. */
-function fillRace(grid, playerRow, rivals, r) {
-  const dnf = new Set();
-  rivals.forEach(d => { if (Math.random() < 0.04) dnf.add(d); });
-  const finishers = [playerRow, ...rivals].filter(d => !dnf.has(d));
-  finishers.sort((a, b) => raceScoreOf(a) - raceScoreOf(b) || Math.random() - 0.5);
-  finishers.forEach((d, i) => { d.cells[r] = i + 1; });
-  dnf.forEach(d => { d.cells[r] = "DNF"; });
-  return finishers;
+function gpRecordFor(isF1, index) {
+  const cal = isF1 ? GP_CALENDAR : GP_CALENDAR.slice(0, 14);
+  const code = (cal[index] || {}).code;
+  const recs = isF1 ? GP_RECORDS : GP_RECORDS_F2;
+  return code ? (recs[code] || null) : null;
+}
+
+function lapBaseTime(d, pole, topAbility) {
+  return pole * (1 + (topAbility - abilityOf(d)) * SIM_TUNING.SPREAD);
+}
+
+/* Clasificación: una vuelta con jitter chico por piloto. Define parrilla y pole. */
+function qualifyRace(grid, record) {
+  const top = Math.max(...grid.map(abilityOf));
+  grid.forEach(d => {
+    d.qTime = lapBaseTime(d, record.pole, top) + (Math.random() + Math.random() - 1) * SIM_TUNING.JITTER * 0.25;
+  });
+  grid.sort((a, b) => a.qTime - b.qTime);
+  grid.forEach((d, i) => { d.gridPos = i + 1; });
+  return grid[0];
+}
+
+/* Carrera vuelta a vuelta como generador: cada `yield` entrega un snapshot del
+   estado (para la vista en vivo), y al agotarse aplica la clasificación final.
+   El modo rápido solo drena el generador (simulateOneRace). */
+function* raceLaps(grid, record) {
+  const top = Math.max(...grid.map(abilityOf));
+  const st = grid.map(d => ({
+    d,
+    base: lapBaseTime(d, record.pole, top),
+    varMult: clamp(1.5 - ((d.stats.awa + d.stats.exp) / 2) / 100, 0.5, 1.5),
+    total: 0, laps: 0, bestLap: Infinity, dnf: false
+  }));
+  st.forEach(s => { s.d.overtakes = 0; s.form = (Math.random() + Math.random() - 1) * SIM_TUNING.FORM; });
+
+  const posOf = new Map(st.map(s => [s.d.name, s.gridPos]));
+  let running = st.slice();
+  let flSoFar = null;
+
+  for (let lap = 1; lap <= record.laps && running.length; lap++) {
+    for (const s of running) {
+      const t = s.base * (1 + SIM_TUNING.RACE_PENALTY + s.form) + (Math.random() + Math.random() - 1) * SIM_TUNING.JITTER * s.varMult;
+      s.total += t;
+      s.laps += 1;
+      if (lap > 1 && t < s.bestLap) {
+        s.bestLap = t;
+        if (!flSoFar || t < flSoFar.time) flSoFar = { name: s.d.name, time: t, lap };
+      }
+    }
+    running.sort((a, b) => a.total - b.total);
+    running.forEach((s, i) => {
+      const now = i + 1;
+      const prev = posOf.get(s.d.name);
+      if (now < prev) s.d.overtakes += prev - now;
+      posOf.set(s.d.name, now);
+    });
+    /* Incidentes: vuelta 1 con más probabilidad (salida), el resto con la base CRASH. */
+    const crashP = lap === 1 ? SIM_TUNING.LAP1_CRASH : SIM_TUNING.CRASH;
+    if (Math.random() < crashP) {
+      const nv = Math.random() < 0.5 ? 1 : 2;
+      for (let k = 0; k < nv && running.length; k++) {
+        const idx = Math.floor(Math.random() * running.length);
+        running[idx].dnf = true;
+        running.splice(idx, 1);
+      }
+    }
+    running = running.filter(s => !(Math.random() < SIM_TUNING.MECH_DNF && (s.dnf = true)));
+    yield liveSnapshot(st, running, record, lap, flSoFar);
+  }
+
+  const classified = st.filter(s => !s.dnf).sort((a, b) => a.total - b.total);
+  const retired = st.filter(s => s.dnf).sort((a, b) => b.laps - a.laps || a.total - b.total);
+  [...classified, ...retired].forEach((s, i) => { s.d.pos = i + 1; s.d.total = s.total; s.d.dnf = s.dnf; });
+
+  const flDriver = st.filter(s => s.bestLap !== Infinity).sort((a, b) => a.bestLap - b.bestLap)[0];
+  if (flDriver) flDriver.d.fl = true;
+}
+
+/* Snapshot de la vista en vivo: corredores en orden actual + retirados al final. */
+function liveSnapshot(st, running, record, lap, flSoFar) {
+  const leader = running[0];
+  const order = running.map((s, i) => ({
+    name: s.d.name, team: s.d.team, isPlayer: !!s.d.isPlayer, pos: i + 1,
+    gap: +(s.total - leader.total).toFixed(2),
+    best: s.bestLap === Infinity ? null : +s.bestLap.toFixed(3),
+    overtakes: s.d.overtakes, out: false
+  })).concat(st.filter(s => s.dnf).sort((a, b) => b.laps - a.laps).map(s => ({
+    name: s.d.name, team: s.d.team, isPlayer: !!s.d.isPlayer, pos: null,
+    gap: null, best: null, overtakes: s.d.overtakes, out: true
+  })));
+  return { lap, totalLaps: record.laps, order, fl: flSoFar };
+}
+
+/* Fast path: drena el generador (equivale a la simulación síncrona de antes). */
+function simulateOneRace(grid, record) {
+  for (const _ of raceLaps(grid, record)) { /* drain */ }
+  return grid;
+}
+
+/* Prepara la carrera (grilla + clasificación). La UI en vivo usa esto + raceLaps + finishRace. */
+function prepareRace() {
+  if (!player.seasonProgress) {
+    player.seasonProgress = { baseRaces: player.category === "F1" ? 24 : 14, racesDone: 0, races: [] };
+  }
+  const p = player.seasonProgress;
+  const isF1 = player.category === "F1";
+  const record = gpRecordFor(isF1, p.racesDone);
+  if (!record) throw new Error("Sin récord para GP " + p.racesDone + " (correr scripts del pipeline)");
+  const grid = buildGrid(isF1, player.team);
+  qualifyRace(grid, record);
+  return { grid, record };
+}
+
+/* Guarda el resultado y cierra la temporada si corresponde. Devuelve el resultado de temporada o null. */
+function finishRace(grid) {
+  const p = player.seasonProgress;
+  p.races.push(grid.map(d => ({
+    name: d.name, team: d.team, isPlayer: d.isPlayer,
+    pos: d.pos, gridPos: d.gridPos, overtakes: d.overtakes || 0, fl: !!d.fl, dnf: !!d.dnf,
+    total: d.total != null ? Math.round(d.total * 100) / 100 : null
+  })));
+  p.racesDone += 1;
+  if (p.racesDone >= p.baseRaces) {
+    const raceStats = aggregateSeason(p);
+    const racesGrid = p.races;
+    player.year += 1;
+    const r = simulateOneSeason(raceStats, racesGrid);
+    player.seasonProgress = null;
+    return r;
+  }
+  return null;
+}
+
+function simulateRace() {
+  const { grid, record } = prepareRace();
+  simulateOneRace(grid, record);
+  return finishRace(grid);
 }
 
 function getTeamData(teamName) {  return ALL_TEAMS.find(t => t.nombre === teamName) || null;
@@ -331,7 +470,8 @@ function createDriver(name, nationalityData, styleCode, careerType = "normal", d
     boughtItems: [],
     idolatria: { [team.nombre]: 5 },
     waitingSeat,
-    rivals
+    rivals,
+    reserves: []
   };
 }
 
@@ -364,42 +504,18 @@ function titleChance(teamRating, driverRating, base, growth) {
   return clamp(base * Math.pow(growth, avg - threshold), 0, 0.96);
 }
 
-function calcSeasonStats(performance, fitness, raceAgg = null) {
+/* Las estadísticas vienen TODAS del agregado real de las carreras (aggregateSeason);
+   nada se inventa acá. Solo se resuelven títulos, idolatría y los stats del estilo. */
+function calcSeasonStats(performance, fitness, agg) {
   const isF1 = player.category === "F1";
-  const baseRaces = isF1 ? 24 : 14;
-  const maxDrivers = 22;
-
-  let champPos, races, wins, podiums, poles, points;
-  if (raceAgg) {
-    champPos = clamp(raceAgg.champPos, 1, maxDrivers);
-    races = raceAgg.matches;
-    wins = raceAgg.wins;
-    podiums = raceAgg.podiums;
-    poles = raceAgg.poles;
-    points = raceAgg.points;
-  } else {
-    champPos = clamp(Math.round(22 - (player.teamRating / 5.5) - (performance / 18) + randInt(-3, 3)), 1, maxDrivers);
-
-    const availability = fitness / 100;
-    races = clamp(Math.round(baseRaces * availability), 2, baseRaces);
-    const availFactor = races / baseRaces;
-
-    if (champPos === 1) wins = randInt(Math.round(baseRaces * 0.35), Math.round(baseRaces * 0.65));
-    else if (champPos === 2) wins = randInt(Math.round(baseRaces * 0.15), Math.round(baseRaces * 0.35));
-    else if (champPos === 3) wins = randInt(Math.round(baseRaces * 0.08), Math.round(baseRaces * 0.25));
-    else if (champPos <= 6) wins = randInt(0, Math.max(1, Math.round(baseRaces * 0.12)));
-    else wins = Math.random() < 0.25 ? randInt(1, 2) : 0;
-    wins = Math.round(wins * availFactor);
-
-    podiums = clamp(wins + Math.round(randInt(0, Math.round(baseRaces * 0.3)) * availFactor), wins, races);
-    poles = clamp(Math.round((wins + randInt(-2, 4) + (player.style === "CAL" ? randInt(1, 4) : 0)) * availFactor), 0, races);
-    const pointsTable = isF1 ? POINTS_F1 : POINTS_F2;
-    points = pointsTable[champPos - 1] || 0;
-  }
-
-  const fastestLaps = randInt(0, Math.max(1, Math.round(wins / 2))) + (player.style === "LLV" && Math.random() < 0.5 ? 1 : 0);
-  const overtakes = Math.round((player.rating / 99) * randInt(baseRaces, baseRaces * 3) * (player.style === "AGR" ? 1.4 : 1) * (races / baseRaces));
-  const pointsTable = isF1 ? POINTS_F1 : POINTS_F2;
+  const champPos = clamp(agg.champPos, 1, 22);
+  const races = agg.matches;
+  const wins = agg.wins;
+  const podiums = agg.podiums;
+  const poles = agg.poles;
+  const points = agg.points;
+  const fastestLaps = agg.fl;
+  const overtakes = agg.overtakes;
 
   let titles = 0;
   let wonTitles = [];
@@ -420,21 +536,15 @@ function calcSeasonStats(performance, fitness, raceAgg = null) {
     addHistory("season", "🛠️ Constructores", `¡${player.team} ganó el Campeonato de Constructores!`);
   }
 
-  /* Trofeos de GP: en modo carrera a carrera se entregan por los GP realmente ganados;
-     en modo temporada (sin detalle de GP) uno aleatorio, igual que el viejo "GP de Mónaco". */
-  if (raceAgg && raceAgg.wonGps && raceAgg.wonGps.length) {
-    raceAgg.wonGps.forEach(i => {
+  /* Trofeos de GP: uno por cada carrera realmente ganada. */
+  if (agg.wonGps && agg.wonGps.length) {
+    agg.wonGps.forEach(i => {
       const gp = GP_TROPHIES[i];
       if (!gp) return;
       titles++;
       wonTitles.push({ name: "GP de " + gp.name, type: "gp" });
       addHistory("season", "👑 " + gp.name, `¡Victoria! ${player.name} ganó el GP de ${gp.name}.`);
     });
-  } else if (wins > 0 && Math.random() < 0.18) {
-    const gp = pickRandom(GP_TROPHIES);
-    titles++;
-    wonTitles.push({ name: "GP de " + gp.name, type: "gp" });
-    addHistory("season", "👑 " + gp.name, `¡Victoria de leyenda! ${player.name} ganó el GP de ${gp.name}.`);
   }
 
   if (player.seasonsInCategory === 1 && champPos <= 6 && Math.random() < 0.5) {
@@ -501,7 +611,7 @@ function seasonProgressionDelta(rating, age, explotar, performance) {
 }
 
 function checkRetirement() {
-  if (player.age >= 50 || (player.age >= 38 && player.rating < 65) || player.rating <= 45) {
+  if (isRetiredDriver(player)) {
     player.retired = true;
   }
 }
@@ -595,6 +705,11 @@ function simulateOneSeason(raceAgg = null, racesGrid = null) {
   evolveRivals("F1");
   evolveRivals("F2");
   runRivalMarket();
+  ageFreeAgents();
+  ageReserves();
+  promoteReserves();
+  assignReserves();
+  resolveFreeAgents();
 
   player.balance += player.salary;
   player.totalEarned += player.salary;
@@ -619,52 +734,32 @@ function simulateOneSeason(raceAgg = null, racesGrid = null) {
 
 /* --- Simulación carrera a carrera --- */
 
-function raceAggFromProgress(progress) {
+/* Agrega la temporada a partir de las carreras realmente corridas: puntos por
+   posición, campeonato, poles (gridPos 1), victorias/podios, adelantamientos,
+   vueltas rápidas y GP ganados. Nada se inventa. */
+function aggregateSeason(progress) {
   const isF1 = player.category === "F1";
   const ptsTable = isF1 ? POINTS_F1 : POINTS_F2;
   const totals = {};
-  let wins = 0, podiums = 0, points = 0;
+  const poleCounts = {};
+  let wins = 0, podiums = 0, points = 0, overtakes = 0, flCount = 0;
   const wonGps = [];
   progress.races.forEach((race, i) => {
     race.forEach(x => {
-      if (typeof x.pos === "number") {
-        const p = ptsTable[x.pos - 1] || 0;
-        totals[x.name] = (totals[x.name] || 0) + p;
-        if (x.isPlayer) {
-          if (x.pos === 1) { wins++; wonGps.push(i); }
-          if (x.pos <= 3) podiums++;
-          points += p;
-        }
+      if (typeof x.pos !== "number") return;
+      totals[x.name] = (totals[x.name] || 0) + (ptsTable[x.pos - 1] || 0);
+      if (x.gridPos === 1) poleCounts[x.name] = (poleCounts[x.name] || 0) + 1;
+      if (x.isPlayer) {
+        points += ptsTable[x.pos - 1] || 0;
+        if (x.pos === 1) { wins++; wonGps.push(i); }
+        if (x.pos <= 3) podiums++;
+        overtakes += x.overtakes || 0;
+        if (x.fl) flCount++;
       }
     });
   });
   const champPos = Object.values(totals).filter(v => v > (totals[player.name] || 0)).length + 1;
-  const poles = clamp(wins + randInt(-2, 4) + (player.style === "CAL" ? randInt(1, 4) : 0), 0, progress.races.length);
-  return { champPos, wins, podiums, poles, points, matches: progress.races.length, wonGps };
-}
-
-function simulateRace() {
-  if (!player.seasonProgress) {
-    player.seasonProgress = { baseRaces: player.category === "F1" ? 24 : 14, racesDone: 0, races: [] };
-  }
-  const p = player.seasonProgress;
-  const isF1 = player.category === "F1";
-  const grid = buildGrid(isF1, player.team);
-  const playerRow = grid.find(d => d.isPlayer);
-  const rivals = grid.filter(d => !d.isPlayer);
-  grid.forEach(d => { d.cells = []; });
-  fillRace(grid, playerRow, rivals, 0);
-  p.races.push(grid.map(d => ({ name: d.name, team: d.team, isPlayer: d.isPlayer, pos: d.cells[0] })));
-  p.racesDone += 1;
-  if (p.racesDone >= p.baseRaces) {
-    const raceStats = raceAggFromProgress(p);
-    const racesGrid = p.races;
-    player.year += 1;
-    const r = simulateOneSeason(raceStats, racesGrid);
-    player.seasonProgress = null;
-    return r;
-  }
-  return null;
+  return { champPos, wins, podiums, poles: poleCounts[player.name] || 0, points, overtakes, fl: flCount, matches: progress.races.length, wonGps };
 }
 
 /* Corre N carreras de a una; devuelve el resultado de la temporada si se completa.
@@ -761,8 +856,9 @@ function runRivalMarket() {
       const offer = generateOfferFor(r, [], cat);
       if (!offer.club) continue;
       // cupo de 2 asientos: si el destino está lleno, un piloto del destino
-      // ocupa el asiento libre del que se va (swap)
-      const seats = list.filter(x => x.team === offer.club.nombre).length;
+      // ocupa el asiento libre del que se va (swap). El asiento del jugador cuenta.
+      const isPlayerTeam = offer.club.nombre === player.team;
+      const seats = list.filter(x => x.team === offer.club.nombre).length + (isPlayerTeam ? 1 : 0);
       if (seats >= 2) {
         const occupant = list.find(x => x.team === offer.club.nombre);
         if (occupant) occupant.team = r.team;
@@ -771,6 +867,153 @@ function runRivalMarket() {
       addHistoryToLastSeason("transfer", "🔄 Traspaso", `${r.name} ficha por <strong>${offer.club.nombre}</strong>.`);
     }
   });
+}
+
+/* Envejece el pool de agentes libres (waitingSeat) y retira por EDAD a los que
+   cumplen 50. Regla solo por edad: un prospecto joven con rating bajo y alto
+   potencial no debe retirarse por rating (la regla completa lo mataría). */
+function ageFreeAgents() {
+  ["F1", "F2"].forEach(cat => {
+    const pool = player.waitingSeat[cat];
+    for (let i = pool.length - 1; i >= 0; i--) {
+      pool[i].age = (pool[i].age ?? 22) + 1;
+      if (pool[i].age >= 50) pool.splice(i, 1);
+    }
+  });
+}
+
+/* Reasignación de agentes libres (folding): llena TODAS las vacantes (retiros,
+   movidas del jugador) y luego mejora equipos por rating. El jugador nunca se
+   desplaza: en su equipo el único desplazable es el compañero (rival). */
+function resolveFreeAgents() {
+  const teamsOf = cat => cat === "F1" ? F1_TEAMS : F2_TEAMS;
+  const rivalsOf = cat => player.rivals[cat] || [];
+
+  /* Slot de una escudería: rivales, si es la del jugador, count y peor rival. */
+  const slot = (cat, t) => {
+    const tRivals = rivalsOf(cat).filter(r => r.team === t.nombre);
+    const isPlayerTeam = player.category === cat && player.team === t.nombre;
+    return {
+      t, tRivals, isPlayerTeam,
+      count: tRivals.length + (isPlayerTeam ? 1 : 0),
+      worst: tRivals.length ? tRivals.reduce((m, r) => (r.rating < m.rating ? r : m), tRivals[0]) : null
+    };
+  };
+
+  /* Mejor libre disponible: misma categoría primero, luego la otra. */
+  const bestFreeAgent = preferCat => {
+    for (const cat of [preferCat, preferCat === "F1" ? "F2" : "F1"]) {
+      const pool = player.waitingSeat[cat];
+      const best = pool.slice().sort((a, b) => b.rating - a.rating)[0];
+      if (best) return { fa: best, cat };
+    }
+    return null;
+  };
+
+  /* Fase A: llenar TODAS las vacantes (invariante: 2 pilotos por escudería).
+     La vacante de mayor team.rating se cubre con el mejor libre disponible. */
+  for (;;) {
+    const vacants = [];
+    ["F1", "F2"].forEach(cat => teamsOf(cat).forEach(t => {
+      const s = slot(cat, t);
+      if (s.count < 2) vacants.push({ cat, s });
+    }));
+    vacants.sort((a, b) => b.s.t.rating - a.s.t.rating);
+    if (!vacants.length) break;
+    const res = bestFreeAgent(vacants[0].cat);
+    if (!res) break;
+    res.fa.team = vacants[0].s.t.nombre;
+    player.waitingSeat[res.cat].splice(player.waitingSeat[res.cat].indexOf(res.fa), 1);
+    rivalsOf(vacants[0].cat).push(res.fa); // la categoría del DESTINO, no la del pool
+  }
+
+  /* Fase B: upgrades opcionales. Un libre con rating R reemplaza al peor rival
+     de un equipo lleno cuya peor media < R; el desplazado queda libre (cascada
+     estrictamente decreciente, termina). */
+  ["F1", "F2"].forEach(cat => {
+    const pool = player.waitingSeat[cat];
+    const rivals = rivalsOf(cat);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const fa of pool.slice().sort((a, b) => b.rating - a.rating)) {
+        const best = teamsOf(cat)
+          .map(t => slot(cat, t))
+          .filter(s => s.count >= 2 && s.worst && fa.rating > s.worst.rating)
+          .sort((a, b) => b.t.rating - a.t.rating)[0];
+        if (!best) continue;
+        fa.team = best.t.nombre;
+        pool.splice(pool.indexOf(fa), 1);
+        rivals.push(fa);
+        const worst = best.worst;
+        rivals.splice(rivals.indexOf(worst), 1);
+        worst.team = null;
+        pool.push(worst);
+        changed = true;
+        break;
+      }
+    }
+  });
+}
+
+/* --- Pilotos de reserva (solo rivales) ---
+   Un reserva NO corre en F2: se guarda en su equipo F1 (player.reserves) y sube
+   cuando ese equipo queda sin un piloto. Se draftea por mérito (mejor F2 → mejor
+   F1, umbral rating >= 72). A los 30 deja de ser reserva y libera la butaca. */
+
+const RESERVE_MIN_RATING = 72;
+
+function ageReserves() {
+  for (let i = player.reserves.length - 1; i >= 0; i--) {
+    const r = player.reserves[i];
+    r.age = (r.age ?? 25) + 1;
+    if (r.age >= 30) {
+      // A los 30 deja de ser reserva: vuelve al mercado (agente libre F1) y
+      // libera la butaca de reserva del equipo.
+      player.reserves.splice(i, 1);
+      delete r.reserveTeam;
+      r.team = null;
+      player.waitingSeat.F1.push(r);
+    }
+  }
+}
+
+/* Ascender reservas: cada equipo F1 con vacante y con reserva lo promueve a F1. */
+function promoteReserves() {
+  F1_TEAMS.forEach(t => {
+    const tRivals = player.rivals.F1.filter(r => r.team === t.nombre);
+    const isPlayerTeam = player.category === "F1" && player.team === t.nombre;
+    if (tRivals.length + (isPlayerTeam ? 1 : 0) >= 2) return; // sin vacante
+    const idx = player.reserves.findIndex(r => r.reserveTeam === t.nombre);
+    if (idx < 0) return; // sin reserva
+    const res = player.reserves[idx];
+    player.reserves.splice(idx, 1);
+    delete res.reserveTeam;
+    res.team = t.nombre;
+    player.rivals.F1.push(res);
+    addHistoryToLastSeason("transfer", "⬆️ Reserva asciende", `${res.name} sube a la F1 como titular de <strong>${t.nombre}</strong>.`);
+  });
+}
+
+/* Draft de reservas: los mejores F2 (rating >= 72) se vuelven reservas de las
+   mejores F1 que tengan butaca de reserva libre (1 por equipo). Salen de F2. */
+function assignReserves() {
+  const teams = F1_TEAMS
+    .filter(t => !player.reserves.some(r => r.reserveTeam === t.nombre))
+    .sort((a, b) => b.rating - a.rating);
+  const candidates = player.rivals.F2
+    .filter(r => r.rating >= RESERVE_MIN_RATING)
+    .sort((a, b) => b.rating - a.rating);
+  for (const t of teams) {
+    if (!candidates.length) break;
+    const c = candidates.shift();
+    const f2 = player.rivals.F2;
+    f2.splice(f2.indexOf(c), 1);
+    delete c.team;
+    c.reserveTeam = t.nombre;
+    player.reserves.push(c);
+    addHistoryToLastSeason("transfer", "🔖 Reserva", `${c.name} ficha como piloto de reserva de <strong>${t.nombre}</strong>.`);
+  }
 }
 
 function generateOffers(count = 3, forcedCategory = null) {
@@ -798,21 +1041,17 @@ function acceptOffer(index) {
     addHistoryToLastSeason("transfer", "🏎️ ¡ASCENSO A LA F1!", `${player.name} llega a la Fórmula 1 de la mano de <strong>${offer.club.nombre}</strong>. ¡Comienza la verdadera aventura!`);
   }
 
-  /* Swap de butaca: el piloto desplazado del equipo nuevo pasa al equipo viejo,
-     para que la parrilla no pierda un piloto. Si es cambio de categoría, se mueve
-     entre listas (el desplazado de F1 baja a F2). */
+  /* El piloto desplazado del equipo nuevo NO se "swap" a la escudería vieja:
+     queda como agente libre (sin butaca) y resolveFreeAgents lo recoloca por
+     rating en un equipo que lo valore (vacante o con un piloto de menor media). */
   if (newTeam !== prevTeam) {
     const dest = player.rivals[newCategory];
     if (dest) {
       const displaced = dest.find(r => r.team === newTeam);
       if (displaced) {
-        if (newCategory === prevCat) {
-          displaced.team = prevTeam;
-        } else {
-          dest.splice(dest.indexOf(displaced), 1);
-          displaced.team = prevTeam;
-          player.rivals[prevCat].push(displaced);
-        }
+        dest.splice(dest.indexOf(displaced), 1);
+        displaced.team = null;
+        player.waitingSeat[newCategory].push(displaced);
       }
     }
   }
@@ -828,6 +1067,8 @@ function acceptOffer(index) {
   player.idolatria[offer.club.nombre] = Math.max(getIdolatry(offer.club.nombre), 5);
   if (typeof sfx === "function") sfx("transfer");
   currentOffers = [];
+  promoteReserves();   // si el jugador dejó un equipo F1, su vacante la cubre la reserva
+  resolveFreeAgents(); // recoloca al desplazado y llena la vacante restante de la escudería previa
 }
 
 function rejectOffer(index) {
@@ -863,5 +1104,86 @@ function buyItem(id) {
 
   const shortNote = item.shortened ? ` ¡Pero el desgaste te hizo envejecer ${item.agePenalty} años!` : "";
   addHistory("transfer", "🛒 Tienda", `Compraste ${item.name} por ${fmtMoney(item.price)}.${shortNote}`);
+  return true;
+}
+
+/* Invariante de asientos: cada escudería debe tener exactamente 2 pilotos
+   (el jugador cuenta 1 en su equipo) y ningún rival debe quedar con team null.
+   También valida reservas coherentes. */
+function seatBalanceFailures() {
+  const fails = [];
+  ["F1", "F2"].forEach(cat => {
+    const teams = cat === "F1" ? F1_TEAMS : F2_TEAMS;
+    const rivals = player.rivals[cat] || [];
+    const inCat = player.category === cat;
+    teams.forEach(t => {
+      const count = rivals.filter(r => r.team === t.nombre).length + (inCat && player.team === t.nombre ? 1 : 0);
+      if (count !== 2) fails.push(`${cat} ${t.nombre}: ${count} pilotos`);
+    });
+    const free = rivals.filter(r => !r.team);
+    if (free.length) fails.push(`${cat}: rival sin equipo: ${free.map(r => r.name).join(", ")}`);
+  });
+
+  /* Reservas: reserveTeam válido (F1), no duplicada en rivals, ≤1 por equipo. */
+  const reserveTeams = new Set();
+  player.reserves.forEach(r => {
+    if (!r.reserveTeam || !F1_TEAMS.some(t => t.nombre === r.reserveTeam)) {
+      fails.push(`reserva inválida: ${r.name} (${r.reserveTeam})`);
+    } else if (reserveTeams.has(r.reserveTeam)) {
+      fails.push(`reserva duplicada en ${r.reserveTeam}: ${r.name}`);
+    }
+    reserveTeams.add(r.reserveTeam);
+    if (r.team != null) fails.push(`reserva con team set: ${r.name} (${r.team})`);
+    const dupRivals = player.rivals.F1.some(x => x.name === r.name);
+    if (dupRivals) fails.push(`reserva duplicada en rivals: ${r.name}`);
+  });
+  return fails;
+}
+
+/* Auto-test del motor: corre temporadas completas y valida invariantes del
+   simulador de carrera (posiciones únicas en rango, poles/victorias coherentes,
+   campeonato en rango) y del mercado de fichajes (2 pilotos por escudería, sin
+   swaps ilógicos ni vacantes). Invocable desde consola: selfTestEngine() */
+function selfTestEngine() {
+  const FAIL = [];
+  const ok = (cond, msg) => { if (!cond) FAIL.push(msg); };
+  for (let trial = 0; trial < 6; trial++) {
+    player = createDriver("Test", NATIONALITIES[0], "GES", "normal", 99);
+    for (let s = 0; s < 12 && !player.retired; s++) {
+      const r = simulateSeason(1);
+      if (r && r.promotionPending) {
+        const offers = generateOffers(3, "F1");
+        if (offers.length) acceptOffer(0);
+      } else if (Math.random() < 0.4) {
+        const offers = generateOffers(2, player.category);
+        if (offers.length) acceptOffer(0);
+      }
+      const fails = seatBalanceFailures();
+      if (fails.length) ok(false, "trial " + trial + " S" + (s + 1) + ": " + fails.join("; "));
+    }
+    const last = player.seasons[player.seasons.length - 1];
+    ok(!!last, "la temporada se cerró");
+    ok(player.seasonProgress === null, "progreso reseteado");
+    const baseRaces = last && last.grid ? last.grid.length : 0;
+    ok(baseRaces > 0, "carreras registradas");
+    if (baseRaces) {
+      last.grid.forEach((race, i) => {
+        const pos = race.map(x => x.pos).filter(n => typeof n === "number");
+        ok(new Set(pos).size === pos.length, "posiciones únicas carrera " + i);
+        ok(pos.every(n => n >= 1 && n <= 22), "posiciones en rango carrera " + i);
+      });
+    }
+    const grid = last && last.grid ? last.grid : [];
+    const poles = grid.filter(r => r.some(x => x.gridPos === 1 && x.isPlayer)).length;
+    const wins = grid.filter(r => r.some(x => x.pos === 1 && x.isPlayer)).length;
+    ok(last.wins === wins, "victorias coherentes");
+    ok(last.poles === poles, "poles coherentes");
+    ok(Number.isInteger(last.champPos) && last.champPos >= 1 && last.champPos <= 22, "champPos en rango");
+  }
+  if (FAIL.length) {
+    console.error("SELFTEST FAIL:\n - " + FAIL.slice(0, 15).join("\n - "));
+    return false;
+  }
+  console.log("SELFTEST OK: temporadas simuladas con traspasos y asientos balanceados");
   return true;
 }

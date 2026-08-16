@@ -33,7 +33,7 @@
 	--radius-md: 8px;
 
 	--pos-w: 34px;
-	--driver-w: 250px;
+	--driver-w: 200px;
 
 	--primary-color: var(--c-f1-red);
 	--primary-hover: #ff2419;
@@ -265,10 +265,9 @@ button:focus {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	justify-content: center;
 	gap: 0.6rem;
-	padding-bottom: 1rem;
-	margin-bottom: 1rem;
-	border-bottom: 1px solid var(--line);
+	padding: 0.5rem 0;
 }
 
 .game-title {
@@ -280,6 +279,16 @@ button:focus {
 	color: var(--text);
 	margin-right: 0.75rem;
 	white-space: nowrap;
+}
+
+.game-title-icon {
+	display: inline-block;
+	width: 50px;
+	height: 40px;
+	object-fit: contain;
+	vertical-align: middle;
+	margin-right: 0.4rem;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
 .theme-bar button {
@@ -555,8 +564,7 @@ select.muted {
 	position: relative;
 	z-index: 1;
 	width: 100%;
-	max-width: 1700px;
-	height: 90vh;
+	height: 100vh;
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
@@ -574,11 +582,9 @@ select.muted {
 	min-height: 0;
 	width: 100%;
 	background: var(--panel);
-	border: 1px solid var(--line);
-	border-radius: 6px;
 	display: flex;
 	flex-direction: column;
-	padding: 14px 18px 0;
+	padding: 12px;
 	position: relative;
 	overflow: hidden;
 	user-select: none;
@@ -922,6 +928,14 @@ select.muted {
 	background-color: var(--row);
 }
 
+/* Sticky del cuerpo por encima de las celdas de carrera al hacer scroll
+   horizontal (las celdas con opacity<1 crean stacking context propio). */
+.standings-table td.pos-cell,
+.standings-table td.driver-cell,
+.standings-table td.tot-cell {
+	z-index: 1;
+}
+
 .standings-table thead th.pos-cell,
 .standings-table thead th.driver-cell,
 .standings-table thead th.tot-cell {
@@ -1007,6 +1021,13 @@ select.muted {
 	width: 44px;
 	min-width: 44px;
 	font-variant-numeric: tabular-nums;
+}
+
+.standings-table td.race-cell.clickable {
+	cursor: pointer;
+}
+.standings-table td.race-cell.clickable:hover {
+	background: var(--cyan-bg);
 }
 
 .standings-table td.race-cell.p1 {
@@ -1213,6 +1234,16 @@ td.race-cell.race-in {
 	align-items: center;
 	justify-content: flex-end;
 	gap: 2px;
+}
+
+/* Trofeos en la fila de resultados: encuadrados a la altura de la fila */
+.col-tr .trophy-img {
+	height: 20px;
+}
+
+.col-tr .trophy-icon {
+	font-size: 16px;
+	min-height: 0;
 }
 
 .sum-header-row .col-tot {
@@ -2060,6 +2091,87 @@ td.race-cell.race-in {
 	margin: 0 auto;
 }
 
+/* --- Vista en vivo vuelta a vuelta --- */
+.live-panel {
+	flex-direction: column;
+	width: min(94vw, 560px);
+	max-height: 88vh;
+}
+.live-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.9rem 1.1rem;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	color: var(--text-mid);
+	border-bottom: 1px solid var(--line-strong);
+}
+.live-head #live-lap {
+	color: var(--primary-color, #e10600);
+}
+.live-table {
+	overflow-y: auto;
+	padding: 0.35rem 0.6rem;
+	flex: 1;
+}
+.live-colhead,
+.live-row {
+	display: grid;
+	grid-template-columns: 34px 1fr 64px 70px 40px;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.5rem;
+	font-size: 13px;
+}
+.live-colhead {
+	color: var(--text-dim);
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	position: sticky;
+	top: 0;
+	background: var(--panel);
+}
+.live-row {
+	border-bottom: 1px solid var(--line);
+	color: var(--text-mid);
+}
+.live-row .live-name {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.live-row .live-name i {
+	width: 4px;
+	height: 16px;
+	border-radius: 2px;
+	flex-shrink: 0;
+}
+.live-row.player {
+	background: var(--cyan-bg);
+	color: var(--text-main);
+	font-weight: 600;
+}
+.live-row.out {
+	opacity: 0.45;
+}
+.live-row .live-pos {
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+}
+.live-foot {
+	padding: 0.7rem 1rem;
+	display: flex;
+	justify-content: flex-end;
+	border-top: 1px solid var(--line-strong);
+}
+
 .vitrina-overlay {
 	position: fixed;
 	inset: 0;
@@ -2116,6 +2228,121 @@ td.race-cell.race-in {
 .vitrina-header button:hover,
 .vitrina-header button:focus {
 	background-color: var(--panel-2);
+}
+
+/* ------------------------- Configuración (switches) ------------------------- */
+
+.settings-panel {
+	max-width: 560px;
+}
+
+.settings-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.55rem 0.8rem;
+	background: var(--row);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+}
+
+.settings-label {
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+/* Interruptor */
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 46px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.switch .slider {
+	position: absolute;
+	inset: 0;
+	background: var(--panel-2);
+	border: 1px solid var(--line-strong);
+	border-radius: 24px;
+	transition: background 0.2s ease;
+	cursor: pointer;
+}
+
+.switch .slider::before {
+	content: "";
+	position: absolute;
+	left: 3px;
+	top: 3px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--text-mid);
+	transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.switch input:checked + .slider {
+	background: var(--primary-color, #e10600);
+	border-color: var(--primary-color, #e10600);
+}
+
+.switch input:checked + .slider::before {
+	transform: translateX(22px);
+	background: #fff;
+}
+
+/* Selector de modo segmentado */
+.seg {
+	display: flex;
+	gap: 0.35rem;
+}
+
+.seg button {
+	padding: 0.35rem 0.7rem;
+	font-size: 0.85rem;
+	font-weight: 700;
+	border-radius: 6px;
+	border: 1px solid var(--line-strong);
+	background: var(--panel-2);
+	color: var(--text-mid);
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.seg button.active {
+	background: var(--primary-color, #e10600);
+	color: #fff;
+	border-color: var(--primary-color, #e10600);
+}
+
+@media (max-width: 480px) {
+	.settings-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.settings-label {
+		text-align: left;
+	}
+	.seg {
+		justify-content: space-between;
+	}
+	.seg button {
+		flex: 1;
+	}
 }
 
 /* ------------------------------ Escuderías ------------------------------ */
@@ -2521,9 +2748,9 @@ td.race-cell.race-in {
 
 	.standings-table th.driver-cell,
 	.standings-table td.driver-cell {
-		width: 200px;
-		min-width: 200px;
-		--driver-w: 200px;
+		width: 160px;
+		min-width: 160px;
+		--driver-w: 160px;
 	}
 }
 
@@ -2531,10 +2758,6 @@ td.race-cell.race-in {
 	body {
 		padding-top: 0;
 		padding-bottom: 0;
-	}
-
-	.game-screen {
-		border-radius: 0;
 	}
 
 	.style-cards {

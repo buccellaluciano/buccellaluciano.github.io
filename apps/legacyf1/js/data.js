@@ -193,3 +193,20 @@ const SHOP_ITEMS = [
   { id: 'extreme', icon: '🏋️', name: 'Entrenamiento Extremo', desc: '+4 Valoración Global, pero envejece 3 años', price: 3000000, repeatable: false, ratingBoost: 4, shortened: true, agePenalty: 3 },
   { id: 'reflex', icon: '⚡', name: 'Reflejos Biónicos', desc: '+6 Valoración Global, pero envejece 4 años', price: 5000000, repeatable: false, ratingBoost: 6, shortened: true, agePenalty: 4 }
 ];
+
+/* Calendario de la temporada. Cada GP se corresponde con un récord en GP_RECORDS
+   (F1) / GP_RECORDS_F2 (F2 usa las primeras 14). F2 usa el mismo calendario. */
+const GP_CALENDAR = [
+  { name: "Australia", flag: "🇦🇺", code: "AUS" }, { name: "China", flag: "🇨🇳", code: "CHN" },
+  { name: "Japón", flag: "🇯🇵", code: "JPN" }, { name: "Bahréin", flag: "🇧🇭", code: "BHR" },
+  { name: "Arabia Saudita", flag: "🇸🇦", code: "KSA" }, { name: "Miami", flag: "🇺🇸", code: "MIA" },
+  { name: "Madrid", flag: "🇪🇸", code: "MAD" }, { name: "Mónaco", flag: "🇲🇨", code: "MCO" },
+  { name: "Canadá", flag: "🇨🇦", code: "CAN" }, { name: "España", flag: "🇪🇸", code: "ESP" },
+  { name: "Austria", flag: "🇦🇹", code: "AUT" }, { name: "Gran Bretaña", flag: "🇬🇧", code: "GBR" },
+  { name: "Bélgica", flag: "🇧🇪", code: "BEL" }, { name: "Hungría", flag: "🇭🇺", code: "HUN" },
+  { name: "Países Bajos", flag: "🇳🇱", code: "NED" }, { name: "Italia", flag: "🇮🇹", code: "ITA" },
+  { name: "Azerbaiyán", flag: "🇦🇿", code: "AZE" }, { name: "Singapur", flag: "🇸🇬", code: "SIN" },
+  { name: "Austin", flag: "🇺🇸", code: "USA" }, { name: "México", flag: "🇲🇽", code: "MEX" },
+  { name: "Brasil", flag: "🇧🇷", code: "BRA" }, { name: "Las Vegas", flag: "🇺🇸", code: "LVG" },
+  { name: "Qatar", flag: "🇶🇦", code: "QAT" }, { name: "Abu Dhabi", flag: "🇦🇪", code: "UAE" }
+];
