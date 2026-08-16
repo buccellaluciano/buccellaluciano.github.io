@@ -18,6 +18,7 @@
     <button id="btn-sim-mode">▶ Simular: 1 temporada</button>
     <button id="btn-gpcard" class="hidden">🎬 Cards GP: ON</button>
     <button id="btn-resultcard" class="hidden">🏁 Avisos: ON</button>
+    <button id="btn-mute">🔊 Sonido: ON</button>
     <button id="btn-contextual">🎨 Color Contextual: OFF</button>
   </div>
 
@@ -27,15 +28,15 @@
       <div class="create-inputs">
         <div class="field">
           <label for="input-name">Nombre</label>
-          <input type="text" id="input-name" placeholder="Ej: Franco Colapinto" maxlength="24">
+          <input type="text" id="input-name" placeholder="Ej: Franco Colapinto" maxlength="24" autocomplete="off">
         </div>
         <div class="field">
           <label for="input-dorsal">Número (1–99)</label>
-          <input type="text" id="input-dorsal" placeholder="Ej: 43" maxlength="2" inputmode="numeric">
+          <input type="text" id="input-dorsal" placeholder="Ej: 43" maxlength="2" inputmode="numeric" autocomplete="off">
         </div>
         <div class="field">
           <label for="input-nationality">Nacionalidad</label>
-          <select id="input-nationality"></select>
+          <select id="input-nationality" autocomplete="off"></select>
         </div>
         <div class="field">
           <label>Tipo de carrera</label>
@@ -56,7 +57,7 @@
         </div>
         <div class="field hidden" id="favorite-field">
           <label for="input-favorite">Elegí tu piloto de la F1</label>
-          <select id="input-favorite"></select>
+          <select id="input-favorite" autocomplete="off"></select>
         </div>
         <button id="btn-create" disabled>🚦 Comenzar carrera</button>
       </div>
@@ -168,7 +169,6 @@
         <div id="view-trophies" class="content-view">
           <div class="trophies-view-head">
             <h3>🏆 Vitrina Personal</h3>
-            <button id="btn-open-vitrina" class="btn-subtle" type="button">Ver vitrina completa</button>
           </div>
           <div id="trophies-view-shelf" class="shelf-container"></div>
         </div>
@@ -478,6 +478,7 @@
 <script src="js/state.js"></script>
 <script src="js/gp_info.js"></script>
 <script src="js/supabase.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

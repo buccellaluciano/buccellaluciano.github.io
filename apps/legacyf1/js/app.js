@@ -634,6 +634,7 @@
     overlay.classList.remove("hidden");
     void overlay.offsetWidth;
     overlay.classList.add("active");
+    sfx("gp");
     setTimeout(() => {
       overlay.classList.remove("active");
       overlay.classList.add("hidden");
@@ -669,6 +670,7 @@
     overlay.classList.remove("hidden");
     void overlay.offsetWidth;
     overlay.classList.add("active");
+    sfx(won ? "win" : "podium");
     setTimeout(() => {
       overlay.classList.remove("active");
       overlay.classList.add("hidden");
@@ -849,6 +851,14 @@
     localStorage.setItem("resultcard", resultCardOn ? "on" : "off");
     updateSimMode();
   });
+  function updateMuteButton() {
+    el("btn-mute").textContent = muted ? "🔇 Sonido: OFF" : "🔊 Sonido: ON";
+  }
+  el("btn-mute").addEventListener("click", () => {
+    toggleMute();
+    updateMuteButton();
+  });
+  updateMuteButton();
   updateSimMode();
   updateSimButton();
   updateRejectAllButton();
@@ -1059,6 +1069,24 @@
   buildStyleCards();
   document.querySelectorAll('input[name="career-type"]').forEach(r => r.addEventListener("change", updateCareerTypeUI));
   updateCareerTypeUI();
+
+  /* Reset de la pantalla de creación: el navegador restaura los valores del form
+     anterior al recargar (location.reload), así que lo limpiamos de forma explícita. */
+  function resetCreateForm() {
+    el("input-name").value = "";
+    el("input-dorsal").value = "";
+    el("input-nationality").selectedIndex = 0;
+    el("input-favorite").selectedIndex = 0;
+    const normal = document.querySelector('input[name="career-type"][value="normal"]');
+    if (normal) normal.checked = true;
+    selectedStyle = null;
+    el("btn-create").disabled = true;
+    document.querySelectorAll(".style-card").forEach(b => b.classList.remove("selected"));
+    el("selected-style-label").textContent = "Seleccioná un estilo";
+    updateCareerTypeUI();
+  }
+  resetCreateForm();
+  window.addEventListener("pageshow", resetCreateForm);
 
   el("btn-clubs").addEventListener("click", openClubsModal);
   el("btn-close-clubs").addEventListener("click", () => el("modal-clubs").classList.add("hidden"));
@@ -1641,7 +1669,6 @@
 
   document.querySelectorAll(".nav-tab").forEach(t => t.addEventListener("click", () => showContent(t.dataset.view)));
   document.querySelectorAll(".sub-tab").forEach(t => t.addEventListener("click", () => showContent(t.dataset.sub)));
-  el("btn-open-vitrina").addEventListener("click", () => { renderVitrina(); el("modal-vitrina").classList.remove("hidden"); });
   el("btn-season-prev").addEventListener("click", () => { if (seasonIdx > 0) { seasonIdx--; refreshSeasonNav(true); } });
   updateSeasonBar();
   updateNewsTab();

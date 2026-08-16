@@ -260,6 +260,25 @@ function createDriver(name, nationalityData, styleCode, careerType = "normal", d
   const initialPot = isFavorite ? favorite.pot : (careerType === "prodigio" ? 92 : 70);
   const styleData = DRIVING_STYLES.find(s => s.code === styleCode);
 
+  const rivals = { F1: createRivalGrid("F1"), F2: createRivalGrid("F2") };
+  const waitingSeat = { F1: [], F2: generateProspects(15) };
+
+  /* El jugador ocupa un asiento: su equipo debe quedar con 1 solo rival (el compañero).
+     En favorito, el favorito es el propio jugador y se elimina; en normal, el rival
+     desplazado va a la cantera para no perder un piloto de la parrilla. */
+  {
+    const cat = isFavorite ? "F1" : "F2";
+    const list = rivals[cat];
+    const atTeam = list.filter(r => r.team === team.nombre);
+    if (atTeam.length > 1) {
+      const drop = isFavorite ? atTeam.find(r => r.name === favorite.name) : atTeam[0];
+      if (drop) {
+        list.splice(list.indexOf(drop), 1);
+        if (!isFavorite) waitingSeat.F2.push(drop);
+      }
+    }
+  }
+
   return {
     name: isFavorite ? favorite.name : name,
     dorsal: isFavorite ? favorite.dorsal : dorsal,
@@ -311,8 +330,8 @@ function createDriver(name, nationalityData, styleCode, careerType = "normal", d
     seasons: [],
     boughtItems: [],
     idolatria: { [team.nombre]: 5 },
-    waitingSeat: { F1: [], F2: generateProspects(15) },
-    rivals: { F1: createRivalGrid("F1"), F2: createRivalGrid("F2") }
+    waitingSeat,
+    rivals
   };
 }
 
@@ -446,6 +465,8 @@ function calcSeasonStats(performance, fitness, raceAgg = null) {
   const val1 = statMap[player.stat1Code] || 0;
   const val2 = statMap[player.stat2Code] || 0;
 
+  if (titles > 0 && typeof sfx === "function") sfx("trophy");
+
   return { matches: races, wins, podiums, poles, points, overtakes, fastestLaps, champPos, val1, val2, titles, wonTitles };
 }
 
@@ -530,6 +551,7 @@ function simulateOneSeason(raceAgg = null, racesGrid = null) {
     delta -= ratingHit;
     player.fitness = clamp(player.fitness - fitnessHit, 10, 100);
     player.injured = true;
+    if (typeof sfx === "function") sfx("injury");
     addHistory("injury", "💥 Accidente", `Sufrió un accidente <strong>${severityLabel}</strong>. Impacto en progresión: -${ratingHit}. Estado físico baja a ${player.fitness}%.`);
   }
 
@@ -767,13 +789,35 @@ function generateOffers(count = 3, forcedCategory = null) {
 function acceptOffer(index) {
   const offer = currentOffers[index];
   if (!offer) return;
-  const wasF2 = player.category === "F2";
+  const prevTeam = player.team;
+  const prevCat = player.category;
   const newCategory = offer.club.categoria;
+  const newTeam = offer.club.nombre;
   addHistoryToLastSeason("transfer", "🤝 Contrato", `${player.name} firma con <strong>${offer.club.nombre}</strong> (${newCategory}). Nuevo salario: ${fmtMoney(offer.salary)}.`);
-  if (wasF2 && newCategory === "F1") {
+  if (prevCat === "F2" && newCategory === "F1") {
     addHistoryToLastSeason("transfer", "🏎️ ¡ASCENSO A LA F1!", `${player.name} llega a la Fórmula 1 de la mano de <strong>${offer.club.nombre}</strong>. ¡Comienza la verdadera aventura!`);
   }
-  player.team = offer.club.nombre;
+
+  /* Swap de butaca: el piloto desplazado del equipo nuevo pasa al equipo viejo,
+     para que la parrilla no pierda un piloto. Si es cambio de categoría, se mueve
+     entre listas (el desplazado de F1 baja a F2). */
+  if (newTeam !== prevTeam) {
+    const dest = player.rivals[newCategory];
+    if (dest) {
+      const displaced = dest.find(r => r.team === newTeam);
+      if (displaced) {
+        if (newCategory === prevCat) {
+          displaced.team = prevTeam;
+        } else {
+          dest.splice(dest.indexOf(displaced), 1);
+          displaced.team = prevTeam;
+          player.rivals[prevCat].push(displaced);
+        }
+      }
+    }
+  }
+
+  player.team = newTeam;
   player.teamRating = offer.club.rating;
   if (newCategory !== player.category) {
     player.category = newCategory;
@@ -782,6 +826,7 @@ function acceptOffer(index) {
   player.salary = offer.salary;
   player.teamRatingRef = player.rating;
   player.idolatria[offer.club.nombre] = Math.max(getIdolatry(offer.club.nombre), 5);
+  if (typeof sfx === "function") sfx("transfer");
   currentOffers = [];
 }
 
